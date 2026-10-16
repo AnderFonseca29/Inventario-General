@@ -1,0 +1,95 @@
+// =============================================================================
+// Feedback: alertas, estados vacíos, spinners y skeletons
+// =============================================================================
+
+.alert {
+  padding: 12px 15px;
+  border-radius: var(--radius-sm);
+  font-size: 13.5px;
+  margin-bottom: 15px;
+  border: 1px solid transparent;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  animation: fadeInUp 0.3s ease both;
+}
+
+.alert svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.alert-error {
+  background: var(--color-danger-bg);
+  border-color: #fecaca;
+  color: #991b1b;
+}
+
+.alert-success {
+  background: var(--color-success-bg);
+  border-color: #bbf7d0;
+  color: #065f46;
+}
+
+.alert-info {
+  background: var(--color-info-bg);
+  border-color: #bae6fd;
+  color: #075985;
+}
+
+// Estados vacíos
+.empty {
+  padding: 54px 20px;
+  text-align: center;
+  color: var(--color-text-muted);
+}
+
+.empty svg {
+  width: 44px;
+  height: 44px;
+  color: #cbd5e1;
+  margin-bottom: 12px;
+}
+
+.empty-title {
+  font-weight: 700;
+  color: #475467;
+  margin-bottom: 4px;
+}
+
+// Spinner
+.spinner {
+  width: 24px;
+  height: 24px;
+  border: 3px solid var(--color-border);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  margin: 0 auto;
+}
+
+// Skeletons
+.skeleton {
+  background: linear-gradient(90deg, #eef1f6 25%, #f6f8fb 37%, #eef1f6 63%);
+  background-size: 400px 100%;
+  animation: shimmer 1.3s ease-in-out infinite;
+  border-radius: 7px;
+  height: 14px;
+}
+
+.skeleton-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 15px 16px;
+  border-bottom: 1px solid #f0f2f7;
+}
+
+.skeleton-circle {
+  width: 38px;
+  height: 38px;
+  border-radius: 11px;
+  flex-shrink: 0;
+}

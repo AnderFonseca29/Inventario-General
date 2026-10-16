@@ -1,0 +1,114 @@
+// Dashboard: hero + KPIs + tarjetas + accesos rápidos
+// Los patrones .hero, .stats-grid, .stat-card, .progress, .info-line y .emp-head
+// viven en los estilos globales (src/styles).
+
+.hero h1 {
+  font-size: 26px;
+}
+
+.col {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.emp-name {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+// ---- Roadmap / estado del sistema ----
+.road-item {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 9px 0;
+  border-bottom: 1px solid #f0f2f7;
+  font-size: 13.5px;
+}
+
+.road-item:last-child {
+  border-bottom: none;
+}
+
+.road-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #cbd5e1;
+  flex-shrink: 0;
+}
+
+.road-dot.listo {
+  background: var(--color-success);
+  box-shadow: 0 0 0 4px rgba(5, 150, 105, 0.15);
+}
+
+.road-nombre {
+  flex: 1;
+  font-weight: 500;
+  color: #344054;
+}
+
+// ---- Accesos rápidos ----
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 16px;
+}
+
+.access-card {
+  padding: 20px;
+  display: block;
+  color: var(--color-text);
+}
+
+.access-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: var(--color-primary-light);
+  color: var(--color-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 14px;
+}
+
+.access-icon app-icon {
+  width: 22px;
+  height: 22px;
+}
+
+.access-title {
+  font-size: 15.5px;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.access-desc {
+  color: var(--color-text-muted);
+  font-size: 13px;
+  min-height: 38px;
+}
+
+.access-cta {
+  margin-top: 12px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--color-primary);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.access-cta app-icon {
+  width: 16px;
+  height: 16px;
+  transition: transform 0.18s;
+}
+
+.access-card:hover .access-cta app-icon {
+  transform: translateX(4px);
+}

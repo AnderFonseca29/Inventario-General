@@ -1,0 +1,25 @@
+// =============================================================================
+// Patrones de entidad (empresa/usuario): cabecera y líneas de información
+// =============================================================================
+
+.emp-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.info-line {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  color: #475467;
+  padding: 6px 0;
+}
+
+.info-line app-icon {
+  width: 17px;
+  height: 17px;
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+}

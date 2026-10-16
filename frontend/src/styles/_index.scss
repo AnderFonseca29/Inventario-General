@@ -1,0 +1,31 @@
+// =============================================================================
+// Punto de entrada de estilos globales
+// Importa todas las parciales en orden. USAR desde styles.scss:
+//   @use 'styles/index';
+// =============================================================================
+
+// Fundaciones
+@forward 'tokens';
+@forward 'base';
+@forward 'animations';
+
+// Componentes / patrones
+@forward 'buttons';
+@forward 'cards';
+@forward 'layout';
+@forward 'forms';
+@forward 'tables';
+@forward 'badges';
+@forward 'avatars';
+@forward 'stats';
+@forward 'entity';
+@forward 'hero';
+@forward 'progress';
+@forward 'feedback';
+@forward 'modal';
+@forward 'dropdown';
+@forward 'toast';
+@forward 'segmented';
+
+// Utilidades (al final para poder sobrescribir)
+@forward 'utilities';

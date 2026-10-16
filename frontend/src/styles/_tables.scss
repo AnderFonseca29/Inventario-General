@@ -1,0 +1,84 @@
+// =============================================================================
+// Tablas
+// =============================================================================
+
+// Barra de herramientas de tabla (búsqueda + filtros + acciones)
+.table-toolbar {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 16px;
+  border-bottom: 1px solid var(--color-border);
+  flex-wrap: wrap;
+}
+
+.table-toolbar .search {
+  flex: 1;
+  min-width: 220px;
+}
+
+.table-wrap {
+  overflow-x: auto;
+  border-radius: var(--radius-lg);
+}
+
+table.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13.5px;
+}
+
+table.table th {
+  text-align: left;
+  padding: 13px 16px;
+  background: #f9fafc;
+  color: #475467;
+  font-weight: 600;
+  font-size: 11.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid var(--color-border);
+  white-space: nowrap;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+table.table td {
+  padding: 13px 16px;
+  border-bottom: 1px solid #f0f2f7;
+  vertical-align: middle;
+}
+
+table.table tbody tr {
+  transition: background 0.14s;
+}
+
+table.table tbody tr:hover {
+  background: #f9fafc;
+}
+
+table.table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+table.table td.actions {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.cell-strong {
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.cell-muted {
+  color: var(--color-text-muted);
+  font-size: 12.5px;
+}
+
+.cell-main {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+}

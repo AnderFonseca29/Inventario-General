@@ -1,0 +1,175 @@
+// Login: layout a dos columnas (aside + formulario)
+
+.login-page {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1.05fr 1fr;
+}
+
+.login-aside {
+  background: var(--gradient-hero);
+  color: #fff;
+  padding: 46px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: relative;
+  overflow: hidden;
+}
+
+.login-aside::after {
+  content: '';
+  position: absolute;
+  right: -120px;
+  bottom: -120px;
+  width: 420px;
+  height: 420px;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.18) 0%, transparent 68%);
+}
+
+.aside-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 800;
+  font-size: 17px;
+  position: relative;
+}
+
+.brand-logo {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(6px);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 16px;
+}
+
+.aside-copy {
+  position: relative;
+  max-width: 430px;
+}
+
+.aside-copy h2 {
+  font-size: 30px;
+  line-height: 1.2;
+  margin-bottom: 14px;
+}
+
+.aside-copy p {
+  opacity: 0.9;
+  font-size: 15px;
+  margin-bottom: 26px;
+}
+
+.features {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.features li {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+}
+
+.features app-icon {
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  margin-top: 2px;
+  opacity: 0.95;
+}
+
+.features strong {
+  display: block;
+  font-size: 14.5px;
+}
+
+.features span {
+  font-size: 13px;
+  opacity: 0.85;
+}
+
+.aside-foot {
+  font-size: 12px;
+  opacity: 0.75;
+  position: relative;
+}
+
+.login-main {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 30px;
+  background: var(--color-bg);
+}
+
+.login-card {
+  width: 100%;
+  max-width: 390px;
+}
+
+.login-logo {
+  margin-bottom: 20px;
+}
+
+.login-logo .brand-logo {
+  background: var(--gradient-primary);
+  box-shadow: var(--shadow-primary);
+  width: 48px;
+  height: 48px;
+  font-size: 18px;
+}
+
+.login-card h1 {
+  font-size: 24px;
+  margin-bottom: 6px;
+}
+
+.login-sub {
+  color: var(--color-text-muted);
+  font-size: 14px;
+  margin: 0 0 26px;
+}
+
+.ver-btn {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: #98a2b3;
+  padding: 6px;
+  border-radius: 7px;
+  display: inline-flex;
+}
+
+.ver-btn:hover {
+  color: var(--color-text);
+}
+
+.ver-btn app-icon {
+  width: 18px;
+  height: 18px;
+}
+
+@media (max-width: 900px) {
+  .login-page {
+    grid-template-columns: 1fr;
+  }
+  .login-aside {
+    display: none;
+  }
+}

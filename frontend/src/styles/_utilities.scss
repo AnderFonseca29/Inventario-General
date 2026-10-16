@@ -1,0 +1,29 @@
+// =============================================================================
+// Utilidades y helpers de grilla
+// =============================================================================
+
+.divider {
+  height: 1px;
+  background: var(--color-border);
+  margin: 18px 0;
+}
+
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+
+.grid-main-side {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr;
+  gap: 18px;
+  align-items: start;
+}
+
+@media (max-width: 940px) {
+  .grid-2,
+  .grid-main-side {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,0 +1,392 @@
+// Shell: barra lateral + topbar + contenido
+
+.layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+.sidebar {
+  width: 256px;
+  flex-shrink: 0;
+  background: var(--gradient-dark);
+  color: #cbd5e1;
+  display: flex;
+  flex-direction: column;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  transition: width 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+  z-index: 30;
+}
+
+.layout.collapsed .sidebar {
+  width: 78px;
+}
+
+// ---- Marca ----
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 18px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  min-height: 68px;
+}
+
+.brand-logo {
+  width: 40px;
+  height: 40px;
+  border-radius: 11px;
+  background: var(--gradient-primary);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 15px;
+  flex-shrink: 0;
+  box-shadow: var(--shadow-primary);
+}
+
+.brand-text {
+  display: flex;
+  flex-direction: column;
+  color: #f8fafc;
+  font-weight: 700;
+  font-size: 14.5px;
+  line-height: 1.25;
+  white-space: nowrap;
+}
+
+.brand-text small {
+  color: #94a3b8;
+  font-weight: 400;
+  font-size: 11px;
+}
+
+// ---- Navegación ----
+.nav {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  flex: 1;
+}
+
+.nav-seccion {
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  color: #64748b;
+  font-weight: 700;
+  padding: 14px 12px 6px;
+  white-space: nowrap;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 9px;
+  color: #cbd5e1;
+  font-size: 13.5px;
+  font-weight: 500;
+  transition: background 0.16s, color 0.16s;
+  position: relative;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.nav-item app-icon {
+  width: 19px;
+  height: 19px;
+  flex-shrink: 0;
+}
+
+.nav-item:hover:not(.disabled) {
+  background: var(--color-sidebar-hover);
+  color: #fff;
+}
+
+.nav-item.active {
+  background: linear-gradient(90deg, rgba(79, 70, 229, 0.95), rgba(14, 165, 233, 0.85));
+  color: #fff;
+  box-shadow: 0 6px 16px -6px rgba(79, 70, 229, 0.8);
+}
+
+.nav-item.active::before {
+  content: '';
+  position: absolute;
+  left: -12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 22px;
+  border-radius: 0 3px 3px 0;
+  background: #fff;
+}
+
+.nav-item.disabled {
+  color: #5b6b85;
+  cursor: default;
+  opacity: 0.75;
+}
+
+.pronto-tag {
+  margin-left: auto;
+  font-size: 9.5px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #cbd5e1;
+  padding: 2px 7px;
+  border-radius: 999px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+.sidebar-footer {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 15px 18px;
+  font-size: 11.5px;
+  color: #64748b;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  white-space: nowrap;
+}
+
+.sidebar-footer app-icon {
+  width: 16px;
+  height: 16px;
+  color: #64748b;
+  flex-shrink: 0;
+}
+
+// ---- Estado colapsado ----
+.layout.collapsed .brand-text,
+.layout.collapsed .nav-seccion,
+.layout.collapsed .nav-label,
+.layout.collapsed .pronto-tag {
+  display: none;
+}
+
+.layout.collapsed .brand,
+.layout.collapsed .nav-item,
+.layout.collapsed .sidebar-footer {
+  justify-content: center;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+// ---- Área principal ----
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.topbar {
+  height: 68px;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 22px;
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  gap: 16px;
+}
+
+.topbar-left,
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+// ---- Migas de pan ----
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.crumb-root {
+  color: var(--color-text-muted);
+}
+
+.crumb-sep {
+  width: 16px;
+  height: 16px;
+  color: #cbd5e1;
+  transform: rotate(-90deg);
+}
+
+.crumb-current {
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+// ---- Reloj ----
+.clock {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--color-text-muted);
+  font-size: 13px;
+  font-weight: 600;
+  background: #f4f6fb;
+  padding: 7px 12px;
+  border-radius: 999px;
+}
+
+.clock app-icon {
+  width: 15px;
+  height: 15px;
+}
+
+// ---- Campana ----
+.bell {
+  position: relative;
+  background: #f4f6fb;
+  border-radius: 10px;
+}
+
+.dot-badge {
+  position: absolute;
+  top: 6px;
+  right: 7px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-danger);
+  border: 2px solid #fff;
+}
+
+.notif {
+  width: 280px;
+}
+
+.notif-head {
+  font-weight: 700;
+  font-size: 13px;
+  padding: 9px 11px 6px;
+  color: #344054;
+}
+
+.empty-notif {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 22px 12px;
+  color: var(--color-text-muted);
+  font-size: 13px;
+}
+
+.empty-notif app-icon {
+  width: 26px;
+  height: 26px;
+  color: #cbd5e1;
+}
+
+// ---- Botón de usuario ----
+.user-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #f4f6fb;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  padding: 5px 12px 5px 5px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.user-btn:hover {
+  border-color: var(--color-border-strong);
+}
+
+.user-btn > app-icon {
+  width: 15px;
+  height: 15px;
+  color: var(--color-text-muted);
+}
+
+.user-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  line-height: 1.2;
+}
+
+.user-name {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #344054;
+  max-width: 190px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.user-role {
+  font-size: 11px;
+  color: var(--color-text-muted);
+}
+
+.dd-user {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 11px;
+}
+
+.dd-email {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #344054;
+  margin-bottom: 5px;
+  max-width: 190px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.menu-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 35;
+  background: transparent;
+}
+
+.content {
+  padding: 26px;
+  flex: 1;
+  animation: fadeIn 0.25s ease both;
+}
+
+@media (max-width: 900px) {
+  .sidebar {
+    width: 78px;
+  }
+  .brand-text,
+  .nav-seccion,
+  .nav-label,
+  .pronto-tag {
+    display: none;
+  }
+  .user-meta,
+  .clock {
+    display: none;
+  }
+  .content {
+    padding: 18px;
+  }
+}

@@ -1,0 +1,49 @@
+// =============================================================================
+// Hero (cabecera destacada del dashboard)
+// =============================================================================
+
+.hero {
+  border-radius: var(--radius-lg);
+  background: var(--gradient-hero);
+  color: #fff;
+  padding: 30px 32px;
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 22px;
+}
+
+.hero::after {
+  content: '';
+  position: absolute;
+  right: -60px;
+  top: -80px;
+  width: 320px;
+  height: 320px;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.22) 0%, transparent 68%);
+  pointer-events: none;
+}
+
+.hero h1 {
+  font-size: 26px;
+  margin-bottom: 6px;
+}
+
+.hero p {
+  margin: 0;
+  opacity: 0.92;
+  font-size: 14px;
+  max-width: 620px;
+}
+
+.hero-tags {
+  display: flex;
+  gap: 8px;
+  margin-top: 18px;
+  flex-wrap: wrap;
+}
+
+.hero-tags .badge {
+  background: rgba(255, 255, 255, 0.18);
+  color: #fff;
+  backdrop-filter: blur(4px);
+}

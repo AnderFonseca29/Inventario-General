@@ -1,0 +1,85 @@
+// Roles: encabezado de permisos y acordeón por módulo.
+// La barra de herramientas (.table-toolbar/.search) es global.
+
+.permiso-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 6px 0 12px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.permiso-head > label {
+  font-size: 13px;
+  font-weight: 700;
+  color: #344054;
+}
+
+.permiso-acciones {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.grupo {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  margin-bottom: 10px;
+  overflow: hidden;
+}
+
+.grupo-head {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 14px;
+  background: #f9fafc;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+}
+
+.grupo-head:hover {
+  background: #f4f6fb;
+}
+
+.grupo-titulo {
+  font-size: 12.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-primary);
+  flex: 1;
+}
+
+.grupo-count {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--color-text-muted);
+  background: #eef1f6;
+  padding: 2px 9px;
+  border-radius: 999px;
+}
+
+.grupo-all input {
+  accent-color: var(--color-primary);
+  width: 16px;
+  height: 16px;
+}
+
+.chev {
+  width: 16px;
+  height: 16px;
+  color: var(--color-text-muted);
+  transition: transform 0.18s;
+}
+
+.chev.abierto {
+  transform: rotate(180deg);
+}
+
+.grupo .checks {
+  padding: 14px;
+}

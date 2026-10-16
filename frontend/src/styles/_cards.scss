@@ -1,0 +1,23 @@
+// =============================================================================
+// Cards
+// =============================================================================
+
+@use 'mixins' as mx;
+
+.card {
+  @include mx.card-surface;
+}
+
+.card-body {
+  padding: 22px;
+}
+
+.card-hover {
+  transition: transform 0.18s, box-shadow 0.18s, border-color 0.18s;
+}
+
+.card-hover:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
+  border-color: #cdd6ea;
+}

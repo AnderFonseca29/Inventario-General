@@ -1,0 +1,29 @@
+// =============================================================================
+// Control segmentado (pills)
+// =============================================================================
+
+.segmented {
+  display: inline-flex;
+  background: #eef1f6;
+  border-radius: 999px;
+  padding: 3px;
+  gap: 3px;
+}
+
+.segmented button {
+  border: none;
+  background: transparent;
+  padding: 6px 15px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #475467;
+  cursor: pointer;
+  transition: background 0.16s, color 0.16s, box-shadow 0.16s;
+}
+
+.segmented button.active {
+  background: #fff;
+  color: var(--color-primary);
+  box-shadow: var(--shadow-xs);
+}

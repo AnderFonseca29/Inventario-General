@@ -1,1 +1,5 @@
-/* You can add global styles to this file, and also import other style files */
+// Estilos globales del frontend.
+// La organización vive en ./styles/*.scss — este archivo solo los agrega.
+// Ver ./styles/_index.scss para el mapa completo de parciales.
+
+@use 'styles/index';
