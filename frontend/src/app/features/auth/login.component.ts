@@ -11,8 +11,8 @@ import { IconComponent } from '../../shared/icons';
     <div class="login-page">
       <div class="login-aside">
         <div class="aside-brand">
-          <span class="brand-logo">IG</span>
-          <span>Inventario General</span>
+          <span class="brand-logo">ST</span>
+          <span>Stockora</span>
         </div>
 
         <div class="aside-copy">
@@ -53,7 +53,7 @@ import { IconComponent } from '../../shared/icons';
       <div class="login-main">
         <div class="login-card">
           <div class="login-logo">
-            <span class="brand-logo">IG</span>
+            <span class="brand-logo">ST</span>
           </div>
           <h1>Bienvenido de nuevo</h1>
           <p class="login-sub">Ingresa con tu cuenta para continuar</p>

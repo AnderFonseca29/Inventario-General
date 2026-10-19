@@ -56,9 +56,9 @@ const COLLAPSE_KEY = 'inv_sidebar_collapsed';
     <div class="layout" [class.collapsed]="colapsado()">
       <aside class="sidebar">
         <div class="brand">
-          <span class="brand-logo">IG</span>
+          <span class="brand-logo">ST</span>
           <span class="brand-text">
-            Inventario General
+            Stockora
             <small>Panel de gestión</small>
           </span>
         </div>
