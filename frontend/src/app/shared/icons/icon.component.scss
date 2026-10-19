@@ -2,6 +2,10 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  width: 1.15em;
+  height: 1.15em;
+  flex-shrink: 0;
+  vertical-align: -0.18em;
 }
 
 svg {

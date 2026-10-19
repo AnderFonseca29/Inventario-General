@@ -41,7 +41,7 @@
   background: #f4f6fb;
 }
 
-.dropdown-item svg {
+.dropdown-item app-icon {
   width: 17px;
   height: 17px;
   color: var(--color-text-muted);
@@ -51,7 +51,7 @@
   color: var(--color-danger);
 }
 
-.dropdown-item.danger svg {
+.dropdown-item.danger app-icon {
   color: var(--color-danger);
 }
 

@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, HostListener, computed, inject, signal } from '@angular/core';
 import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { filter } from 'rxjs';
 import { AuthService } from '../core/services/auth.service';
@@ -109,6 +109,42 @@ const COLLAPSE_KEY = 'inv_sidebar_collapsed';
             </div>
           </div>
 
+          <div class="topsearch">
+            <div class="control-icon">
+              <app-icon name="search" />
+              <input
+                class="form-control"
+                type="search"
+                placeholder="Buscar módulo…"
+                [value]="busqueda()"
+                (input)="alBuscar($event)"
+              />
+            </div>
+            @if (busqueda().trim().length > 0) {
+              <div class="search-panel">
+                @if (resultadosBusqueda().length === 0) {
+                  <div class="search-empty">Sin resultados para “{{ busqueda() }}”</div>
+                } @else {
+                  @for (r of resultadosBusqueda(); track r.seccion + r.label) {
+                    @if (r.ruta) {
+                      <a class="dropdown-item" [routerLink]="r.ruta" (click)="limpiarBusqueda()">
+                        <app-icon [name]="r.icono" />
+                        <span class="search-label">{{ r.label }}</span>
+                        <span class="search-sec">{{ r.seccion }}</span>
+                      </a>
+                    } @else {
+                      <div class="dropdown-item disabled">
+                        <app-icon [name]="r.icono" />
+                        <span class="search-label">{{ r.label }}</span>
+                        <span class="search-sec">Pronto</span>
+                      </div>
+                    }
+                  }
+                }
+              </div>
+            }
+          </div>
+
           <div class="topbar-right">
             <div class="clock">
               <app-icon name="clock" />
@@ -189,6 +225,7 @@ export class ShellComponent {
 
   readonly userAbierto = signal(false);
   readonly notifAbierto = signal(false);
+  readonly busqueda = signal('');
 
   readonly colapsado = signal(localStorage.getItem(COLLAPSE_KEY) === '1');
 
@@ -218,6 +255,15 @@ export class ShellComponent {
       }),
     })).filter((seccion) => seccion.items.length > 0),
   );
+
+  readonly resultadosBusqueda = computed<(NavItem & { seccion: string })[]>(() => {
+    const termino = this.busqueda().trim().toLowerCase();
+    if (!termino) return [];
+    return this.secciones()
+      .flatMap((seccion) => seccion.items.map((item) => ({ ...item, seccion: seccion.titulo })))
+      .filter((item) => item.label.toLowerCase().includes(termino))
+      .slice(0, 8);
+  });
 
   readonly tituloModulo = computed(() => {
     const actual = this.url();
@@ -261,6 +307,21 @@ export class ShellComponent {
   cerrarMenus(): void {
     this.userAbierto.set(false);
     this.notifAbierto.set(false);
+  }
+
+  alBuscar(event: Event): void {
+    this.busqueda.set((event.target as HTMLInputElement).value);
+    this.cerrarMenus();
+  }
+
+  limpiarBusqueda(): void {
+    this.busqueda.set('');
+  }
+
+  @HostListener('document:click', ['$event'])
+  onClickFuera(event: MouseEvent): void {
+    const objetivo = event.target as HTMLElement;
+    if (!objetivo.closest('.topsearch')) this.busqueda.set('');
   }
 
   salir(): void {
