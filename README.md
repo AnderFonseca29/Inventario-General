@@ -159,6 +159,19 @@ variables de entorno del apartado anterior y aplica migraciones con
 `npx prisma migrate deploy` durante el build/release. Ajusta `CORS_ORIGINS` con
 la URL pública del frontend.
 
+#### Opción lista para Render (Docker)
+
+El repositorio incluye `backend/Dockerfile` y `render.yaml` (Blueprint). Pasos:
+
+1. En Render, **New → Blueprint** y conecta este repositorio.
+2. Render crea la base de datos PostgreSQL y el servicio web, e inyecta
+   `DATABASE_URL` automáticamente. El contenedor aplica migraciones y ejecuta el
+   seed al arrancar.
+3. Copia la URL pública del servicio (p. ej. `https://inventario-backend.onrender.com`)
+   y úsala en:
+   - `frontend/src/environments/environment.prod.ts` → `apiUrl`
+   - `CORS_ORIGINS` del backend (ya incluye el origen de GitHub Pages)
+
 ### Frontend en GitHub Pages (automático)
 
 El workflow `.github/workflows/deploy-pages.yml` compila el frontend y lo publica

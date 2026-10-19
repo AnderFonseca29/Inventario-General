@@ -1,0 +1,33 @@
+# Blueprint de Render: API NestJS (Docker) + PostgreSQL gestionado.
+# 1) Sube este repositorio a GitHub y crea un "Blueprint" en Render apuntando a el.
+# 2) Render crea la base de datos y el servicio web, e inyecta DATABASE_URL.
+# 3) Copia la URL publica del servicio y usala en
+#    frontend/src/environments/environment.prod.ts (apiUrl) y en CORS_ORIGINS.
+services:
+  - type: web
+    name: inventario-backend
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    plan: free
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: inventario-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_REFRESH_SECRET
+        generateValue: true
+      - key: JWT_EXPIRES_IN
+        value: 15m
+      - key: JWT_REFRESH_EXPIRES_IN
+        value: 7d
+      - key: NODE_ENV
+        value: production
+      - key: CORS_ORIGINS
+        value: https://anderfonseca29.github.io
+
+databases:
+  - name: inventario-db
+    plan: free
