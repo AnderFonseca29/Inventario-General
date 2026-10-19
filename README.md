@@ -159,18 +159,35 @@ variables de entorno del apartado anterior y aplica migraciones con
 `npx prisma migrate deploy` durante el build/release. Ajusta `CORS_ORIGINS` con
 la URL pública del frontend.
 
-### Frontend
+### Frontend en GitHub Pages (automático)
 
-Genera la build estática y publícala en cualquier hosting (GitHub Pages, Vercel,
-Netlify, Cloudflare Pages…):
+El workflow `.github/workflows/deploy-pages.yml` compila el frontend y lo publica
+en **GitHub Pages** en cada push a `main` (y de forma manual con *workflow_dispatch*).
+
+URL prevista: **https://anderfonseca29.github.io/Inventario-General/**
+
+Requisito único (una sola vez): en el repositorio, **Settings → Pages → Build and
+deployment → Source: GitHub Actions**. Sin ese paso el workflow falla con
+`Resource not accessible by integration` (el token por defecto no puede crear el
+sitio de Pages). Después, vuelve a ejecutar el workflow desde la pestaña *Actions*.
+
+La URL de la API para la build de producción se define en
+`frontend/src/environments/environment.prod.ts` (se aplica vía `fileReplacements`
+de `angular.json`). Por defecto apunta a `http://localhost:3001/api`, por lo que
+para que el login funcione desde el sitio publicado debes:
+
+1. Ejecutar el backend localmente (`npm run start:dev`), o desplegarlo en la nube.
+2. Confirmar que ese origen está en `CORS_ORIGINS` del backend.
+
+### Alternativas de hosting estático
 
 ```bash
 cd frontend
 npm run build           # salida en dist/frontend/browser
 ```
 
-Antes de compilar, apunta `frontend/src/environments/environment.ts` a la URL
-pública del backend.
+Puedes publicar `dist/frontend/browser` en Vercel, Netlify o Cloudflare Pages
+apuntando `environment.prod.ts` a la URL pública del backend.
 
 ---
 
