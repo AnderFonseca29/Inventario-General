@@ -39,6 +39,8 @@ export function validateEnv(config: Record<string, unknown>): AppEnv {
     JWT_REFRESH_SECRET: config.JWT_REFRESH_SECRET as string,
     JWT_EXPIRES_IN: (config.JWT_EXPIRES_IN as string) ?? '15m',
     JWT_REFRESH_EXPIRES_IN: (config.JWT_REFRESH_EXPIRES_IN as string) ?? '7d',
-    CORS_ORIGINS: (config.CORS_ORIGINS as string) ?? 'http://localhost:4200',
+    CORS_ORIGINS:
+      (config.CORS_ORIGINS as string) ??
+      'http://localhost:4200,https://anderfonseca29.github.io',
   };
 }
