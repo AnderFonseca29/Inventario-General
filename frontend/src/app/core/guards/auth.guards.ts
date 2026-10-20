@@ -27,7 +27,27 @@ export function permisoGuard(codigo: string): CanActivateFn {
     const auth = inject(AuthService);
     const router = inject(Router);
 
+    // El usuario operativo (vendedor) solo accede a su resumen (Inicio).
+    if (auth.esOperativo()) {
+      return router.createUrlTree(['/dashboard']);
+    }
     if (auth.hasPermiso(codigo)) {
+      return true;
+    }
+    return router.createUrlTree(['/dashboard']);
+  };
+}
+
+// Permite el acceso con el permiso indicado o al propietario de plataforma.
+export function permisoOSuperAdminGuard(codigo: string): CanActivateFn {
+  return () => {
+    const auth = inject(AuthService);
+    const router = inject(Router);
+
+    if (auth.esOperativo()) {
+      return router.createUrlTree(['/dashboard']);
+    }
+    if (auth.isSuperAdmin() || auth.hasPermiso(codigo)) {
       return true;
     }
     return router.createUrlTree(['/dashboard']);

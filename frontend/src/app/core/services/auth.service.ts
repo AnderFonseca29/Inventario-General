@@ -13,6 +13,28 @@ const ACCESS_KEY = 'inv_access_token';
 const REFRESH_KEY = 'inv_refresh_token';
 const USER_KEY = 'inv_user';
 
+// Permisos "de terreno": identifican a un usuario operativo (vendedor) que solo
+// debe ver su propio resumen y no los modulos de gestion de la empresa.
+const PERMISOS_TERRENO = [
+  'cargues.ver.propios',
+  'botellones.registrar',
+  'botellones.ver.propios',
+];
+
+// Permisos de gestion/vision de empresa: si el usuario tiene alguno, no es un
+// usuario operativo aunque tambien registre cargues o botellones.
+const PERMISOS_EMPRESA = [
+  'usuarios.ver',
+  'roles.ver',
+  'modulos.ver',
+  'empresa.configurar',
+  'catalogos.ver',
+  'inventario.ver',
+  'produccion.ver',
+  'reportes.ver',
+  'auditoria.ver',
+];
+
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private readonly http = inject(HttpClient);
@@ -23,6 +45,17 @@ export class AuthService {
   readonly user = this._user.asReadonly();
   readonly isAuthenticated = computed(() => this._user() !== null);
   readonly isSuperAdmin = computed(() => this._user()?.esSuperAdmin ?? false);
+
+  // Usuario operativo (vendedor): registra actividad propia pero no administra
+  // la empresa. Solo debe ver su resumen personal.
+  readonly esOperativo = computed(() => {
+    const user = this._user();
+    if (!user || user.esSuperAdmin) return false;
+    const permisos = user.permisos;
+    const tieneTerreno = permisos.some((p) => PERMISOS_TERRENO.includes(p));
+    const tieneEmpresa = permisos.some((p) => PERMISOS_EMPRESA.includes(p));
+    return tieneTerreno && !tieneEmpresa;
+  });
 
   private leerUsuario(): AuthenticatedUser | null {
     const raw = localStorage.getItem(USER_KEY);

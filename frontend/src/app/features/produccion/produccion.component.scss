@@ -1,0 +1,87 @@
+// Produccion: pestanas, materias primas, formulas, ordenes y mermas.
+
+.prod-tabs {
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.ta-right {
+  text-align: right;
+}
+
+.qty {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+.code-pill {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: #eef1f6;
+  color: #344054;
+  font-family: var(--font-mono, monospace);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.form-row .full {
+  grid-column: 1 / -1;
+}
+
+.lineas-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 6px 0 10px;
+}
+
+.lineas-head label {
+  font-size: 13px;
+  font-weight: 700;
+  color: #344054;
+}
+
+.lineas {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.linea {
+  display: grid;
+  gap: 8px;
+  align-items: center;
+}
+
+.linea-formula {
+  grid-template-columns: 2fr 1fr auto;
+}
+
+.linea-consumo {
+  grid-template-columns: 1.6fr 1fr 1fr;
+}
+
+.linea-consumo .cell-strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 640px) {
+  .linea-formula {
+    grid-template-columns: 1fr auto;
+  }
+
+  .linea-formula select {
+    grid-column: 1 / -1;
+  }
+
+  .linea-consumo {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .linea-consumo .cell-strong {
+    grid-column: 1 / -1;
+  }
+}

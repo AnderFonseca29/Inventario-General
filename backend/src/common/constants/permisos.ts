@@ -7,6 +7,9 @@ export const PERMISOS = {
   ROLES_VER: 'roles.ver',
   ROLES_ADMINISTRAR: 'roles.administrar',
 
+  MODULOS_VER: 'modulos.ver',
+  MODULOS_ADMINISTRAR: 'modulos.administrar',
+
   EMPRESA_CONFIGURAR: 'empresa.configurar',
 
   CATALOGOS_VER: 'catalogos.ver',
@@ -36,6 +39,10 @@ export const PERMISOS = {
 
   MERMAS_REGISTRAR: 'mermas.registrar',
   MERMAS_APROBAR: 'mermas.aprobar',
+
+  MEMBRESIA_VER: 'membresia.ver',
+  MEMBRESIA_ADMINISTRAR: 'membresia.administrar',
+  MEMBRESIA_AFILIAR: 'membresia.afiliar',
 
   REPORTES_VER: 'reportes.ver',
   REPORTES_EXPORTAR: 'reportes.exportar',
@@ -74,6 +81,13 @@ export const CATALOGO_PERMISOS: PermisoDefinicion[] = [
     codigo: PERMISOS.ROLES_ADMINISTRAR,
     nombre: 'Administrar roles',
     modulo: 'roles',
+  },
+
+  { codigo: PERMISOS.MODULOS_VER, nombre: 'Ver modulos', modulo: 'modulos' },
+  {
+    codigo: PERMISOS.MODULOS_ADMINISTRAR,
+    nombre: 'Administrar modulos de la empresa',
+    modulo: 'modulos',
   },
 
   {
@@ -198,6 +212,22 @@ export const CATALOGO_PERMISOS: PermisoDefinicion[] = [
     modulo: 'mermas',
   },
 
+  {
+    codigo: PERMISOS.MEMBRESIA_VER,
+    nombre: 'Ver clientes y membresias',
+    modulo: 'membresia',
+  },
+  {
+    codigo: PERMISOS.MEMBRESIA_ADMINISTRAR,
+    nombre: 'Administrar clientes y planes de membresia',
+    modulo: 'membresia',
+  },
+  {
+    codigo: PERMISOS.MEMBRESIA_AFILIAR,
+    nombre: 'Afiliar y renovar membresias',
+    modulo: 'membresia',
+  },
+
   { codigo: PERMISOS.REPORTES_VER, nombre: 'Ver reportes', modulo: 'reportes' },
   {
     codigo: PERMISOS.REPORTES_EXPORTAR,
@@ -225,6 +255,8 @@ export const PERMISOS_POR_ROL_SISTEMA: Record<string, string[]> = {
     PERMISOS.CARGUES_VER_PROPIOS,
     PERMISOS.BOTELLONES_REGISTRAR,
     PERMISOS.BOTELLONES_VER_PROPIOS,
+    PERMISOS.MEMBRESIA_VER,
+    PERMISOS.MEMBRESIA_AFILIAR,
   ],
   [ROLES_SISTEMA.BODEGA]: [
     PERMISOS.CATALOGOS_VER,

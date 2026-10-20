@@ -20,6 +20,7 @@
 .table-wrap {
   overflow-x: auto;
   border-radius: var(--radius-lg);
+  -webkit-overflow-scrolling: touch;
 }
 
 table.table {
@@ -81,4 +82,20 @@ table.table td.actions {
   display: flex;
   align-items: center;
   gap: 11px;
+}
+
+@media (max-width: 640px) {
+  .table-toolbar {
+    padding: 12px;
+    gap: 10px;
+  }
+
+  .table-toolbar .search {
+    min-width: 100%;
+  }
+
+  table.table th,
+  table.table td {
+    padding: 11px 12px;
+  }
 }

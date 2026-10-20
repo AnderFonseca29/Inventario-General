@@ -1,0 +1,87 @@
+export interface ModuloSistemaDefinicion {
+  clave: string;
+  nombre: string;
+  descripcion: string;
+  icono: string;
+  orden: number;
+  ruta: string;
+  implementado: boolean;
+}
+
+// Modulos fijos del sistema: se siembran por cada empresa y no se pueden eliminar.
+export const MODULOS_SISTEMA: ModuloSistemaDefinicion[] = [
+  {
+    clave: 'catalogo',
+    nombre: 'Catalogo',
+    descripcion: 'Productos, categorias, unidades y presentaciones',
+    icono: 'box',
+    orden: 1,
+    ruta: '/catalogos',
+    implementado: true,
+  },
+  {
+    clave: 'inventario',
+    nombre: 'Inventario',
+    descripcion: 'Existencias, entradas, salidas y ajustes',
+    icono: 'box',
+    orden: 2,
+    ruta: '/inventario',
+    implementado: true,
+  },
+  {
+    clave: 'produccion',
+    nombre: 'Produccion',
+    descripcion: 'Materias primas, formulas y ordenes de produccion',
+    icono: 'factory',
+    orden: 3,
+    ruta: '/produccion',
+    implementado: true,
+  },
+  {
+    clave: 'membresia',
+    nombre: 'Membresia',
+    descripcion: 'Clientes y planes de membresia',
+    icono: 'users',
+    orden: 4,
+    ruta: '/membresia',
+    implementado: true,
+  },
+  {
+    clave: 'reportes',
+    nombre: 'Reportes',
+    descripcion: 'Indicadores y reportes operativos',
+    icono: 'report',
+    orden: 5,
+    ruta: '/reportes',
+    implementado: true,
+  },
+  {
+    clave: 'auditorias',
+    nombre: 'Auditorias',
+    descripcion: 'Trazabilidad de acciones y cambios',
+    icono: 'audit',
+    orden: 6,
+    ruta: '/auditorias',
+    implementado: true,
+  },
+];
+
+// Iconos disponibles para los modulos configurables por el administrador.
+export const ICONOS_MODULO = [
+  'box',
+  'truck',
+  'bottle',
+  'factory',
+  'report',
+  'audit',
+  'users',
+  'user',
+  'shield',
+  'building',
+  'dashboard',
+  'settings',
+  'calendar',
+  'spark',
+  'trend-up',
+  'warning',
+] as const;

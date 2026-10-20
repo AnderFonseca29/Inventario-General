@@ -1,0 +1,71 @@
+// Auditoria: filtros, tabla y detalle JSON.
+
+.aud-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding: 14px 16px;
+}
+
+.aud-filters .search {
+  flex: 1 1 260px;
+}
+
+.aud-filters .form-group {
+  margin: 0;
+}
+
+.mono {
+  font-family: var(--font-mono, monospace);
+  font-size: 12px;
+}
+
+.aud-detalle {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: 8px 12px;
+  margin: 0;
+}
+
+.aud-detalle dt {
+  font-weight: 600;
+  color: #475467;
+  font-size: 13px;
+}
+
+.aud-detalle dd {
+  margin: 0;
+  word-break: break-word;
+}
+
+.aud-json {
+  margin-top: 6px;
+  padding: 12px;
+  border-radius: 8px;
+  background: #f8fafc;
+  border: 1px solid #eaecf0;
+  font-family: var(--font-mono, monospace);
+  font-size: 12px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 320px;
+  overflow: auto;
+}
+
+@media (max-width: 640px) {
+  .aud-filters {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .aud-detalle {
+    grid-template-columns: 1fr;
+    gap: 2px;
+  }
+
+  .aud-detalle dt {
+    margin-top: 8px;
+  }
+}

@@ -11,6 +11,7 @@ import {
   PERMISOS_POR_ROL_SISTEMA,
   ROLES_SISTEMA,
 } from '../common/constants/permisos';
+import { MODULOS_SISTEMA } from '../common/constants/modulos';
 import { CreateEmpresaDto, UpdateEmpresaDto } from './dto/empresa.dto';
 
 @Injectable()
@@ -47,6 +48,26 @@ export class EmpresasService {
     }
   }
 
+  private async crearModulosSistema(
+    tx: Prisma.TransactionClient,
+    empresaId: string,
+  ) {
+    await tx.modulo.createMany({
+      data: MODULOS_SISTEMA.map((modulo) => ({
+        empresaId,
+        clave: modulo.clave,
+        nombre: modulo.nombre,
+        descripcion: modulo.descripcion,
+        icono: modulo.icono,
+        orden: modulo.orden,
+        ruta: modulo.ruta,
+        tipo: 'SISTEMA' as const,
+        implementado: modulo.implementado,
+      })),
+      skipDuplicates: true,
+    });
+  }
+
   async crear(dto: CreateEmpresaDto, actorId: string, ip?: string) {
     const email = dto.admin.email.toLowerCase();
     const existe = await this.prisma.usuario.findUnique({ where: { email } });
@@ -79,6 +100,7 @@ export class EmpresasService {
       });
 
       await this.crearRolesSistema(tx, nueva.id);
+      await this.crearModulosSistema(tx, nueva.id);
 
       const rolAdmin = await tx.rol.findFirst({
         where: { empresaId: nueva.id, nombre: ROLES_SISTEMA.ADMINISTRADOR },

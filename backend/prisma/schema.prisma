@@ -118,6 +118,18 @@ enum EstadoSolicitud {
   ANULADA
 }
 
+enum EstadoMembresia {
+  ACTIVA
+  VENCIDA
+  SUSPENDIDA
+  CANCELADA
+}
+
+enum TipoModulo {
+  SISTEMA
+  PERSONALIZADO
+}
+
 // ============================ PLATAFORMA ====================================
 
 model Funcionalidad {
@@ -179,6 +191,7 @@ model Empresa {
 
   usuarios             Usuario[]
   roles                Rol[]
+  modulos              Modulo[]
   categorias           Categoria[]
   unidades             Unidad[]
   presentaciones       Presentacion[]
@@ -204,6 +217,9 @@ model Empresa {
   historialSuscripcion HistorialSuscripcion[]
   auditorias           Auditoria[]
   auditoriasSoporte    AuditoriaSoporte[]
+  clientes             Cliente[]
+  planesMembresia      PlanMembresia[]
+  membresiasCliente    MembresiaCliente[]
 
   @@map("empresas")
 }
@@ -299,6 +315,7 @@ model Usuario {
   auditorias              Auditoria[]
   auditoriasSoporte       AuditoriaSoporte[]      @relation("AuditoriaSoporteUsuario")
   recepcionesMp           RecepcionMateriaPrima[] @relation("RecepcionResponsable")
+  membresiasCreadas       MembresiaCliente[]      @relation("MembresiaCreador")
 
   @@index([empresaId])
   @@map("usuarios")
@@ -371,6 +388,30 @@ model RefreshToken {
 
   @@index([usuarioId])
   @@map("refresh_tokens")
+}
+
+// ============================= MODULOS ======================================
+
+model Modulo {
+  id           String     @id @default(uuid()) @db.Uuid
+  empresaId    String     @db.Uuid
+  clave        String
+  nombre       String
+  descripcion  String?
+  icono        String
+  orden        Int        @default(0)
+  ruta         String?
+  tipo         TipoModulo @default(PERSONALIZADO)
+  implementado Boolean    @default(false)
+  activo       Boolean    @default(true)
+  createdAt    DateTime   @default(now()) @db.Timestamptz(3)
+  updatedAt    DateTime   @updatedAt @db.Timestamptz(3)
+
+  empresa Empresa @relation(fields: [empresaId], references: [id])
+
+  @@unique([empresaId, clave])
+  @@index([empresaId])
+  @@map("modulos")
 }
 
 // ============================ CATALOGOS =====================================
@@ -489,10 +530,12 @@ model Bodega {
   createdAt DateTime   @default(now()) @db.Timestamptz(3)
   updatedAt DateTime   @updatedAt @db.Timestamptz(3)
 
-  empresa     Empresa                @relation(fields: [empresaId], references: [id])
-  ubicaciones Ubicacion[]
-  existencias Existencia[]
-  movimientos MovimientoInventario[]
+  empresa           Empresa                @relation(fields: [empresaId], references: [id])
+  ubicaciones       Ubicacion[]
+  existencias       Existencia[]
+  movimientos       MovimientoInventario[]
+  documentos        DocumentoInventario[]  @relation("DocumentoBodega")
+  documentosDestino DocumentoInventario[]  @relation("DocumentoBodegaDestino")
 
   @@unique([empresaId, codigo])
   @@index([empresaId])
@@ -565,17 +608,20 @@ model DocumentoInventario {
   empresaId     String          @db.Uuid
   tipo          TipoMovimiento
   consecutivo   String
-  estado        EstadoDocumento @default(BORRADOR)
-  bodegaId      String?         @db.Uuid
-  observaciones String?
-  usuarioId     String          @db.Uuid
-  creadoEn      DateTime        @default(now()) @db.Timestamptz(3)
-  confirmadoEn  DateTime?       @db.Timestamptz(3)
+  estado          EstadoDocumento @default(BORRADOR)
+  bodegaId        String?         @db.Uuid
+  bodegaDestinoId String?         @db.Uuid
+  observaciones   String?
+  usuarioId       String          @db.Uuid
+  creadoEn        DateTime        @default(now()) @db.Timestamptz(3)
+  confirmadoEn    DateTime?       @db.Timestamptz(3)
 
-  empresa     Empresa                @relation(fields: [empresaId], references: [id])
-  usuario     Usuario                @relation("DocumentoUsuario", fields: [usuarioId], references: [id])
-  detalles    DocumentoDetalle[]
-  movimientos MovimientoInventario[]
+  empresa       Empresa                @relation(fields: [empresaId], references: [id])
+  usuario       Usuario                @relation("DocumentoUsuario", fields: [usuarioId], references: [id])
+  bodega        Bodega?                @relation("DocumentoBodega", fields: [bodegaId], references: [id])
+  bodegaDestino Bodega?                @relation("DocumentoBodegaDestino", fields: [bodegaDestinoId], references: [id])
+  detalles      DocumentoDetalle[]
+  movimientos   MovimientoInventario[]
 
   @@unique([empresaId, tipo, consecutivo])
   @@index([empresaId, estado])
@@ -888,6 +934,69 @@ model SolicitudDetalle {
 
   @@index([solicitudId])
   @@map("solicitud_detalle")
+}
+
+// ============================= MEMBRESIA ====================================
+
+model Cliente {
+  id        String   @id @default(uuid()) @db.Uuid
+  empresaId String   @db.Uuid
+  nombre    String
+  documento String?
+  email     String?
+  telefono  String?
+  direccion String?
+  activo    Boolean  @default(true)
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @db.Timestamptz(3)
+
+  empresa    Empresa            @relation(fields: [empresaId], references: [id])
+  membresias MembresiaCliente[]
+
+  @@unique([empresaId, documento])
+  @@index([empresaId])
+  @@map("clientes")
+}
+
+model PlanMembresia {
+  id           String   @id @default(uuid()) @db.Uuid
+  empresaId    String   @db.Uuid
+  nombre       String
+  descripcion  String?
+  precio       Decimal  @default(0) @db.Decimal(18, 4)
+  duracionDias Int
+  activo       Boolean  @default(true)
+  createdAt    DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt    DateTime @updatedAt @db.Timestamptz(3)
+
+  empresa    Empresa            @relation(fields: [empresaId], references: [id])
+  membresias MembresiaCliente[]
+
+  @@unique([empresaId, nombre])
+  @@index([empresaId])
+  @@map("planes_membresia")
+}
+
+model MembresiaCliente {
+  id           String          @id @default(uuid()) @db.Uuid
+  empresaId    String          @db.Uuid
+  clienteId    String          @db.Uuid
+  planId       String          @db.Uuid
+  estado       EstadoMembresia @default(ACTIVA)
+  fechaInicio  DateTime        @default(now()) @db.Timestamptz(3)
+  fechaFin     DateTime        @db.Timestamptz(3)
+  creadoPorId  String          @db.Uuid
+  createdAt    DateTime        @default(now()) @db.Timestamptz(3)
+  updatedAt    DateTime        @updatedAt @db.Timestamptz(3)
+
+  empresa   Empresa       @relation(fields: [empresaId], references: [id])
+  cliente   Cliente       @relation(fields: [clienteId], references: [id])
+  plan      PlanMembresia @relation(fields: [planId], references: [id])
+  creadoPor Usuario       @relation("MembresiaCreador", fields: [creadoPorId], references: [id])
+
+  @@index([empresaId, estado])
+  @@index([empresaId, clienteId])
+  @@map("membresias_cliente")
 }
 
 // ============================= AUDITORIA ====================================

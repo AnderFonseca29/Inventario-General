@@ -31,6 +31,10 @@ export class PermisosGuard implements CanActivate {
       throw new ForbiddenException('No autenticado');
     }
 
+    if (user.esSuperAdmin) {
+      return true;
+    }
+
     const faltantes = requeridos.filter(
       (permiso) => !user.permisos.includes(permiso),
     );

@@ -6,6 +6,16 @@
   font-size: 26px;
 }
 
+@media (max-width: 640px) {
+  .hero h1 {
+    font-size: 21px;
+  }
+
+  .cards {
+    grid-template-columns: 1fr;
+  }
+}
+
 .col {
   display: flex;
   flex-direction: column;
@@ -16,6 +26,12 @@
   font-size: 16px;
   font-weight: 700;
   margin-bottom: 6px;
+}
+
+// ---- Aviso de conciliaciones pendientes (resumen del vendedor) ----
+.info-line.warn {
+  color: #b54708;
+  font-weight: 600;
 }
 
 // ---- Roadmap / estado del sistema ----

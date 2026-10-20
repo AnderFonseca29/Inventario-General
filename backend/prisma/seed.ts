@@ -1,6 +1,10 @@
 import { PrismaClient } from '@prisma/client';
 import * as argon2 from 'argon2';
-import { CATALOGO_PERMISOS } from '../src/common/constants/permisos';
+import {
+  CATALOGO_PERMISOS,
+  ROLES_SISTEMA,
+} from '../src/common/constants/permisos';
+import { MODULOS_SISTEMA } from '../src/common/constants/modulos';
 
 const prisma = new PrismaClient();
 
@@ -102,6 +106,65 @@ async function main() {
     });
   }
   console.log(`Planes sincronizados: ${PLANES.length}`);
+
+  const empresas = await prisma.empresa.findMany({ select: { id: true } });
+  for (const empresa of empresas) {
+    for (const modulo of MODULOS_SISTEMA) {
+      await prisma.modulo.upsert({
+        where: {
+          empresaId_clave: { empresaId: empresa.id, clave: modulo.clave },
+        },
+        update: {
+          implementado: modulo.implementado,
+          ruta: modulo.ruta,
+        },
+        create: {
+          empresaId: empresa.id,
+          clave: modulo.clave,
+          nombre: modulo.nombre,
+          descripcion: modulo.descripcion,
+          icono: modulo.icono,
+          orden: modulo.orden,
+          ruta: modulo.ruta,
+          tipo: 'SISTEMA',
+          implementado: modulo.implementado,
+        },
+      });
+    }
+  }
+  console.log(
+    `Modulos de sistema sincronizados: ${empresas.length * MODULOS_SISTEMA.length}`,
+  );
+
+  // Mantiene el rol de sistema "Administrador" con todos los permisos vigentes.
+  const todosPermisos = await prisma.permiso.findMany({ select: { id: true } });
+  for (const empresa of empresas) {
+    const rolAdmin = await prisma.rol.findFirst({
+      where: {
+        empresaId: empresa.id,
+        nombre: ROLES_SISTEMA.ADMINISTRADOR,
+        esSistema: true,
+      },
+      select: { id: true },
+    });
+    if (!rolAdmin) continue;
+
+    const asignados = await prisma.rolPermiso.findMany({
+      where: { rolId: rolAdmin.id },
+      select: { permisoId: true },
+    });
+    const set = new Set(asignados.map((a) => a.permisoId));
+    const faltantes = todosPermisos
+      .filter((p) => !set.has(p.id))
+      .map((p) => ({ rolId: rolAdmin.id, permisoId: p.id }));
+    if (faltantes.length > 0) {
+      await prisma.rolPermiso.createMany({
+        data: faltantes,
+        skipDuplicates: true,
+      });
+    }
+  }
+  console.log('Permisos del rol Administrador sincronizados.');
 
   const superEmail = process.env.SEED_SUPERADMIN_EMAIL?.toLowerCase();
   const superPassword = process.env.SEED_SUPERADMIN_PASSWORD;

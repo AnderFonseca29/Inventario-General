@@ -1,5 +1,10 @@
 import { Routes } from '@angular/router';
-import { authGuard, permisoGuard, superAdminGuard } from './core/guards/auth.guards';
+import {
+  authGuard,
+  permisoGuard,
+  permisoOSuperAdminGuard,
+  superAdminGuard,
+} from './core/guards/auth.guards';
 
 export const routes: Routes = [
   {
@@ -36,6 +41,62 @@ export const routes: Routes = [
             (m) => m.RolesComponent,
           ),
         canActivate: [permisoGuard('roles.ver')],
+      },
+      {
+        path: 'modulos',
+        loadComponent: () =>
+          import('./features/modulos/modulos.component').then(
+            (m) => m.ModulosComponent,
+          ),
+        canActivate: [permisoOSuperAdminGuard('modulos.ver')],
+      },
+      {
+        path: 'catalogos',
+        loadComponent: () =>
+          import('./features/catalogos/catalogos.component').then(
+            (m) => m.CatalogosComponent,
+          ),
+        canActivate: [permisoGuard('catalogos.ver')],
+      },
+      {
+        path: 'inventario',
+        loadComponent: () =>
+          import('./features/inventario/inventario.component').then(
+            (m) => m.InventarioComponent,
+          ),
+        canActivate: [permisoGuard('inventario.ver')],
+      },
+      {
+        path: 'produccion',
+        loadComponent: () =>
+          import('./features/produccion/produccion.component').then(
+            (m) => m.ProduccionComponent,
+          ),
+        canActivate: [permisoGuard('produccion.ver')],
+      },
+      {
+        path: 'membresia',
+        loadComponent: () =>
+          import('./features/membresia/membresia.component').then(
+            (m) => m.MembresiaComponent,
+          ),
+        canActivate: [permisoGuard('membresia.ver')],
+      },
+      {
+        path: 'reportes',
+        loadComponent: () =>
+          import('./features/reportes/reportes.component').then(
+            (m) => m.ReportesComponent,
+          ),
+        canActivate: [permisoGuard('reportes.ver')],
+      },
+      {
+        path: 'auditorias',
+        loadComponent: () =>
+          import('./features/auditorias/auditorias.component').then(
+            (m) => m.AuditoriasComponent,
+          ),
+        canActivate: [permisoGuard('auditoria.ver')],
       },
       {
         path: 'mi-empresa',

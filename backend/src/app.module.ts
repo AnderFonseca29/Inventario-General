@@ -11,6 +11,13 @@ import { AuthModule } from './auth/auth.module';
 import { EmpresasModule } from './empresas/empresas.module';
 import { UsuariosModule } from './usuarios/usuarios.module';
 import { RolesModule } from './roles/roles.module';
+import { ModulosModule } from './modulos/modulos.module';
+import { CatalogosModule } from './catalogos/catalogos.module';
+import { InventarioModule } from './inventario/inventario.module';
+import { ProduccionModule } from './produccion/produccion.module';
+import { MembresiaModule } from './membresia/membresia.module';
+import { ReportesModule } from './reportes/reportes.module';
+import { ResumenModule } from './resumen/resumen.module';
 import { PermisosModule } from './permisos/permisos.module';
 import { SuscripcionesModule } from './suscripciones/suscripciones.module';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
@@ -27,6 +34,13 @@ import { SuperAdminGuard } from './common/guards/superadmin.guard';
     EmpresasModule,
     UsuariosModule,
     RolesModule,
+    ModulosModule,
+    CatalogosModule,
+    InventarioModule,
+    ProduccionModule,
+    MembresiaModule,
+    ReportesModule,
+    ResumenModule,
     PermisosModule,
     SuscripcionesModule,
   ],

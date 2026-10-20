@@ -1,0 +1,164 @@
+import { EstadoMembresia } from '@prisma/client';
+import {
+  IsBoolean,
+  IsDateString,
+  IsEmail,
+  IsEnum,
+  IsNumber,
+  IsOptional,
+  IsString,
+  IsUUID,
+  Min,
+  MinLength,
+} from 'class-validator';
+
+// -------------------------------- Clientes ---------------------------------
+
+export class CreateClienteDto {
+  @IsString()
+  @MinLength(2)
+  nombre!: string;
+
+  @IsOptional()
+  @IsString()
+  documento?: string;
+
+  @IsOptional()
+  @IsEmail()
+  email?: string;
+
+  @IsOptional()
+  @IsString()
+  telefono?: string;
+
+  @IsOptional()
+  @IsString()
+  direccion?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  activo?: boolean;
+}
+
+export class UpdateClienteDto {
+  @IsOptional()
+  @IsString()
+  @MinLength(2)
+  nombre?: string;
+
+  @IsOptional()
+  @IsString()
+  documento?: string;
+
+  @IsOptional()
+  @IsEmail()
+  email?: string;
+
+  @IsOptional()
+  @IsString()
+  telefono?: string;
+
+  @IsOptional()
+  @IsString()
+  direccion?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  activo?: boolean;
+}
+
+export class ListarClientesDto {
+  @IsOptional()
+  @IsString()
+  buscar?: string;
+}
+
+// ----------------------------- Planes de membresia -------------------------
+
+export class CreatePlanMembresiaDto {
+  @IsString()
+  @MinLength(2)
+  nombre!: string;
+
+  @IsOptional()
+  @IsString()
+  descripcion?: string;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  precio?: number;
+
+  @IsNumber()
+  @Min(1)
+  duracionDias!: number;
+
+  @IsOptional()
+  @IsBoolean()
+  activo?: boolean;
+}
+
+export class UpdatePlanMembresiaDto {
+  @IsOptional()
+  @IsString()
+  @MinLength(2)
+  nombre?: string;
+
+  @IsOptional()
+  @IsString()
+  descripcion?: string;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  precio?: number;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(1)
+  duracionDias?: number;
+
+  @IsOptional()
+  @IsBoolean()
+  activo?: boolean;
+}
+
+export class ListarPlanesMembresiaDto {
+  @IsOptional()
+  @IsString()
+  buscar?: string;
+}
+
+// ------------------------------ Afiliaciones -------------------------------
+
+export class CreateMembresiaDto {
+  @IsUUID()
+  clienteId!: string;
+
+  @IsUUID()
+  planId!: string;
+
+  @IsOptional()
+  @IsDateString()
+  fechaInicio?: string;
+}
+
+export class RenovarMembresiaDto {
+  @IsOptional()
+  @IsUUID()
+  planId?: string;
+
+  @IsOptional()
+  @IsDateString()
+  fechaInicio?: string;
+}
+
+export class ListarMembresiasDto {
+  @IsOptional()
+  @IsEnum(EstadoMembresia)
+  estado?: EstadoMembresia;
+
+  @IsOptional()
+  @IsUUID()
+  clienteId?: string;
+}

@@ -164,20 +164,44 @@
   flex-shrink: 0;
 }
 
-// ---- Estado colapsado ----
-.layout.collapsed .brand-text,
-.layout.collapsed .nav-seccion,
-.layout.collapsed .nav-label,
-.layout.collapsed .pronto-tag {
+// ---- Botón cerrar (solo móvil) ----
+.drawer-close {
   display: none;
+  position: absolute;
+  top: 14px;
+  right: 12px;
+  border: none;
+  background: rgba(255, 255, 255, 0.08);
+  color: #cbd5e1;
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
 }
 
-.layout.collapsed .brand,
-.layout.collapsed .nav-item,
-.layout.collapsed .sidebar-footer {
-  justify-content: center;
-  padding-left: 0;
-  padding-right: 0;
+.drawer-close app-icon {
+  width: 18px;
+  height: 18px;
+}
+
+// ---- Estado colapsado (solo escritorio) ----
+@media (min-width: 901px) {
+  .layout.collapsed .brand-text,
+  .layout.collapsed .nav-seccion,
+  .layout.collapsed .nav-label,
+  .layout.collapsed .pronto-tag {
+    display: none;
+  }
+
+  .layout.collapsed .brand,
+  .layout.collapsed .nav-item,
+  .layout.collapsed .sidebar-footer {
+    justify-content: center;
+    padding-left: 0;
+    padding-right: 0;
+  }
 }
 
 // ---- Área principal ----
@@ -420,27 +444,80 @@
   background: transparent;
 }
 
+.sidebar-overlay {
+  display: none;
+}
+
 .content {
   padding: 26px;
   flex: 1;
+  min-width: 0;
   animation: fadeIn 0.25s ease both;
 }
 
 @media (max-width: 900px) {
   .sidebar {
-    width: 78px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 264px;
+    max-width: 82vw;
+    transform: translateX(-102%);
+    transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+    box-shadow: var(--shadow-lg);
+    z-index: 50;
   }
-  .brand-text,
-  .nav-seccion,
-  .nav-label,
-  .pronto-tag {
-    display: none;
+
+  .layout.movil-abierto .sidebar {
+    transform: translateX(0);
   }
+
+  .drawer-close {
+    display: inline-flex;
+  }
+
+  .sidebar-overlay.visible {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(16, 24, 40, 0.5);
+    backdrop-filter: blur(2px);
+    z-index: 40;
+    animation: fadeIn 0.2s ease both;
+  }
+
   .user-meta,
   .clock {
     display: none;
   }
+
   .content {
     padding: 18px;
+  }
+}
+
+@media (max-width: 640px) {
+  .topbar {
+    height: 60px;
+    padding: 0 14px;
+    gap: 8px;
+  }
+
+  .crumb-root,
+  .crumb-sep {
+    display: none;
+  }
+
+  .topsearch {
+    margin: 0 4px;
+  }
+
+  .content {
+    padding: 14px;
+  }
+
+  .sidebar-footer {
+    justify-content: center;
   }
 }

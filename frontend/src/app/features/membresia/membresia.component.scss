@@ -1,0 +1,23 @@
+// Membresia: clientes, planes y afiliaciones.
+
+.memb-tabs {
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.memb-filter {
+  max-width: 220px;
+}
+
+.memb-nota {
+  margin: 0 0 4px;
+  color: var(--text-muted, #667085);
+  font-size: 13px;
+}
+
+@media (max-width: 640px) {
+  .memb-filter {
+    max-width: none;
+    width: 100%;
+  }
+}

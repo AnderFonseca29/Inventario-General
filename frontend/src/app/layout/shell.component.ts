@@ -2,6 +2,8 @@ import { Component, HostListener, computed, inject, signal } from '@angular/core
 import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { filter } from 'rxjs';
 import { AuthService } from '../core/services/auth.service';
+import { ModulosStateService } from '../core/services/modulos-state.service';
+import { Modulo } from '../core/models/modulo.model';
 import { IconComponent } from '../shared/icons';
 
 interface NavItem {
@@ -10,6 +12,7 @@ interface NavItem {
   ruta?: string;
   permiso?: string;
   soloSuperAdmin?: boolean;
+  paraSuperAdmin?: boolean;
   pronto?: boolean;
 }
 
@@ -28,24 +31,31 @@ const NAV: NavSeccion[] = [
     items: [
       { label: 'Usuarios', icono: 'users', ruta: '/usuarios', permiso: 'usuarios.ver' },
       { label: 'Roles y permisos', icono: 'shield', ruta: '/roles', permiso: 'roles.ver' },
+      {
+        label: 'Módulos',
+        icono: 'settings',
+        ruta: '/modulos',
+        permiso: 'modulos.ver',
+        paraSuperAdmin: true,
+      },
       { label: 'Mi empresa', icono: 'building', ruta: '/mi-empresa', permiso: 'empresa.configurar' },
       { label: 'Empresas', icono: 'building', ruta: '/empresas', soloSuperAdmin: true },
     ],
   },
-  {
-    titulo: 'Operación',
-    items: [
-      { label: 'Catálogos', icono: 'box', permiso: 'catalogos.ver', pronto: true },
-      { label: 'Inventario', icono: 'box', permiso: 'inventario.ver', pronto: true },
-      { label: 'Cargues', icono: 'truck', permiso: 'cargues.ver.todos', pronto: true },
-      { label: 'Botellones', icono: 'bottle', permiso: 'botellones.ver.todos', pronto: true },
-      { label: 'Producción', icono: 'factory', permiso: 'produccion.ver', pronto: true },
-      { label: 'Mermas', icono: 'warning', permiso: 'mermas.registrar', pronto: true },
-      { label: 'Reportes', icono: 'report', permiso: 'reportes.ver', pronto: true },
-      { label: 'Auditoría', icono: 'audit', permiso: 'auditoria.ver', pronto: true },
-    ],
-  },
 ];
+
+const SECCION_OPERACION = 'Operación';
+
+// Permiso necesario para ver cada modulo de sistema en el menu. Un modulo sin
+// mapeo (personalizado) se muestra a quien tenga acceso a la seccion.
+const PERMISO_POR_CLAVE: Record<string, string> = {
+  catalogo: 'catalogos.ver',
+  inventario: 'inventario.ver',
+  produccion: 'produccion.ver',
+  membresia: 'membresia.ver',
+  reportes: 'reportes.ver',
+  auditorias: 'auditoria.ver',
+};
 
 const COLLAPSE_KEY = 'inv_sidebar_collapsed';
 
@@ -53,8 +63,11 @@ const COLLAPSE_KEY = 'inv_sidebar_collapsed';
   selector: 'app-shell',
   imports: [RouterOutlet, RouterLink, RouterLinkActive, IconComponent],
   template: `
-    <div class="layout" [class.collapsed]="colapsado()">
+    <div class="layout" [class.collapsed]="colapsado()" [class.movil-abierto]="movilAbierto()">
       <aside class="sidebar">
+        <button class="drawer-close" (click)="cerrarDrawer()" title="Cerrar menú">
+          <app-icon name="close" />
+        </button>
         <div class="brand">
           <span class="brand-logo">ST</span>
           <span class="brand-text">
@@ -80,6 +93,7 @@ const COLLAPSE_KEY = 'inv_sidebar_collapsed';
                     [routerLink]="item.ruta"
                     routerLinkActive="active"
                     [title]="item.label"
+                    (click)="cerrarDrawer()"
                   >
                     <app-icon [name]="item.icono" />
                     <span class="nav-label">{{ item.label }}</span>
@@ -208,6 +222,8 @@ const COLLAPSE_KEY = 'inv_sidebar_collapsed';
         </main>
       </div>
 
+      <div class="sidebar-overlay" [class.visible]="movilAbierto()" (click)="cerrarDrawer()"></div>
+
       @if (userAbierto() || notifAbierto()) {
         <div class="menu-overlay" (click)="cerrarMenus()"></div>
       }
@@ -218,14 +234,31 @@ const COLLAPSE_KEY = 'inv_sidebar_collapsed';
 export class ShellComponent {
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly modulosState = inject(ModulosStateService);
 
   readonly user = this.auth.user;
   readonly esSuperAdmin = this.auth.isSuperAdmin;
+  readonly esOperativo = this.auth.esOperativo;
   readonly puedeConfigEmpresa = () => this.auth.hasPermiso('empresa.configurar');
 
   readonly userAbierto = signal(false);
   readonly notifAbierto = signal(false);
+  readonly movilAbierto = signal(false);
   readonly busqueda = signal('');
+
+  // El usuario operativo (vendedor) solo ve Inicio: se oculta toda la seccion
+  // de operacion. Para el resto se filtra cada modulo por su permiso.
+  readonly modulosOperacion = computed<NavItem[]>(() => {
+    if (this.esOperativo()) return [];
+    return this.modulosState
+      .menu()
+      .filter((modulo) => {
+        if (modulo.tipo !== 'SISTEMA') return true;
+        const permiso = PERMISO_POR_CLAVE[modulo.clave];
+        return permiso ? this.auth.hasPermiso(permiso) : false;
+      })
+      .map(toNavItem);
+  });
 
   readonly colapsado = signal(localStorage.getItem(COLLAPSE_KEY) === '1');
 
@@ -245,16 +278,25 @@ export class ShellComponent {
     return email.slice(0, 2).toUpperCase();
   });
 
-  readonly secciones = computed<NavSeccion[]>(() =>
-    NAV.map((seccion) => ({
-      titulo: seccion.titulo,
-      items: seccion.items.filter((item) => {
+  readonly secciones = computed<NavSeccion[]>(() => {
+    const visibles = NAV.map((seccion) => {
+      const items = seccion.items.filter((item) => {
         if (item.soloSuperAdmin) return this.esSuperAdmin();
-        if (item.permiso) return this.auth.hasPermiso(item.permiso);
+        if (item.permiso) {
+          if (this.auth.hasPermiso(item.permiso)) return true;
+          return item.paraSuperAdmin ? this.esSuperAdmin() : false;
+        }
         return true;
-      }),
-    })).filter((seccion) => seccion.items.length > 0),
-  );
+      });
+      return { titulo: seccion.titulo, items };
+    }).filter((seccion) => seccion.items.length > 0);
+
+    const operacion = this.modulosOperacion();
+    if (operacion.length === 0) {
+      return visibles;
+    }
+    return [...visibles, { titulo: SECCION_OPERACION, items: operacion }];
+  });
 
   readonly resultadosBusqueda = computed<(NavItem & { seccion: string })[]>(() => {
     const termino = this.busqueda().trim().toLowerCase();
@@ -267,7 +309,7 @@ export class ShellComponent {
 
   readonly tituloModulo = computed(() => {
     const actual = this.url();
-    for (const seccion of NAV) {
+    for (const seccion of this.secciones()) {
       for (const item of seccion.items) {
         if (item.ruta && actual.startsWith(item.ruta)) return item.label;
       }
@@ -281,15 +323,35 @@ export class ShellComponent {
       .subscribe(() => {
         this.url.set(this.router.url);
         this.cerrarMenus();
+        this.cerrarDrawer();
       });
 
     setInterval(() => this.ahora.set(new Date()), 1000);
+
+    this.modulosState.cargar();
   }
 
   toggleSidebar(): void {
+    if (this.esMovil()) {
+      this.movilAbierto.update((v) => !v);
+      return;
+    }
     const nuevo = !this.colapsado();
     this.colapsado.set(nuevo);
     localStorage.setItem(COLLAPSE_KEY, nuevo ? '1' : '0');
+  }
+
+  cerrarDrawer(): void {
+    if (this.movilAbierto()) this.movilAbierto.set(false);
+  }
+
+  private esMovil(): boolean {
+    return window.matchMedia('(max-width: 900px)').matches;
+  }
+
+  @HostListener('window:resize')
+  onResize(): void {
+    if (!this.esMovil() && this.movilAbierto()) this.movilAbierto.set(false);
   }
 
   toggleUser(event: Event): void {
@@ -328,4 +390,14 @@ export class ShellComponent {
     this.cerrarMenus();
     this.auth.cerrarSesion();
   }
+}
+
+function toNavItem(modulo: Modulo): NavItem {
+  const implementado = modulo.implementado && !!modulo.ruta;
+  return {
+    label: modulo.nombre,
+    icono: modulo.icono,
+    ruta: implementado ? (modulo.ruta as string) : undefined,
+    pronto: !implementado,
+  };
 }
