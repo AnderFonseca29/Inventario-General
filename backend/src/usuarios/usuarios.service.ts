@@ -15,6 +15,8 @@ import {
   ResetPasswordDto,
   UpdateUsuarioDto,
 } from './dto/usuario.dto';
+import { assertPermisosNoSuperiores } from '../common/authz/permisos-actor';
+import type { AuthenticatedUser } from '../common/types/authenticated-user';
 
 @Injectable()
 export class UsuariosService {
@@ -24,13 +26,62 @@ export class UsuariosService {
     private readonly suscripciones: SuscripcionesService,
   ) {}
 
+  // Un usuario solo puede gestionar (editar, desactivar, resetear contraseña)
+  // a usuarios cuyos roles no tengan permisos superiores a los propios.
+  private async assertPuedeGestionarUsuario(
+    empresaId: string,
+    id: string,
+    actor: Pick<AuthenticatedUser, 'esSuperAdmin' | 'permisos'>,
+    accion: string,
+  ) {
+    if (actor.esSuperAdmin) {
+      return;
+    }
+    const objetivo = await this.prisma.usuario.findFirst({
+      where: { id, empresaId },
+      select: {
+        esSuperAdmin: true,
+        roles: {
+          select: {
+            rol: {
+              select: {
+                permisos: { select: { permiso: { select: { codigo: true } } } },
+              },
+            },
+          },
+        },
+      },
+    });
+    if (!objetivo) {
+      throw new NotFoundException('Usuario no encontrado');
+    }
+    if (objetivo.esSuperAdmin) {
+      throw new ForbiddenException(
+        `No puede ${accion} a un propietario de plataforma`,
+      );
+    }
+    const codigos = objetivo.roles.flatMap((ur) =>
+      ur.rol.permisos.map((rp) => rp.permiso.codigo),
+    );
+    try {
+      assertPermisosNoSuperiores(actor, codigos);
+    } catch {
+      throw new ForbiddenException(
+        `No puede ${accion} a un usuario con permisos superiores a los suyos`,
+      );
+    }
+  }
+
   private async validarRolesDeEmpresa(empresaId: string, rolIds: string[]) {
     if (rolIds.length === 0) {
       throw new BadRequestException('Debe asignar al menos un rol');
     }
     const roles = await this.prisma.rol.findMany({
       where: { id: { in: rolIds }, empresaId },
-      select: { id: true },
+      select: {
+        id: true,
+        permisos: { select: { permiso: { select: { codigo: true } } } },
+      },
     });
     if (roles.length !== rolIds.length) {
       throw new BadRequestException(
@@ -38,6 +89,25 @@ export class UsuariosService {
       );
     }
     return roles.map((r) => r.id);
+  }
+
+  // Un usuario solo puede asignar roles cuyos permisos no excedan los propios.
+  private async validarPermisosDeRoles(
+    empresaId: string,
+    rolIds: string[],
+    actor: Pick<AuthenticatedUser, 'esSuperAdmin' | 'permisos'>,
+  ) {
+    if (actor.esSuperAdmin) {
+      return;
+    }
+    const roles = await this.prisma.rol.findMany({
+      where: { id: { in: rolIds }, empresaId },
+      select: { permisos: { select: { permiso: { select: { codigo: true } } } } },
+    });
+    const codigos = roles.flatMap((r) =>
+      r.permisos.map((rp) => rp.permiso.codigo),
+    );
+    assertPermisosNoSuperiores(actor, codigos);
   }
 
   private serialize(usuario: {
@@ -91,7 +161,7 @@ export class UsuariosService {
   async crear(
     empresaId: string,
     dto: CreateUsuarioDto,
-    actorId: string,
+    actor: AuthenticatedUser,
     ip?: string,
   ) {
     const email = dto.email.toLowerCase();
@@ -101,6 +171,7 @@ export class UsuariosService {
     }
 
     const rolIds = await this.validarRolesDeEmpresa(empresaId, dto.roles);
+    await this.validarPermisosDeRoles(empresaId, rolIds, actor);
     const passwordHash = await argon2.hash(dto.password);
 
     const usuario = await this.prisma.$transaction(async (tx) => {
@@ -140,7 +211,7 @@ export class UsuariosService {
 
     await this.auditoria.registrar({
       empresaId,
-      usuarioId: actorId,
+      usuarioId: actor.id,
       accion: 'usuario.creado',
       entidad: 'Usuario',
       entidadId: usuario.id,
@@ -155,17 +226,22 @@ export class UsuariosService {
     empresaId: string,
     id: string,
     dto: UpdateUsuarioDto,
-    actorId: string,
+    actor: AuthenticatedUser,
     ip?: string,
   ) {
     await this.obtener(empresaId, id);
 
-    if (id === actorId && dto.activo === false) {
+    if (id === actor.id && dto.activo === false) {
       throw new BadRequestException('No puede desactivar su propio usuario');
     }
 
+    if (id !== actor.id) {
+      await this.assertPuedeGestionarUsuario(empresaId, id, actor, 'editar');
+    }
+
     if (dto.roles) {
-      await this.validarRolesDeEmpresa(empresaId, dto.roles);
+      const rolIds = await this.validarRolesDeEmpresa(empresaId, dto.roles);
+      await this.validarPermisosDeRoles(empresaId, rolIds, actor);
     }
 
     await this.prisma.$transaction(async (tx) => {
@@ -184,7 +260,7 @@ export class UsuariosService {
 
     await this.auditoria.registrar({
       empresaId,
-      usuarioId: actorId,
+      usuarioId: actor.id,
       accion: 'usuario.actualizado',
       entidad: 'Usuario',
       entidadId: id,
@@ -198,20 +274,20 @@ export class UsuariosService {
   async desactivar(
     empresaId: string,
     id: string,
-    actorId: string,
+    actor: AuthenticatedUser,
     ip?: string,
   ) {
-    if (id === actorId) {
+    if (id === actor.id) {
       throw new BadRequestException('No puede desactivar su propio usuario');
     }
-    await this.obtener(empresaId, id);
+    await this.assertPuedeGestionarUsuario(empresaId, id, actor, 'desactivar');
     await this.prisma.usuario.update({
       where: { id },
       data: { activo: false },
     });
     await this.auditoria.registrar({
       empresaId,
-      usuarioId: actorId,
+      usuarioId: actor.id,
       accion: 'usuario.desactivado',
       entidad: 'Usuario',
       entidadId: id,
@@ -224,9 +300,10 @@ export class UsuariosService {
     empresaId: string,
     id: string,
     dto: ResetPasswordDto,
-    actorId: string,
+    actor: AuthenticatedUser,
     ip?: string,
   ) {
+    await this.assertPuedeGestionarUsuario(empresaId, id, actor, 'resetear la contraseña');
     await this.obtener(empresaId, id);
     const passwordHash = await argon2.hash(dto.newPassword);
     await this.prisma.$transaction([
@@ -238,7 +315,7 @@ export class UsuariosService {
     ]);
     await this.auditoria.registrar({
       empresaId,
-      usuarioId: actorId,
+      usuarioId: actor.id,
       accion: 'usuario.password_reseteado',
       entidad: 'Usuario',
       entidadId: id,

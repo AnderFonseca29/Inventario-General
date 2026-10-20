@@ -46,7 +46,7 @@ export class UsuariosController {
     @Body() dto: CreateUsuarioDto,
     @Req() req: Request,
   ) {
-    return this.usuariosService.crear(user.empresaId!, dto, user.id, req.ip);
+    return this.usuariosService.crear(user.empresaId!, dto, user, req.ip);
   }
 
   @Patch(':id')
@@ -61,7 +61,7 @@ export class UsuariosController {
       user.empresaId!,
       id,
       dto,
-      user.id,
+      user,
       req.ip,
     );
   }
@@ -76,7 +76,7 @@ export class UsuariosController {
     return this.usuariosService.desactivar(
       user.empresaId!,
       id,
-      user.id,
+      user,
       req.ip,
     );
   }
@@ -93,7 +93,7 @@ export class UsuariosController {
       user.empresaId!,
       id,
       dto,
-      user.id,
+      user,
       req.ip,
     );
   }

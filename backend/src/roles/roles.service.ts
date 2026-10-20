@@ -8,6 +8,8 @@ import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditoriaService } from '../auditoria/auditoria.service';
 import { CreateRolDto, UpdateRolDto } from './dto/rol.dto';
+import { assertPermisosNoSuperiores } from '../common/authz/permisos-actor';
+import type { AuthenticatedUser } from '../common/types/authenticated-user';
 
 @Injectable()
 export class RolesService {
@@ -56,9 +58,10 @@ export class RolesService {
   async crear(
     empresaId: string,
     dto: CreateRolDto,
-    actorId: string,
+    actor: AuthenticatedUser,
     ip?: string,
   ) {
+    assertPermisosNoSuperiores(actor, dto.permisos);
     const existe = await this.prisma.rol.findFirst({
       where: { empresaId, nombre: dto.nombre },
     });
@@ -80,7 +83,7 @@ export class RolesService {
 
     await this.auditoria.registrar({
       empresaId,
-      usuarioId: actorId,
+      usuarioId: actor.id,
       accion: 'rol.creado',
       entidad: 'Rol',
       entidadId: rol.id,
@@ -95,10 +98,14 @@ export class RolesService {
     empresaId: string,
     id: string,
     dto: UpdateRolDto,
-    actorId: string,
+    actor: AuthenticatedUser,
     ip?: string,
   ) {
     const rol = await this.obtener(empresaId, id);
+
+    if (dto.permisos) {
+      assertPermisosNoSuperiores(actor, dto.permisos);
+    }
 
     if (rol.esSistema && dto.nombre && dto.nombre !== rol.nombre) {
       throw new BadRequestException('No se puede renombrar un rol de sistema');
@@ -122,7 +129,7 @@ export class RolesService {
 
     await this.auditoria.registrar({
       empresaId,
-      usuarioId: actorId,
+      usuarioId: actor.id,
       accion: 'rol.actualizado',
       entidad: 'Rol',
       entidadId: id,

@@ -43,7 +43,7 @@ export class RolesController {
     @Body() dto: CreateRolDto,
     @Req() req: Request,
   ) {
-    return this.rolesService.crear(user.empresaId!, dto, user.id, req.ip);
+    return this.rolesService.crear(user.empresaId!, dto, user, req.ip);
   }
 
   @Patch(':id')
@@ -58,7 +58,7 @@ export class RolesController {
       user.empresaId!,
       id,
       dto,
-      user.id,
+      user,
       req.ip,
     );
   }
