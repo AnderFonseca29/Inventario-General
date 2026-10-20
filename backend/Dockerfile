@@ -14,6 +14,7 @@ COPY prisma ./prisma
 RUN npm ci
 
 COPY . .
+ARG DATABASE_URL="postgresql://user:password@localhost:5432/db"
 RUN npx prisma generate && npm run build
 
 ENV NODE_ENV=production
