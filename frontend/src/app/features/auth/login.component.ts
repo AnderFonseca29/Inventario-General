@@ -1,19 +1,19 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import { IconComponent } from '../../shared/icons';
 
 @Component({
   selector: 'app-login',
-  imports: [ReactiveFormsModule, IconComponent],
+  imports: [ReactiveFormsModule, RouterLink, IconComponent],
   template: `
     <div class="login-page">
       <div class="login-aside">
-        <div class="aside-brand">
+        <a class="aside-brand" routerLink="/">
           <span class="brand-logo">ST</span>
           <span>Stockora</span>
-        </div>
+        </a>
 
         <div class="aside-copy">
           <h2>Control total de tu inventario</h2>
@@ -161,7 +161,7 @@ export class LoginComponent {
     this.auth.login(this.form.getRawValue()).subscribe({
       next: () => {
         const destino =
-          this.route.snapshot.queryParamMap.get('redirect') ?? '/dashboard';
+          this.route.snapshot.queryParamMap.get('redirect') ?? '/app/dashboard';
         void this.router.navigateByUrl(destino);
       },
       error: (err) => {

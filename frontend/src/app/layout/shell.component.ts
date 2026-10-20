@@ -24,22 +24,22 @@ interface NavSeccion {
 const NAV: NavSeccion[] = [
   {
     titulo: 'Principal',
-    items: [{ label: 'Inicio', icono: 'dashboard', ruta: '/dashboard' }],
+    items: [{ label: 'Inicio', icono: 'dashboard', ruta: '/app/dashboard' }],
   },
   {
     titulo: 'Administración',
     items: [
-      { label: 'Usuarios', icono: 'users', ruta: '/usuarios', permiso: 'usuarios.ver' },
-      { label: 'Roles y permisos', icono: 'shield', ruta: '/roles', permiso: 'roles.ver' },
+      { label: 'Usuarios', icono: 'users', ruta: '/app/usuarios', permiso: 'usuarios.ver' },
+      { label: 'Roles y permisos', icono: 'shield', ruta: '/app/roles', permiso: 'roles.ver' },
       {
         label: 'Módulos',
         icono: 'settings',
-        ruta: '/modulos',
+        ruta: '/app/modulos',
         permiso: 'modulos.ver',
         paraSuperAdmin: true,
       },
-      { label: 'Mi empresa', icono: 'building', ruta: '/mi-empresa', permiso: 'empresa.configurar' },
-      { label: 'Empresas', icono: 'building', ruta: '/empresas', soloSuperAdmin: true },
+      { label: 'Mi empresa', icono: 'building', ruta: '/app/mi-empresa', permiso: 'empresa.configurar' },
+      { label: 'Empresas', icono: 'building', ruta: '/app/empresas', soloSuperAdmin: true },
     ],
   },
 ];
@@ -204,7 +204,7 @@ const COLLAPSE_KEY = 'inv_sidebar_collapsed';
                   </div>
                   <div class="dropdown-divider"></div>
                   @if (puedeConfigEmpresa()) {
-                    <a class="dropdown-item" routerLink="/mi-empresa" (click)="cerrarMenus()">
+                    <a class="dropdown-item" routerLink="/app/mi-empresa" (click)="cerrarMenus()">
                       <app-icon name="building" /> Mi empresa
                     </a>
                   }
@@ -397,7 +397,7 @@ function toNavItem(modulo: Modulo): NavItem {
   return {
     label: modulo.nombre,
     icono: modulo.icono,
-    ruta: implementado ? (modulo.ruta as string) : undefined,
+    ruta: implementado ? `/app${modulo.ruta as string}` : undefined,
     pronto: !implementado,
   };
 }

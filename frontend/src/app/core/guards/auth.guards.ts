@@ -19,7 +19,7 @@ export const superAdminGuard: CanActivateFn = () => {
   if (auth.isSuperAdmin()) {
     return true;
   }
-  return router.createUrlTree(['/dashboard']);
+  return router.createUrlTree(['/app/dashboard']);
 };
 
 export function permisoGuard(codigo: string): CanActivateFn {
@@ -29,12 +29,12 @@ export function permisoGuard(codigo: string): CanActivateFn {
 
     // El usuario operativo (vendedor) solo accede a su resumen (Inicio).
     if (auth.esOperativo()) {
-      return router.createUrlTree(['/dashboard']);
+      return router.createUrlTree(['/app/dashboard']);
     }
     if (auth.hasPermiso(codigo)) {
       return true;
     }
-    return router.createUrlTree(['/dashboard']);
+    return router.createUrlTree(['/app/dashboard']);
   };
 }
 
@@ -45,11 +45,11 @@ export function permisoOSuperAdminGuard(codigo: string): CanActivateFn {
     const router = inject(Router);
 
     if (auth.esOperativo()) {
-      return router.createUrlTree(['/dashboard']);
+      return router.createUrlTree(['/app/dashboard']);
     }
     if (auth.isSuperAdmin() || auth.hasPermiso(codigo)) {
       return true;
     }
-    return router.createUrlTree(['/dashboard']);
+    return router.createUrlTree(['/app/dashboard']);
   };
 }

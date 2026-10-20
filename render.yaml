@@ -26,7 +26,7 @@ services:
       - key: NODE_ENV
         value: production
       - key: CORS_ORIGINS
-        value: https://anderfonseca29.github.io
+        value: https://anderfonseca29.github.io,https://inventario-general.vercel.app
 
 databases:
   - name: inventario-db

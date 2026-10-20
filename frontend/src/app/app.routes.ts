@@ -8,12 +8,20 @@ import {
 
 export const routes: Routes = [
   {
+    path: '',
+    pathMatch: 'full',
+    loadComponent: () =>
+      import('./features/landing/landing.component').then(
+        (m) => m.LandingComponent,
+      ),
+  },
+  {
     path: 'login',
     loadComponent: () =>
       import('./features/auth/login.component').then((m) => m.LoginComponent),
   },
   {
-    path: '',
+    path: 'app',
     loadComponent: () =>
       import('./layout/shell.component').then((m) => m.ShellComponent),
     canActivate: [authGuard],
