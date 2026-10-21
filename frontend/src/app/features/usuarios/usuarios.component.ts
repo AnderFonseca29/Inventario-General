@@ -1,5 +1,4 @@
 import { Component, computed, inject, signal } from '@angular/core';
-import { DatePipe } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { UsuariosService } from '../../core/services/usuarios.service';
 import { RolesService } from '../../core/services/roles.service';
@@ -14,7 +13,7 @@ type Filtro = 'todos' | 'activos' | 'inactivos';
 
 @Component({
   selector: 'app-usuarios',
-  imports: [ReactiveFormsModule, DatePipe, IconComponent, FechaColPipe],
+  imports: [ReactiveFormsModule, IconComponent, FechaColPipe],
   template: `
     <div class="page-header">
       <div>

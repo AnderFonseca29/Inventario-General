@@ -20,6 +20,7 @@ import {
 } from '../../core/models/inventario.model';
 import { IconComponent } from '../../shared/icons';
 import { aNumero } from '../../core/utils/numeros';
+import { formatearFechaHora } from '../../core/utils/fechas';
 
 @Component({
   selector: 'app-inventario',
@@ -596,10 +597,7 @@ export class InventarioComponent {
 
   fecha(valor: string | null): string {
     if (!valor) return '—';
-    return new Date(valor).toLocaleString('es-CO', {
-      dateStyle: 'short',
-      timeStyle: 'short',
-    });
+    return formatearFechaHora(valor);
   }
 
   etiquetaTipo(tipo: TipoMovimiento): string {
