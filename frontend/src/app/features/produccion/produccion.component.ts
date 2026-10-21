@@ -18,6 +18,7 @@ import {
 } from '../../core/models/produccion.model';
 import { IconComponent } from '../../shared/icons';
 import { aNumero } from '../../core/utils/numeros';
+import { formatearFechaHora } from '../../core/utils/fechas';
 
 type Tab = 'materias' | 'recepciones' | 'formulas' | 'ordenes' | 'mermas';
 type Modo =
@@ -930,7 +931,7 @@ export class ProduccionComponent {
       });
   }
 
-  // -------------------------------- Formulas -------------------------------
+  // -------------------------------- Fórmulas -------------------------------
 
   abrirFormula(): void {
     this.editandoId.set(null);
@@ -1020,7 +1021,7 @@ export class ProduccionComponent {
     });
   }
 
-  // -------------------------------- Ordenes --------------------------------
+  // -------------------------------- Órdenes --------------------------------
 
   abrirOrden(): void {
     this.errorModal.set(null);
@@ -1270,10 +1271,7 @@ export class ProduccionComponent {
 
   fecha(valor: string | null): string {
     if (!valor) return '—';
-    return new Date(valor).toLocaleString('es-CO', {
-      dateStyle: 'short',
-      timeStyle: 'short',
-    });
+    return formatearFechaHora(valor);
   }
 
   etiquetaOrden(estado: EstadoOrdenProduccion): string {

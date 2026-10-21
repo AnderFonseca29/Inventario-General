@@ -14,6 +14,7 @@ import {
 } from '../../core/models/cargues.model';
 import { IconComponent } from '../../shared/icons';
 import { aNumero } from '../../core/utils/numeros';
+import { formatearFechaHora } from '../../core/utils/fechas';
 
 @Component({
   selector: 'app-cargues',
@@ -482,10 +483,7 @@ export class CarguesComponent {
 
   fecha(valor: string | null): string {
     if (!valor) return '—';
-    return new Date(valor).toLocaleString('es-CO', {
-      dateStyle: 'short',
-      timeStyle: 'short',
-    });
+    return formatearFechaHora(valor);
   }
 
   etiquetaEstado(estado: EstadoCargue): string {

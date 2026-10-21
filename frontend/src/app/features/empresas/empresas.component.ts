@@ -1,5 +1,4 @@
 import { Component, computed, inject, signal } from '@angular/core';
-import { DatePipe } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { EmpresasService } from '../../core/services/empresas.service';
 import { ToastService } from '../../core/services/toast.service';
@@ -9,7 +8,7 @@ import { FechaColPipe } from '../../shared/fecha-col.pipe';
 
 @Component({
   selector: 'app-empresas',
-  imports: [ReactiveFormsModule, DatePipe, IconComponent, FechaColPipe],
+  imports: [ReactiveFormsModule, IconComponent, FechaColPipe],
   template: `
     <div class="page-header">
       <div>
