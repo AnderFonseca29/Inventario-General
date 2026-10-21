@@ -127,6 +127,10 @@ import { IconComponent } from '../../shared/icons';
               }
             </button>
           </form>
+          <div class="login-footer">
+            <p>¿No tienes cuenta?</p>
+            <a routerLink="/registro" class="btn btn-outline btn-block">Crear cuenta</a>
+          </div>
         </div>
       </div>
     </div>

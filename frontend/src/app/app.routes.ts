@@ -22,6 +22,11 @@ export const routes: Routes = [
       import('./features/auth/login.component').then((m) => m.LoginComponent),
   },
   {
+    path: 'registro',
+    loadComponent: () =>
+      import('./features/auth/registro.component').then((m) => m.RegistroComponent),
+  },
+  {
     path: 'app',
     loadComponent: () =>
       import('./layout/shell.component').then((m) => m.ShellComponent),

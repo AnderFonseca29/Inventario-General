@@ -1,4 +1,4 @@
-// Login: layout a dos columnas (aside + formulario)
+﻿// Login: layout a dos columnas (aside + formulario)
 
 .login-page {
   min-height: 100vh;
@@ -144,6 +144,39 @@
   margin: 0 0 26px;
 }
 
+.login-footer {
+  margin-top: 18px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.login-footer p {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 13px;
+}
+
+.registro-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.registro-login {
+  text-align: center;
+  margin: 16px 0 0;
+  color: var(--color-text-muted);
+  font-size: 13px;
+}
+
+.registro-login a {
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
 .ver-btn {
   position: absolute;
   right: 8px;
@@ -156,6 +189,15 @@
   padding: 6px;
   border-radius: 7px;
   display: inline-flex;
+}
+
+.ver-btn:hover {
+  color: var(--color-text);
+}
+
+.ver-btn app-icon {
+  width: 18px;
+  height: 18px;
 }
 
 .ver-btn:hover {

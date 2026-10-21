@@ -109,10 +109,10 @@ const PASOS: Paso[] = [
 
         <div class="lp-nav-actions">
           <a class="btn btn-ghost" routerLink="/login">Iniciar sesión</a>
-          <a class="btn btn-primary" routerLink="/login">Comenzar gratis</a>
+          <a class="btn btn-primary" routerLink="/registro">Comenzar gratis</a>
         </div>
 
-        <button class="lp-burger" (click)="menu.set(!menu())" title="Menú">
+        <button class="lp-burger" (click)="menu.set(!menu())" title="Menú" aria-label="Abrir menú" [attr.aria-expanded]="menu()">
           <app-icon [name]="menu() ? 'close' : 'menu'" />
         </button>
       </div>
@@ -123,7 +123,7 @@ const PASOS: Paso[] = [
           <a href="#modulos" (click)="menu.set(false)">Módulos</a>
           <a href="#como" (click)="menu.set(false)">Cómo funciona</a>
           <a href="#planes" (click)="menu.set(false)">Planes</a>
-          <a class="btn btn-primary" routerLink="/login" (click)="menu.set(false)">Iniciar sesión</a>
+          <a class="btn btn-primary" routerLink="/registro" (click)="menu.set(false)">Crear cuenta</a>
         </div>
       }
     </header>
@@ -146,7 +146,7 @@ const PASOS: Paso[] = [
             empresa.
           </p>
           <div class="lp-hero-cta">
-            <a class="btn btn-primary btn-lg" routerLink="/login">
+            <a class="btn btn-primary btn-lg" routerLink="/registro">
               Comenzar ahora <app-icon name="arrow-right" />
             </a>
             <a class="btn btn-outline btn-lg" href="#caracteristicas">
@@ -288,7 +288,7 @@ const PASOS: Paso[] = [
                 <li><app-icon name="check" /> {{ f }}</li>
               }
             </ul>
-            <a class="btn btn-block" [class]="pl.destacado ? 'btn-primary' : 'btn-outline'" routerLink="/login">
+            <a class="btn btn-block" [class]="pl.destacado ? 'btn-primary' : 'btn-outline'" routerLink="/registro">
               Elegir {{ pl.nombre }}
             </a>
           </div>
@@ -300,9 +300,9 @@ const PASOS: Paso[] = [
       <div class="lp-cta-inner">
         <h2>Empieza a controlar tu inventario hoy</h2>
         <p>Crea tu cuenta y ten tu operación ordenada desde el primer día.</p>
-        <a class="btn btn-primary btn-lg" routerLink="/login">
-          Crear mi cuenta <app-icon name="arrow-right" />
-        </a>
+            <a class="btn btn-primary btn-lg" routerLink="/registro">
+              Crear mi cuenta <app-icon name="arrow-right" />
+            </a>
       </div>
     </section>
 
@@ -324,7 +324,7 @@ const PASOS: Paso[] = [
         <div class="lp-footer-col">
           <h4>Cuenta</h4>
           <a routerLink="/login">Iniciar sesión</a>
-          <a routerLink="/login">Crear cuenta</a>
+          <a routerLink="/registro">Crear cuenta</a>
         </div>
       </div>
       <div class="lp-footer-bottom">

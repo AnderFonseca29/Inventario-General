@@ -473,6 +473,10 @@
     transform: translateX(0);
   }
 
+  .layout.movil-abierto {
+    overflow: hidden;
+  }
+
   .drawer-close {
     display: inline-flex;
   }

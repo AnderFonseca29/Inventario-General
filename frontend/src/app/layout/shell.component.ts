@@ -1,4 +1,4 @@
-import { Component, HostListener, computed, inject, signal } from '@angular/core';
+﻿import { Component, HostListener, computed, inject, signal } from '@angular/core';
 import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { filter } from 'rxjs';
 import { AuthService } from '../core/services/auth.service';
@@ -27,12 +27,12 @@ const NAV: NavSeccion[] = [
     items: [{ label: 'Inicio', icono: 'dashboard', ruta: '/app/dashboard' }],
   },
   {
-    titulo: 'Administración',
+    titulo: 'AdministraciÃ³n',
     items: [
       { label: 'Usuarios', icono: 'users', ruta: '/app/usuarios', permiso: 'usuarios.ver' },
       { label: 'Roles y permisos', icono: 'shield', ruta: '/app/roles', permiso: 'roles.ver' },
       {
-        label: 'Módulos',
+        label: 'MÃ³dulos',
         icono: 'settings',
         ruta: '/app/modulos',
         permiso: 'modulos.ver',
@@ -44,7 +44,7 @@ const NAV: NavSeccion[] = [
   },
 ];
 
-const SECCION_OPERACION = 'Operación';
+const SECCION_OPERACION = 'OperaciÃ³n';
 
 // Permiso necesario para ver cada modulo de sistema en el menu. Un modulo sin
 // mapeo (personalizado) se muestra a quien tenga acceso a la seccion. El valor
@@ -66,25 +66,25 @@ const COLLAPSE_KEY = 'inv_sidebar_collapsed';
   imports: [RouterOutlet, RouterLink, RouterLinkActive, IconComponent],
   template: `
     <div class="layout" [class.collapsed]="colapsado()" [class.movil-abierto]="movilAbierto()">
-      <aside class="sidebar">
-        <button class="drawer-close" (click)="cerrarDrawer()" title="Cerrar menú">
+      <aside class="sidebar" [attr.aria-hidden]="esMovil() ? !movilAbierto() : null">
+        <button class="drawer-close" (click)="cerrarDrawer()" title="Cerrar menÃº" aria-label="Cerrar menÃº">
           <app-icon name="close" />
         </button>
         <div class="brand">
-          <span class="brand-logo">ST</span>
+          <span class="brand-logo" aria-hidden="true">ST</span>
           <span class="brand-text">
             Stockora
-            <small>Panel de gestión</small>
+            <small>Panel de gestiÃ³n</small>
           </span>
         </div>
 
-        <nav class="nav">
+        <nav class="nav" aria-label="NavegaciÃ³n principal">
           @for (seccion of secciones(); track seccion.titulo) {
             @if (seccion.items.length) {
               <div class="nav-seccion">{{ seccion.titulo }}</div>
               @for (item of seccion.items; track item.label) {
                 @if (item.pronto) {
-                  <div class="nav-item disabled" [title]="item.label + ' (próximamente)'">
+                  <div class="nav-item disabled" [title]="item.label + ' (prÃ³ximamente)'" role="menuitem" aria-disabled="true">
                     <app-icon [name]="item.icono" />
                     <span class="nav-label">{{ item.label }}</span>
                     <span class="pronto-tag">Pronto</span>
@@ -96,6 +96,7 @@ const COLLAPSE_KEY = 'inv_sidebar_collapsed';
                     routerLinkActive="active"
                     [title]="item.label"
                     (click)="cerrarDrawer()"
+                    [attr.aria-current]="isActive(item) ? 'page' : null"
                   >
                     <app-icon [name]="item.icono" />
                     <span class="nav-label">{{ item.label }}</span>
@@ -108,15 +109,15 @@ const COLLAPSE_KEY = 'inv_sidebar_collapsed';
 
         <div class="sidebar-footer">
           <app-icon name="bolt" />
-          <span class="nav-label">v1.0 · Fase 3</span>
+          <span class="nav-label">v1.0 Â· Fase 3</span>
         </div>
       </aside>
+
 
       <div class="main">
         <header class="topbar">
           <div class="topbar-left">
-            <button class="icon-btn" (click)="toggleSidebar()" title="Menú">
-              <app-icon name="menu" />
+          <button class="icon-btn" (click)="toggleSidebar()" title="MenÃº" aria-label="Abrir o cerrar menÃº" [attr.aria-expanded]="!esMovil() ? !colapsado() : movilAbierto()">
             </button>
             <div class="breadcrumb">
               <span class="crumb-root">Panel</span>
@@ -131,7 +132,7 @@ const COLLAPSE_KEY = 'inv_sidebar_collapsed';
               <input
                 class="form-control"
                 type="search"
-                placeholder="Buscar módulo…"
+                placeholder="Buscar mÃ³duloâ€¦"
                 [value]="busqueda()"
                 (input)="alBuscar($event)"
               />
@@ -139,15 +140,15 @@ const COLLAPSE_KEY = 'inv_sidebar_collapsed';
             @if (busqueda().trim().length > 0) {
               <div class="search-panel">
                 @if (resultadosBusqueda().length === 0) {
-                  <div class="search-empty">Sin resultados para “{{ busqueda() }}”</div>
+                  <div class="search-empty">Sin resultados para â€œ{{ busqueda() }}â€</div>
                 } @else {
                   @for (r of resultadosBusqueda(); track r.seccion + r.label) {
                     @if (r.ruta) {
-                      <a class="dropdown-item" [routerLink]="r.ruta" (click)="limpiarBusqueda()">
-                        <app-icon [name]="r.icono" />
-                        <span class="search-label">{{ r.label }}</span>
-                        <span class="search-sec">{{ r.seccion }}</span>
-                      </a>
+                  <a class="dropdown-item" [routerLink]="r.ruta" (click)="busqueda.set('')">
+                    <app-icon [name]="r.icono" />
+                    <span class="search-label">{{ r.label }}</span>
+                    <span class="search-sec">{{ r.seccion }}</span>
+                  </a>
                     } @else {
                       <div class="dropdown-item disabled">
                         <app-icon [name]="r.icono" />
@@ -168,7 +169,7 @@ const COLLAPSE_KEY = 'inv_sidebar_collapsed';
             </div>
 
             <div class="dropdown">
-              <button class="icon-btn bell" (click)="toggleNotif($event)" title="Notificaciones">
+              <button class="icon-btn bell" (click)="toggleNotif($event)" title="Notificaciones" aria-label="Notificaciones" [attr.aria-expanded]="notifAbierto()">
                 <app-icon name="bell" />
                 <span class="dot-badge"></span>
               </button>
@@ -184,7 +185,7 @@ const COLLAPSE_KEY = 'inv_sidebar_collapsed';
             </div>
 
             <div class="dropdown">
-              <button class="user-btn" (click)="toggleUser($event)">
+              <button class="user-btn" (click)="toggleUser($event)" aria-haspopup="menu" [attr.aria-expanded]="userAbierto()">
                 <span class="avatar avatar-sm">{{ iniciales() }}</span>
                 <span class="user-meta">
                   <span class="user-name">{{ user()?.email }}</span>
@@ -211,7 +212,7 @@ const COLLAPSE_KEY = 'inv_sidebar_collapsed';
                     </a>
                   }
                   <button class="dropdown-item danger" (click)="salir()">
-                    <app-icon name="logout" /> Cerrar sesión
+                    <app-icon name="logout" /> Cerrar sesiÃ³n
                   </button>
                 </div>
               }
@@ -224,10 +225,10 @@ const COLLAPSE_KEY = 'inv_sidebar_collapsed';
         </main>
       </div>
 
-      <div class="sidebar-overlay" [class.visible]="movilAbierto()" (click)="cerrarDrawer()"></div>
+      <div class="sidebar-overlay" [class.visible]="movilAbierto()" (click)="cerrarDrawer()" tabindex="-1" aria-hidden="true"></div>
 
       @if (userAbierto() || notifAbierto()) {
-        <div class="menu-overlay" (click)="cerrarMenus()"></div>
+        <div class="menu-overlay" (click)="cerrarMenus()" tabindex="-1" aria-hidden="true"></div>
       }
     </div>
   `,
@@ -381,14 +382,15 @@ export class ShellComponent {
     this.cerrarMenus();
   }
 
-  limpiarBusqueda(): void {
-    this.busqueda.set('');
+  @HostListener('window:keydown.escape')
+  onEscape(): void {
+    if (this.movilAbierto()) this.cerrarDrawer();
+    if (this.userAbierto() || this.notifAbierto()) this.cerrarMenus();
   }
 
-  @HostListener('document:click', ['$event'])
-  onClickFuera(event: MouseEvent): void {
-    const objetivo = event.target as HTMLElement;
-    if (!objetivo.closest('.topsearch')) this.busqueda.set('');
+  isActive(item: NavItem): boolean {
+    if (!item.ruta) return false;
+    return this.url().startsWith(item.ruta);
   }
 
   salir(): void {
