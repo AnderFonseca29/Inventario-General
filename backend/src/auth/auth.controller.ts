@@ -11,7 +11,7 @@ import { CurrentUser } from '../common/decorators/current-user.decorator';
 import type { AuthenticatedUser } from '../common/types/authenticated-user';
 
 // El superadministrador de plataforma (empresaId null) usa login, refresh y
-// cambio de contrasena: no son endpoints operativos de empresa.
+// cambio de contraseña: no son endpoints operativos de empresa.
 @RequiereEmpresa(false)
 @Controller('auth')
 export class AuthController {
@@ -20,7 +20,7 @@ export class AuthController {
   @Public()
   @Post('login')
   @HttpCode(200)
-  // Limite estricto por IP ademas del bloqueo progresivo por correo (hallazgo D).
+  // Límite estricto por IP además del bloqueo progresivo por correo (hallazgo D).
   @Throttle({ default: { limit: 10, ttl: 60000 } })
   login(@Body() dto: LoginDto, @Req() req: Request) {
     return this.authService.login(dto, req.ip, req.headers['user-agent']);

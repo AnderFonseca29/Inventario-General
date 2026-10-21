@@ -84,19 +84,19 @@ export class ProduccionService {
 
   private async exigirMateriaPrima(empresaId: string, id: string) {
     if (!(await this.prisma.materiaPrima.count({ where: { id, empresaId } }))) {
-      throw new BadRequestException('Materia prima invalida');
+      throw new BadRequestException('Materia prima inválida');
     }
   }
 
   private async exigirProducto(empresaId: string, id: string) {
     if (!(await this.prisma.producto.count({ where: { id, empresaId } }))) {
-      throw new BadRequestException('Producto invalido');
+      throw new BadRequestException('Producto inválido');
     }
   }
 
   private async exigirBodega(empresaId: string, id: string) {
     if (!(await this.prisma.bodega.count({ where: { id, empresaId } }))) {
-      throw new BadRequestException('Bodega invalida');
+      throw new BadRequestException('Bodega inválida');
     }
   }
 
@@ -221,7 +221,7 @@ export class ProduccionService {
 
   private async exigirUnidad(empresaId: string, id: string) {
     if (!(await this.prisma.unidad.count({ where: { id, empresaId } }))) {
-      throw new BadRequestException('Unidad invalida');
+      throw new BadRequestException('Unidad inválida');
     }
   }
 
@@ -267,7 +267,7 @@ export class ProduccionService {
           where: { id: dto.proveedorId, empresaId },
         }))
       ) {
-        throw new BadRequestException('Proveedor invalido');
+        throw new BadRequestException('Proveedor inválido');
       }
     }
     if (dto.bodegaId) await this.exigirBodega(empresaId, dto.bodegaId);
@@ -326,7 +326,7 @@ export class ProduccionService {
     return recepcion;
   }
 
-  // -------------------------------- Formulas -------------------------------
+  // -------------------------------- Fórmulas -------------------------------
 
   listarFormulas(empresaId: string) {
     return this.prisma.formula.findMany({
@@ -353,7 +353,7 @@ export class ProduccionService {
         },
       },
     });
-    if (!formula) throw new NotFoundException('Formula no encontrada');
+    if (!formula) throw new NotFoundException('Fórmula no encontrada');
     return formula;
   }
 
@@ -366,7 +366,7 @@ export class ProduccionService {
       where: { empresaId, id: { in: ids } },
     });
     if (encontradas !== ids.length) {
-      throw new BadRequestException('Una o mas materias primas son invalidas');
+      throw new BadRequestException('Una o mas materias primas son inválidas');
     }
   }
 
@@ -468,14 +468,14 @@ export class ProduccionService {
     });
     if (usados > 0) {
       throw new ConflictException(
-        'La formula tiene ordenes de produccion asociadas',
+        'La fórmula tiene órdenes de producción asociadas',
       );
     }
     await this.prisma.formula.delete({ where: { id } });
     return { ok: true };
   }
 
-  // --------------------------- Ordenes de produccion -----------------------
+  // --------------------------- Órdenes de producción -----------------------
 
   async listarOrdenes(empresaId: string, filtros: ListarOrdenesDto) {
     const estado = this.parseEstadoOrden(filtros.estado);
@@ -514,7 +514,7 @@ export class ProduccionService {
       },
     });
     if (!orden)
-      throw new NotFoundException('Orden de produccion no encontrada');
+      throw new NotFoundException('Orden de producción no encontrada');
     return orden;
   }
 
@@ -549,7 +549,7 @@ export class ProduccionService {
         where: { id: dto.formulaId, empresaId },
         include: { detalles: true },
       });
-      if (!formula) throw new BadRequestException('Formula invalida');
+      if (!formula) throw new BadRequestException('Fórmula inválida');
       if (formula.productoId !== dto.productoId) {
         throw new BadRequestException(
           'La formula no corresponde al producto de la orden',
@@ -615,7 +615,7 @@ export class ProduccionService {
           include: { detalles: true },
         });
         if (!actual) throw new NotFoundException('Orden no encontrada');
-        // Transicion atomica: solo una peticion concurrente inicia la orden.
+        // Transición atómica: solo una petición concurrente inicia la orden.
         const transicion = await tx.ordenProduccion.updateMany({
           where: {
             id,
@@ -635,7 +635,7 @@ export class ProduccionService {
           });
           if (!mp) continue;
           const reserva = new Prisma.Decimal(detalle.cantidadTeorica);
-          // Reserva atomica con control de disponible: si no alcanza, 0 filas.
+          // Reserva atómica con control de disponible: si no alcanza, 0 filas.
           const reservado = await tx.materiaPrima.updateMany({
             where: {
               id: mp.id,
@@ -685,7 +685,7 @@ export class ProduccionService {
       });
       if (afectadas.count === 0) {
         throw new BadRequestException(
-          `Stock insuficiente de "${nombreProducto}" para completar la operacion`,
+          `Stock insuficiente de "${nombreProducto}" para completar la operación`,
         );
       }
       return;
@@ -719,7 +719,7 @@ export class ProduccionService {
           },
         });
         if (!actual) throw new NotFoundException('Orden no encontrada');
-        // Transicion atomica a COMPLETADA: dos completados concurrentes no pueden
+        // Transición atómica a COMPLETADA: dos completados concurrentes no pueden
         // consumir ni producir dos veces.
         const transicion = await tx.ordenProduccion.updateMany({
           where: { id, empresaId, estado: 'EN_PROCESO' },
@@ -730,7 +730,7 @@ export class ProduccionService {
           },
         });
         if (transicion.count === 0) {
-          throw new BadRequestException('Solo se completan ordenes en proceso');
+          throw new BadRequestException('Solo se completan órdenes en proceso');
         }
 
         for (const detalle of actual.detalles) {
@@ -744,7 +744,7 @@ export class ProduccionService {
           if (consumida.lessThan(0)) {
             throw new BadRequestException('El consumo no puede ser negativo');
           }
-          // Descuento atomico con control de disponible.
+          // Descuento atómico con control de disponible.
           const liberado = Prisma.Decimal.max(
             new Prisma.Decimal(mp.reservado).minus(teorica),
             new Prisma.Decimal(0),
@@ -815,7 +815,7 @@ export class ProduccionService {
           include: { detalles: true },
         });
         if (!actual) throw new NotFoundException('Orden no encontrada');
-        // Transicion atomica: evita doble liberacion de reservas.
+        // Transición atómica: evita doble liberacion de reservas.
         const transicion = await tx.ordenProduccion.updateMany({
           where: {
             id,
@@ -907,7 +907,7 @@ export class ProduccionService {
           where: { id: dto.ordenId, empresaId },
         }))
       ) {
-        throw new BadRequestException('Orden invalida');
+        throw new BadRequestException('Orden inválida');
       }
     }
 
@@ -942,7 +942,7 @@ export class ProduccionService {
           where: { id, empresaId },
         });
         if (!actual) throw new NotFoundException('Merma no encontrada');
-        // Transicion atomica: la merma no puede aprobarse dos veces.
+        // Transición atómica: la merma no puede aprobarse dos veces.
         const transicion = await tx.merma.updateMany({
           where: { id, empresaId, estado: 'PENDIENTE' },
           data: {
@@ -958,7 +958,7 @@ export class ProduccionService {
           const mp = await tx.materiaPrima.findUnique({
             where: { id: actual.materiaPrimaId },
           });
-          if (!mp) throw new BadRequestException('Materia prima invalida');
+          if (!mp) throw new BadRequestException('Materia prima inválida');
           const descontado = await tx.materiaPrima.updateMany({
             where: {
               id: mp.id,

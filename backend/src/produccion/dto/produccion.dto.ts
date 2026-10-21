@@ -1,4 +1,4 @@
-﻿import { Type } from 'class-transformer';
+import { Type } from 'class-transformer';
 import {
   IsInt,
   ArrayNotEmpty,
@@ -106,7 +106,7 @@ export class ListarRecepcionesDto extends PaginacionDto {
   materiaPrimaId?: string;
 }
 
-// -------------------------------- Formulas ---------------------------------
+// -------------------------------- Fórmulas ---------------------------------
 
 export class FormulaDetalleDto {
   @IsUUID()
@@ -156,7 +156,7 @@ export class UpdateFormulaDto {
   detalles?: FormulaDetalleDto[];
 }
 
-// --------------------------- Ordenes de produccion -------------------------
+// --------------------------- Órdenes de producción -------------------------
 
 export class CreateOrdenDto {
   @IsUUID()

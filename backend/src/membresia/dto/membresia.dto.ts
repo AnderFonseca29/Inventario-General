@@ -76,7 +76,7 @@ export class ListarClientesDto extends PaginacionDto {
   buscar?: string;
 }
 
-// ----------------------------- Planes de membresia -------------------------
+// ----------------------------- Planes de membresía -------------------------
 
 export class CreatePlanMembresiaDto {
   @IsString()

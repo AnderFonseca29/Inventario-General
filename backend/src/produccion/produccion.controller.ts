@@ -130,7 +130,7 @@ export class ProduccionController {
     );
   }
 
-  // -------------------------------- Formulas -------------------------------
+  // -------------------------------- Fórmulas -------------------------------
 
   @Get('formulas')
   @Permisos(PERMISOS.PRODUCCION_VER)
@@ -188,7 +188,7 @@ export class ProduccionController {
     return this.produccion.eliminarFormula(exigirEmpresa(user), id);
   }
 
-  // --------------------------- Ordenes de produccion -----------------------
+  // --------------------------- Órdenes de producción -----------------------
 
   @Get('ordenes')
   @Permisos(PERMISOS.PRODUCCION_VER)

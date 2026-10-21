@@ -96,7 +96,7 @@ export class MembresiaController {
     return this.membresia.eliminarCliente(exigirEmpresa(user), id);
   }
 
-  // ----------------------------- Planes de membresia -----------------------
+  // ----------------------------- Planes de membresía -----------------------
 
   @Get('planes')
   @Permisos(PERMISOS.MEMBRESIA_VER)

@@ -27,12 +27,12 @@ const NAV: NavSeccion[] = [
     items: [{ label: 'Inicio', icono: 'dashboard', ruta: '/app/dashboard' }],
   },
   {
-    titulo: 'AdministraciÃ³n',
+    titulo: 'Administración',
     items: [
       { label: 'Usuarios', icono: 'users', ruta: '/app/usuarios', permiso: 'usuarios.ver' },
       { label: 'Roles y permisos', icono: 'shield', ruta: '/app/roles', permiso: 'roles.ver' },
       {
-        label: 'MÃ³dulos',
+        label: 'Módulos',
         icono: 'settings',
         ruta: '/app/modulos',
         permiso: 'modulos.ver',
@@ -44,7 +44,7 @@ const NAV: NavSeccion[] = [
   },
 ];
 
-const SECCION_OPERACION = 'OperaciÃ³n';
+const SECCION_OPERACION = 'Operación';
 
 // Permiso necesario para ver cada modulo de sistema en el menu. Un modulo sin
 // mapeo (personalizado) se muestra a quien tenga acceso a la seccion. El valor
@@ -67,24 +67,24 @@ const COLLAPSE_KEY = 'inv_sidebar_collapsed';
   template: `
     <div class="layout" [class.collapsed]="colapsado()" [class.movil-abierto]="movilAbierto()">
       <aside class="sidebar" [attr.aria-hidden]="esMovil() ? !movilAbierto() : null">
-        <button class="drawer-close" (click)="cerrarDrawer()" title="Cerrar menÃº" aria-label="Cerrar menÃº">
+        <button class="drawer-close" (click)="cerrarDrawer()" title="Cerrar menú" aria-label="Cerrar menú">
           <app-icon name="close" />
         </button>
         <div class="brand">
           <span class="brand-logo" aria-hidden="true">ST</span>
           <span class="brand-text">
             Stockora
-            <small>Panel de gestiÃ³n</small>
+            <small>Panel de gestión</small>
           </span>
         </div>
 
-        <nav class="nav" aria-label="NavegaciÃ³n principal">
+        <nav class="nav" aria-label="Navegación principal">
           @for (seccion of secciones(); track seccion.titulo) {
             @if (seccion.items.length) {
               <div class="nav-seccion">{{ seccion.titulo }}</div>
               @for (item of seccion.items; track item.label) {
                 @if (item.pronto) {
-                  <div class="nav-item disabled" [title]="item.label + ' (prÃ³ximamente)'" role="menuitem" aria-disabled="true">
+                  <div class="nav-item disabled" [title]="item.label + ' (próximamente)'" role="menuitem" aria-disabled="true">
                     <app-icon [name]="item.icono" />
                     <span class="nav-label">{{ item.label }}</span>
                     <span class="pronto-tag">Pronto</span>
@@ -109,7 +109,7 @@ const COLLAPSE_KEY = 'inv_sidebar_collapsed';
 
         <div class="sidebar-footer">
           <app-icon name="bolt" />
-          <span class="nav-label">v1.0 Â· Fase 3</span>
+          <span class="nav-label">v1.0 · Fase 3</span>
         </div>
       </aside>
 
@@ -117,7 +117,7 @@ const COLLAPSE_KEY = 'inv_sidebar_collapsed';
       <div class="main">
         <header class="topbar">
           <div class="topbar-left">
-          <button class="icon-btn" (click)="toggleSidebar()" title="MenÃº" aria-label="Abrir o cerrar menÃº" [attr.aria-expanded]="!esMovil() ? !colapsado() : movilAbierto()">
+          <button class="icon-btn" (click)="toggleSidebar()" title="Menú" aria-label="Abrir o cerrar menú" [attr.aria-expanded]="!esMovil() ? !colapsado() : movilAbierto()">
             </button>
             <div class="breadcrumb">
               <span class="crumb-root">Panel</span>
@@ -132,7 +132,7 @@ const COLLAPSE_KEY = 'inv_sidebar_collapsed';
               <input
                 class="form-control"
                 type="search"
-                placeholder="Buscar mÃ³duloâ€¦"
+                placeholder="Buscar módulo⬦"
                 [value]="busqueda()"
                 (input)="alBuscar($event)"
               />
@@ -140,7 +140,7 @@ const COLLAPSE_KEY = 'inv_sidebar_collapsed';
             @if (busqueda().trim().length > 0) {
               <div class="search-panel">
                 @if (resultadosBusqueda().length === 0) {
-                  <div class="search-empty">Sin resultados para â€œ{{ busqueda() }}â€</div>
+                  <div class="search-empty">Sin resultados para “{{ busqueda() }}”</div>
                 } @else {
                   @for (r of resultadosBusqueda(); track r.seccion + r.label) {
                     @if (r.ruta) {
@@ -212,7 +212,7 @@ const COLLAPSE_KEY = 'inv_sidebar_collapsed';
                     </a>
                   }
                   <button class="dropdown-item danger" (click)="salir()">
-                    <app-icon name="logout" /> Cerrar sesiÃ³n
+                    <app-icon name="logout" /> Cerrar sesión
                   </button>
                 </div>
               }
@@ -250,7 +250,7 @@ export class ShellComponent {
   readonly busqueda = signal('');
 
   // El usuario operativo (vendedor) solo ve Inicio: se oculta toda la seccion
-  // de operacion. Para el resto se filtra cada modulo por su permiso.
+  // de operación. Para el resto se filtra cada modulo por su permiso.
   readonly modulosOperacion = computed<NavItem[]>(() => {
     if (this.esOperativo()) return [];
     return this.modulosState

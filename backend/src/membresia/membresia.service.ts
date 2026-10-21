@@ -191,11 +191,11 @@ export class MembresiaService {
 
   private async exigirCliente(empresaId: string, id: string) {
     if (!(await this.prisma.cliente.count({ where: { id, empresaId } }))) {
-      throw new BadRequestException('Cliente invalido');
+      throw new BadRequestException('Cliente inválido');
     }
   }
 
-  // ----------------------------- Planes de membresia -----------------------
+  // ----------------------------- Planes de membresía -----------------------
 
   async listarPlanesMembresia(
     empresaId: string,
@@ -295,7 +295,7 @@ export class MembresiaService {
     const plan = await this.prisma.planMembresia.findFirst({
       where: { id, empresaId },
     });
-    if (!plan) throw new NotFoundException('Plan de membresia no encontrado');
+    if (!plan) throw new NotFoundException('Plan de membresía no encontrado');
     return plan;
   }
 
@@ -303,7 +303,7 @@ export class MembresiaService {
     const plan = await this.prisma.planMembresia.findFirst({
       where: { id, empresaId },
     });
-    if (!plan) throw new BadRequestException('Plan de membresia invalido');
+    if (!plan) throw new BadRequestException('Plan de membresía inválido');
     return plan;
   }
 
@@ -316,8 +316,8 @@ export class MembresiaService {
     };
 
     // El estado efectivo se calcula en memoria (depende de fechaFin), por lo
-    // que cuando se filtra por estado la paginacion se aplica despues del
-    // filtro para no devolver paginas incompletas (hallazgo Q).
+    // que cuando se filtra por estado la paginación se aplica después del
+    // filtro para no devolver páginas incompletas (hallazgo Q).
     if (filtros.estado) {
       const todas = await this.prisma.membresiaCliente.findMany({
         where,
@@ -438,9 +438,9 @@ export class MembresiaService {
       : new Date();
     const fechaFin = this.fechaFinDesde(fechaInicio, plan.duracionDias);
 
-    // Transicion atomica (hallazgo A/H): solo una renovacion concurrente puede
-    // pasar la membresia de ACTIVA a VENCIDA. updateMany con guardia de estado
-    // evita que dos peticiones simultaneas creen dos membresias activas.
+    // Transición atómica (hallazgo A/H): solo una renovación concurrente puede
+    // pasar la membresía de ACTIVA a VENCIDA. updateMany con guardia de estado
+    // evita que dos peticiones simultáneas creen dos membresías activas.
     const creada = await this.prisma.$transaction(async (tx) => {
       const afectadas = await tx.membresiaCliente.updateMany({
         where: { id: anterior.id, empresaId, estado: EstadoMembresia.ACTIVA },
@@ -486,9 +486,9 @@ export class MembresiaService {
     ip?: string,
   ) {
     const membresia = await this.obtenerMembresia(empresaId, id);
-    // Transicion atomica (hallazgo A/H): solo una cancelacion concurrente pasa
+    // Transición atómica (hallazgo A/H): solo una cancelación concurrente pasa
     // de no-cancelada a CANCELADA; la segunda recibe 409 en lugar de "cancelar"
-    // dos veces (o cancelar una membresia recien renovada).
+    // dos veces (o cancelar una membresía recien renovada).
     const afectadas = await this.prisma.membresiaCliente.updateMany({
       where: {
         id: membresia.id,
@@ -498,7 +498,7 @@ export class MembresiaService {
       data: { estado: EstadoMembresia.CANCELADA },
     });
     if (afectadas.count === 0) {
-      throw new BadRequestException('La membresia ya esta cancelada');
+      throw new BadRequestException('La membresía ya esta cancelada');
     }
     const actualizada = await this.prisma.membresiaCliente.findUniqueOrThrow({
       where: { id: membresia.id },
@@ -519,7 +519,7 @@ export class MembresiaService {
     const membresia = await this.prisma.membresiaCliente.findFirst({
       where: { id, empresaId },
     });
-    if (!membresia) throw new NotFoundException('Membresia no encontrada');
+    if (!membresia) throw new NotFoundException('Membresía no encontrada');
     return membresia;
   }
 }

@@ -37,9 +37,9 @@ export class AuditoriaService {
         },
       });
     } catch (error) {
-      // La auditoria no debe romper la operacion principal, pero si debe quedar visible.
+      // La auditoría no debe romper la operación principal, pero sí debe quedar visible.
       this.logger.error(
-        `No se pudo registrar auditoria (${evento.accion} ${evento.entidad}): ${
+        `No se pudo registrar auditoría (${evento.accion} ${evento.entidad}): ${
           (error as Error).message
         }`,
       );
@@ -108,7 +108,7 @@ export class AuditoriaService {
       },
     });
     if (!registro)
-      throw new NotFoundException('Registro de auditoria no encontrado');
+      throw new NotFoundException('Registro de auditoría no encontrado');
     return registro;
   }
 }

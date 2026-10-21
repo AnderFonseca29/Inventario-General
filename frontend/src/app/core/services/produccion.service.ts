@@ -65,7 +65,7 @@ export class ProduccionService {
     return this.http.post<Recepcion>(`${this.base}/recepciones`, dto);
   }
 
-  // -------------------------------- Formulas -------------------------------
+  // -------------------------------- Fórmulas -------------------------------
 
   listarFormulas(): Observable<Formula[]> {
     return this.http.get<Formula[]>(`${this.base}/formulas`);
@@ -87,7 +87,7 @@ export class ProduccionService {
     return this.http.delete<{ ok: boolean }>(`${this.base}/formulas/${id}`);
   }
 
-  // -------------------------- Ordenes de produccion ------------------------
+  // -------------------------- Órdenes de producción ------------------------
 
   listarOrdenes(estado?: string): Observable<OrdenProduccion[]> {
     const params = estado

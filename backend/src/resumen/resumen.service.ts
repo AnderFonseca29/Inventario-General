@@ -7,7 +7,7 @@ export class ResumenService {
   constructor(private readonly prisma: PrismaService) {}
 
   // Resumen personal del usuario autenticado (pensado para el rol Vendedor):
-  // solo expone la informacion propia del usuario, nunca la de toda la empresa.
+  // solo expone la información propia del usuario, nunca la de toda la empresa.
   async miResumen(usuarioId: string, empresaId: string | null) {
     if (!empresaId) {
       return this.vacio();

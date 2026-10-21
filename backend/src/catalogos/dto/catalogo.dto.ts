@@ -12,7 +12,7 @@ import {
 } from 'class-validator';
 import { TransformDecimal } from '../../common/utils/decimal';
 
-// ------------------------------ Categorias ---------------------------------
+// ------------------------------ Categorías ---------------------------------
 
 export class CreateCategoriaDto {
   @IsString()

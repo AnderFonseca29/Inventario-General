@@ -31,41 +31,41 @@ const CARACTERISTICAS: Caracteristica[] = [
     icono: 'box',
     titulo: 'Inventario trazable',
     texto:
-      'Entradas, salidas, traslados y ajustes con documento, consecutivo y auditorÃ­a de cada cambio.',
+      'Entradas, salidas, traslados y ajustes con documento, consecutivo y auditoría de cada cambio.',
   },
   {
     icono: 'truck',
     titulo: 'Cargues y botellones',
     texto:
-      'Asigna cargues a vendedores y controla la rotaciÃ³n de envases retornables con conciliaciÃ³n.',
+      'Asigna cargues a vendedores y controla la rotación de envases retornables con conciliación.',
   },
   {
     icono: 'factory',
-    titulo: 'ProducciÃ³n y materias primas',
+    titulo: 'Producción y materias primas',
     texto:
-      'FÃ³rmulas, Ã³rdenes de producciÃ³n y mermas con consumo real y costos internos calculados.',
+      'Fórmulas, órdenes de producción y mermas con consumo real y costos internos calculados.',
   },
   {
     icono: 'users',
-    titulo: 'Clientes y membresÃ­as',
+    titulo: 'Clientes y membresías',
     texto:
-      'Administra clientes, planes y afiliaciones con vigencia y renovaciÃ³n bajo control.',
+      'Administra clientes, planes y afiliaciones con vigencia y renovación bajo control.',
   },
   {
     icono: 'audit',
-    titulo: 'Permisos y auditorÃ­a',
+    titulo: 'Permisos y auditoría',
     texto:
-      'Roles configurables por empresa y registro inmutable de quiÃ©n hizo quÃ© y cuÃ¡ndo.',
+      'Roles configurables por empresa y registro inmutable de quién hizo qué y cuándo.',
   },
 ];
 
 const MODULOS: Modulo[] = [
-  { icono: 'box', nombre: 'CatÃ¡logo', texto: 'Productos, categorÃ­as y unidades' },
+  { icono: 'box', nombre: 'Catálogo', texto: 'Productos, categorías y unidades' },
   { icono: 'box', nombre: 'Inventario', texto: 'Existencias y movimientos' },
-  { icono: 'factory', nombre: 'ProducciÃ³n', texto: 'FÃ³rmulas y Ã³rdenes' },
-  { icono: 'users', nombre: 'MembresÃ­a', texto: 'Clientes y planes' },
+  { icono: 'factory', nombre: 'Producción', texto: 'Fórmulas y órdenes' },
+  { icono: 'users', nombre: 'Membresía', texto: 'Clientes y planes' },
   { icono: 'report', nombre: 'Reportes', texto: 'Indicadores operativos' },
-  { icono: 'audit', nombre: 'AuditorÃ­a', texto: 'Trazabilidad completa' },
+  { icono: 'audit', nombre: 'Auditoría', texto: 'Trazabilidad completa' },
 ];
 
 const PASOS: Paso[] = [
@@ -77,7 +77,7 @@ const PASOS: Paso[] = [
   },
   {
     numero: '02',
-    titulo: 'Carga tu catÃ¡logo',
+    titulo: 'Carga tu catálogo',
     texto:
       'Da de alta productos, bodegas y presentaciones; el inventario queda listo para operar.',
   },
@@ -85,7 +85,7 @@ const PASOS: Paso[] = [
     numero: '03',
     titulo: 'Opera y controla',
     texto:
-      'Registra movimientos, cargues y producciÃ³n. Consulta reportes y la auditorÃ­a en tiempo real.',
+      'Registra movimientos, cargues y producción. Consulta reportes y la auditoría en tiempo real.',
   },
 ];
 
@@ -101,27 +101,27 @@ const PASOS: Paso[] = [
         </a>
 
         <nav class="lp-links">
-          <a href="#caracteristicas">CaracterÃ­sticas</a>
-          <a href="#modulos">MÃ³dulos</a>
-          <a href="#como">CÃ³mo funciona</a>
+          <a href="#caracteristicas">Características</a>
+          <a href="#modulos">Módulos</a>
+          <a href="#como">Cómo funciona</a>
           <a href="#planes">Planes</a>
         </nav>
 
         <div class="lp-nav-actions">
-          <a class="btn btn-ghost" routerLink="/login">Iniciar sesiÃ³n</a>
+          <a class="btn btn-ghost" routerLink="/login">Iniciar sesión</a>
           <a class="btn btn-primary" routerLink="/registro">Comenzar gratis</a>
         </div>
 
-        <button class="lp-burger" (click)="menu.set(!menu())" title="MenÃº" aria-label="Abrir menÃº" [attr.aria-expanded]="menu()">
+        <button class="lp-burger" (click)="menu.set(!menu())" title="Menú" aria-label="Abrir menú" [attr.aria-expanded]="menu()">
           <app-icon [name]="menu() ? 'close' : 'menu'" />
         </button>
       </div>
 
       @if (menu()) {
         <div class="lp-mobile">
-          <a href="#caracteristicas" (click)="menu.set(false)">CaracterÃ­sticas</a>
-          <a href="#modulos" (click)="menu.set(false)">MÃ³dulos</a>
-          <a href="#como" (click)="menu.set(false)">CÃ³mo funciona</a>
+          <a href="#caracteristicas" (click)="menu.set(false)">Características</a>
+          <a href="#modulos" (click)="menu.set(false)">Módulos</a>
+          <a href="#como" (click)="menu.set(false)">Cómo funciona</a>
           <a href="#planes" (click)="menu.set(false)">Planes</a>
           <a class="btn btn-primary" routerLink="/registro" (click)="menu.set(false)">Crear cuenta</a>
         </div>
@@ -137,12 +137,12 @@ const PASOS: Paso[] = [
           </span>
           <h1>
             Controla tu inventario,
-            <span class="grad">toda tu operaciÃ³n</span>
+            <span class="grad">toda tu operación</span>
             en un solo lugar
           </h1>
           <p>
-            Stockora centraliza catÃ¡logo, inventario, cargues, botellones,
-            producciÃ³n y membresÃ­as con trazabilidad completa y aislamiento por
+            Stockora centraliza catálogo, inventario, cargues, botellones,
+            producción y membresías con trazabilidad completa y aislamiento por
             empresa.
           </p>
           <div class="lp-hero-cta">
@@ -150,13 +150,13 @@ const PASOS: Paso[] = [
               Comenzar ahora <app-icon name="arrow-right" />
             </a>
             <a class="btn btn-outline btn-lg" href="#caracteristicas">
-              Ver caracterÃ­sticas
+              Ver características
             </a>
           </div>
           <div class="lp-hero-stats">
             <div>
               <strong>6</strong>
-              <span>MÃ³dulos integrados</span>
+              <span>Módulos integrados</span>
             </div>
             <div>
               <strong>100%</strong>
@@ -172,7 +172,7 @@ const PASOS: Paso[] = [
         <div class="lp-hero-card anim-up">
           <div class="mock-top">
             <span class="dot"></span><span class="dot"></span><span class="dot"></span>
-            <span class="mock-title">Panel Â· Inventario</span>
+            <span class="mock-title">Panel · Inventario</span>
           </div>
           <div class="mock-body">
             <div class="mock-kpis">
@@ -186,7 +186,7 @@ const PASOS: Paso[] = [
               </div>
               <div class="mock-kpi">
                 <app-icon name="factory" />
-                <div><strong>7</strong><span>Ã“rdenes</span></div>
+                <div><strong>7</strong><span>Órdenes</span></div>
               </div>
             </div>
             <div class="mock-rows">
@@ -207,15 +207,15 @@ const PASOS: Paso[] = [
     </section>
 
     <section class="lp-logos">
-      <span>Todo lo que tu operaciÃ³n necesita, sin hojas de cÃ¡lculo</span>
+      <span>Todo lo que tu operación necesita, sin hojas de cálculo</span>
     </section>
 
     <section class="lp-section" id="caracteristicas">
       <div class="lp-head">
-        <span class="lp-eyebrow">CaracterÃ­sticas</span>
-        <h2>DiseÃ±ado para operaciones que no pueden fallar</h2>
+        <span class="lp-eyebrow">Características</span>
+        <h2>Diseñado para operaciones que no pueden fallar</h2>
         <p>
-          Cada funciÃ³n estÃ¡ pensada para mantener la integridad del inventario y
+          Cada función está pensada para mantener la integridad del inventario y
           la claridad de los procesos.
         </p>
       </div>
@@ -232,9 +232,9 @@ const PASOS: Paso[] = [
 
     <section class="lp-section alt" id="modulos">
       <div class="lp-head">
-        <span class="lp-eyebrow">MÃ³dulos</span>
-        <h2>Seis mÃ³dulos que cubren todo el ciclo</h2>
-        <p>ActÃ­valos segÃºn tu plan y el tamaÃ±o de tu operaciÃ³n.</p>
+        <span class="lp-eyebrow">Módulos</span>
+        <h2>Seis módulos que cubren todo el ciclo</h2>
+        <p>Actívalos según tu plan y el tamaño de tu operación.</p>
       </div>
       <div class="lp-modules">
         @for (m of modulos; track m.nombre) {
@@ -251,7 +251,7 @@ const PASOS: Paso[] = [
 
     <section class="lp-section" id="como">
       <div class="lp-head">
-        <span class="lp-eyebrow">CÃ³mo funciona</span>
+        <span class="lp-eyebrow">Cómo funciona</span>
         <h2>En marcha en tres pasos</h2>
       </div>
       <div class="lp-steps">
@@ -275,7 +275,7 @@ const PASOS: Paso[] = [
         @for (pl of planes; track pl.nombre) {
           <div class="lp-plan" [class.destacado]="pl.destacado">
             @if (pl.destacado) {
-              <span class="lp-plan-tag">MÃ¡s elegido</span>
+              <span class="lp-plan-tag">Más elegido</span>
             }
             <h3>{{ pl.nombre }}</h3>
             <p class="lp-plan-desc">{{ pl.descripcion }}</p>
@@ -299,7 +299,7 @@ const PASOS: Paso[] = [
     <section class="lp-cta">
       <div class="lp-cta-inner">
         <h2>Empieza a controlar tu inventario hoy</h2>
-        <p>Crea tu cuenta y ten tu operaciÃ³n ordenada desde el primer dÃ­a.</p>
+        <p>Crea tu cuenta y ten tu operación ordenada desde el primer día.</p>
             <a class="btn btn-primary btn-lg" routerLink="/registro">
               Crear mi cuenta <app-icon name="arrow-right" />
             </a>
@@ -317,18 +317,18 @@ const PASOS: Paso[] = [
         </div>
         <div class="lp-footer-col">
           <h4>Producto</h4>
-          <a href="#caracteristicas">CaracterÃ­sticas</a>
-          <a href="#modulos">MÃ³dulos</a>
+          <a href="#caracteristicas">Características</a>
+          <a href="#modulos">Módulos</a>
           <a href="#planes">Planes</a>
         </div>
         <div class="lp-footer-col">
           <h4>Cuenta</h4>
-          <a routerLink="/login">Iniciar sesiÃ³n</a>
+          <a routerLink="/login">Iniciar sesión</a>
           <a routerLink="/registro">Crear cuenta</a>
         </div>
       </div>
       <div class="lp-footer-bottom">
-        Â© {{ anio }} Stockora Â· Sistema de inventario multiempresa
+        © {{ anio }} Stockora · Sistema de inventario multiempresa
       </div>
     </footer>
   `,
@@ -345,41 +345,41 @@ export class LandingComponent {
 
   readonly mockRows = [
     { inicial: 'A', nombre: 'Bodega Central', modulo: 'Inventario', estado: 'Activo', clase: 'badge-success' },
-    { inicial: 'P', nombre: 'Planta Norte', modulo: 'ProducciÃ³n', estado: 'En proceso', clase: 'badge-warn' },
+    { inicial: 'P', nombre: 'Planta Norte', modulo: 'Producción', estado: 'En proceso', clase: 'badge-warn' },
     { inicial: 'V', nombre: 'Ruta Vendedor 3', modulo: 'Cargues', estado: 'Confirmado', clase: 'badge-primary' },
   ];
 
   readonly planes = [
     {
-      nombre: 'BÃ¡sico',
-      descripcion: 'Para equipos pequeÃ±os que inician.',
-      precio: '$â€”',
+      nombre: 'Básico',
+      descripcion: 'Para equipos pequeños que inician.',
+      precio: '$—',
       periodo: '/ mes',
       destacado: false,
-      incluye: ['CatÃ¡logo e inventario', 'Hasta 5 usuarios', 'Reportes esenciales'],
+      incluye: ['Catálogo e inventario', 'Hasta 5 usuarios', 'Reportes esenciales'],
     },
     {
       nombre: 'Pro',
       descripcion: 'Para operaciones en crecimiento.',
-      precio: '$â€”',
+      precio: '$—',
       periodo: '/ mes',
       destacado: true,
       incluye: [
-        'Todo lo del plan BÃ¡sico',
+        'Todo lo del plan Básico',
         'Cargues y botellones',
-        'ProducciÃ³n y membresÃ­as',
+        'Producción y membresías',
         'Reportes avanzados',
       ],
     },
     {
       nombre: 'Empresa',
       descripcion: 'Para operaciones multisede.',
-      precio: '$â€”',
+      precio: '$—',
       periodo: '/ mes',
       destacado: false,
       incluye: [
         'Todo lo del plan Pro',
-        'MÃ³dulos ilimitados',
+        'Módulos ilimitados',
         'Usuarios ilimitados',
         'Soporte prioritario',
       ],

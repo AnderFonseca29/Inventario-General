@@ -43,7 +43,7 @@ export class AuthService {
     try {
       await argon2.verify(this.hashFicticio, password);
     } catch {
-      // El hash ficticio nunca valida: solo consume tiempo comparable.
+      // El hash ficticio nunca válida: solo consume tiempo comparable.
     }
   }
 
@@ -225,16 +225,16 @@ export class AuthService {
     });
 
     if (!usuario || !usuario.activo) {
-      // Tiempo comparable al caso valido y mensaje uniforme (hallazgo D).
+      // Tiempo comparable al caso válido y mensaje uniforme (hallazgo D).
       await this.consumirTiempoDeHash(dto.password);
       await this.registrarIntento(email, ip, false);
-      throw new UnauthorizedException('Correo o contrasena incorrectos');
+      throw new UnauthorizedException('Correo o contraseña incorrectos');
     }
 
     const valida = await argon2.verify(usuario.passwordHash, dto.password);
     if (!valida) {
       await this.registrarIntento(email, ip, false);
-      throw new UnauthorizedException('Correo o contrasena incorrectos');
+      throw new UnauthorizedException('Correo o contraseña incorrectos');
     }
 
     const user = await this.loadAuthenticatedUser(usuario.id);
@@ -258,7 +258,7 @@ export class AuthService {
         secret: this.config.getOrThrow<string>('JWT_REFRESH_SECRET'),
       });
     } catch {
-      throw new UnauthorizedException('Refresh token invalido o expirado');
+      throw new UnauthorizedException('Refresh token inválido o expirado');
     }
 
     const almacenado = await this.prisma.refreshToken.findUnique({
@@ -322,10 +322,10 @@ export class AuthService {
       dto.currentPassword,
     );
     if (!valida) {
-      throw new UnauthorizedException('La contrasena actual no es correcta');
+      throw new UnauthorizedException('La contraseña actual no es correcta');
     }
 
-    // Regla de contrasena: minimo 10 caracteres, mayuscula, minuscula y numero.
+    // Regla de contraseña: mínimo 10 caracteres, mayúscula, minúscula y número.
     const nuevas = dto.newPassword ?? '';
     const reglas = [
       nuevas.length >= 10,
@@ -335,7 +335,7 @@ export class AuthService {
     ];
     if (!reglas.every(Boolean)) {
       throw new BadRequestException(
-        'La nueva contrasena debe tener al menos 10 caracteres e incluir mayuscula, minuscula y numero',
+        'La nueva contraseña debe tener al menos 10 caracteres e incluir mayúscula, minúscula y número',
       );
     }
 

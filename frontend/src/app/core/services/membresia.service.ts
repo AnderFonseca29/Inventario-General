@@ -39,7 +39,7 @@ export class MembresiaService {
     return this.http.delete<{ ok: boolean }>(`${this.base}/clientes/${id}`);
   }
 
-  // ----------------------------- Planes de membresia -----------------------
+  // ----------------------------- Planes de membresía -----------------------
 
   listarPlanes(buscar?: string): Observable<PlanMembresia[]> {
     const params = buscar

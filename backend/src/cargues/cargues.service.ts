@@ -24,7 +24,7 @@ export class CarguesService {
 
   // ------------------------------- Consultas -------------------------------
 
-  // Con solo "ver propios" el usuario unicamente ve los cargues asignados a
+  // Con solo "ver propios" el usuario únicamente ve los cargues asignados a
   // su persona; con "ver todos" ve la lista completa de la empresa.
   private soloPropios(user: AuthenticatedUser): boolean {
     if (user.esSuperAdmin) return false;
@@ -100,7 +100,7 @@ export class CarguesService {
 
   // Candidatos a recibir cargues: usuarios con permiso de terreno de vendedor.
   // Si la empresa aun no tiene roles con ese permiso, se ofrecen todos los
-  // usuarios activos para no bloquear la creacion del cargue.
+  // usuarios activos para no bloquear la creación del cargue.
   async vendedores(empresaId: string) {
     const conPermiso = await this.prisma.usuario.findMany({
       where: {
@@ -177,7 +177,7 @@ export class CarguesService {
     const bodega = await this.prisma.bodega.findFirst({
       where: { id: dto.bodegaOrigenId, empresaId, activo: true },
     });
-    if (!bodega) throw new BadRequestException('Bodega de origen invalida');
+    if (!bodega) throw new BadRequestException('Bodega de origen inválida');
 
     const vendedor = await this.prisma.usuario.findFirst({
       where: {
@@ -187,7 +187,7 @@ export class CarguesService {
         esSuperAdmin: false,
       },
     });
-    if (!vendedor) throw new BadRequestException('Vendedor invalido');
+    if (!vendedor) throw new BadRequestException('Vendedor inválido');
 
     const productoIds = [...new Set(dto.detalles.map((d) => d.productoId))];
     const productos = await this.prisma.producto.findMany({
@@ -195,7 +195,7 @@ export class CarguesService {
       select: { id: true, nombre: true, costo: true },
     });
     if (productos.length !== productoIds.length) {
-      throw new BadRequestException('Uno o mas productos son invalidos');
+      throw new BadRequestException('Uno o mas productos son inválidos');
     }
     const mapaProductos = new Map(productos.map((p) => [p.id, p]));
 
