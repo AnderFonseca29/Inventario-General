@@ -1,6 +1,6 @@
 # Inventario General
 
-SaaS **multempresa** para la gestión de inventario de una empresa de botellones
+SaaS **multiempresa** para la gestión de inventario de una empresa de botellones
 (agua/envasados): bodegas, cargues, botellones retornables, producción, mermas y
 auditoría, con **aislamiento estricto de datos por empresa**.
 

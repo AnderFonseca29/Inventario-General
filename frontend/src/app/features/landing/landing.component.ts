@@ -133,7 +133,7 @@ const PASOS: Paso[] = [
       <div class="lp-hero-inner">
         <div class="lp-hero-copy anim-up">
           <span class="lp-pill">
-            <app-icon name="spark" /> Inventario multempresa en la nube
+            <app-icon name="spark" /> Inventario multiempresa en la nube
           </span>
           <h1>
             Controla tu inventario,
@@ -313,7 +313,7 @@ const PASOS: Paso[] = [
             <span class="brand-logo">ST</span>
             <span class="brand-text">Stockora</span>
           </a>
-          <p>Plataforma de inventario multempresa con trazabilidad completa.</p>
+          <p>Plataforma de inventario multiempresa con trazabilidad completa.</p>
         </div>
         <div class="lp-footer-col">
           <h4>Producto</h4>
@@ -328,7 +328,7 @@ const PASOS: Paso[] = [
         </div>
       </div>
       <div class="lp-footer-bottom">
-        © {{ anio }} Stockora · Sistema de inventario multempresa
+        © {{ anio }} Stockora · Sistema de inventario multiempresa
       </div>
     </footer>
   `,
