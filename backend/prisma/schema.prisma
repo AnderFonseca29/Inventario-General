@@ -390,6 +390,20 @@ model RefreshToken {
   @@map("refresh_tokens")
 }
 
+// Intentos de inicio de sesion: base del bloqueo temporal progresivo por
+// correo y por IP (hallazgo D). Se purgan periodicamente.
+model IntentoLogin {
+  id       String   @id @default(uuid()) @db.Uuid
+  email    String
+  ip       String?
+  exito    Boolean  @default(false)
+  creadoEn DateTime @default(now()) @db.Timestamptz(3)
+
+  @@index([email, creadoEn])
+  @@index([ip, creadoEn])
+  @@map("intentos_login")
+}
+
 // ============================= MODULOS ======================================
 
 model Modulo {

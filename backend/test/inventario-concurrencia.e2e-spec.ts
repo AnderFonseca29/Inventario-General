@@ -25,9 +25,7 @@ const describeSiHayBase = databaseUrl ? describe : describe.skip;
 
 describeSiHayBase('Concurrencia de inventario (hallazgo A)', () => {
   const prisma = new PrismaClient(
-    databaseUrl
-      ? { datasources: { db: { url: databaseUrl } } }
-      : undefined,
+    databaseUrl ? { datasources: { db: { url: databaseUrl } } } : undefined,
   );
 
   let empresaId: string;

@@ -1,4 +1,5 @@
 import { Body, Controller, Get, HttpCode, Post, Req } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 import type { Request } from 'express';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
@@ -15,6 +16,8 @@ export class AuthController {
   @Public()
   @Post('login')
   @HttpCode(200)
+  // Limite estricto por IP ademas del bloqueo progresivo por correo (hallazgo D).
+  @Throttle({ default: { ttl: 60000, limit: 10 } })
   login(@Body() dto: LoginDto, @Req() req: Request) {
     return this.authService.login(dto, req.ip, req.headers['user-agent']);
   }
@@ -22,6 +25,7 @@ export class AuthController {
   @Public()
   @Post('refresh')
   @HttpCode(200)
+  @Throttle({ default: { ttl: 60000, limit: 30 } })
   refresh(@Body() dto: RefreshDto, @Req() req: Request) {
     return this.authService.refresh(dto, req.ip, req.headers['user-agent']);
   }
