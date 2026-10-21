@@ -376,11 +376,19 @@ export class MembresiaService {
       : new Date();
     const fechaFin = this.fechaFinDesde(fechaInicio, plan.duracionDias);
 
+    // Transicion atomica (hallazgo A/H): solo una renovacion concurrente puede
+    // pasar la membresia de ACTIVA a VENCIDA. updateMany con guardia de estado
+    // evita que dos peticiones simultaneas creen dos membresias activas.
     const creada = await this.prisma.$transaction(async (tx) => {
-      await tx.membresiaCliente.update({
-        where: { id: anterior.id },
+      const afectadas = await tx.membresiaCliente.updateMany({
+        where: { id: anterior.id, empresaId, estado: EstadoMembresia.ACTIVA },
         data: { estado: EstadoMembresia.VENCIDA },
       });
+      if (afectadas.count === 0) {
+        throw new ConflictException(
+          'La membresia ya fue renovada o no esta activa',
+        );
+      }
       return tx.membresiaCliente.create({
         data: {
           empresaId,
@@ -416,12 +424,22 @@ export class MembresiaService {
     ip?: string,
   ) {
     const membresia = await this.obtenerMembresia(empresaId, id);
-    if (membresia.estado === EstadoMembresia.CANCELADA) {
+    // Transicion atomica (hallazgo A/H): solo una cancelacion concurrente pasa
+    // de no-cancelada a CANCELADA; la segunda recibe 409 en lugar de "cancelar"
+    // dos veces (o cancelar una membresia recien renovada).
+    const afectadas = await this.prisma.membresiaCliente.updateMany({
+      where: {
+        id: membresia.id,
+        empresaId,
+        estado: { not: EstadoMembresia.CANCELADA },
+      },
+      data: { estado: EstadoMembresia.CANCELADA },
+    });
+    if (afectadas.count === 0) {
       throw new BadRequestException('La membresia ya esta cancelada');
     }
-    const actualizada = await this.prisma.membresiaCliente.update({
+    const actualizada = await this.prisma.membresiaCliente.findUniqueOrThrow({
       where: { id: membresia.id },
-      data: { estado: EstadoMembresia.CANCELADA },
     });
     await this.auditar(
       empresaId,
