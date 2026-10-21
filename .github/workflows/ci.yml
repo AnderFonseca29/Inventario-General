@@ -1,4 +1,4 @@
-name: CI
+﻿name: CI
 
 on:
   push:
@@ -17,6 +17,21 @@ jobs:
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/inventario_saas?schema=public
       JWT_SECRET: ci-jwt-secret
       JWT_REFRESH_SECRET: ci-jwt-refresh-secret
+      E2E_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/inventario_saas?schema=public
+    services:
+      postgres:
+        image: postgres:18-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: inventario_saas
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
     steps:
       - uses: actions/checkout@v4
 
@@ -32,14 +47,20 @@ jobs:
       - name: Generar cliente Prisma
         run: npx prisma generate
 
+      - name: Aplicar migraciones
+        run: npx prisma migrate deploy
+
       - name: Lint
         run: npm run lint
 
       - name: Build
         run: npm run build
 
-      - name: Tests
+      - name: Tests unitarios
         run: npm test
+
+      - name: Tests e2e
+        run: npm run test:e2e
 
   frontend:
     name: Frontend (Angular)
@@ -64,3 +85,28 @@ jobs:
 
       - name: Tests
         run: npm test -- --watch=false
+
+  seguridad:
+    name: Seguridad (audit + secretos)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Auditar dependencias del backend
+        working-directory: backend
+        run: npm audit --audit-level=high || echo "::warning::npm audit reporta vulnerabilidades en backend"
+
+      - name: Auditar dependencias del frontend
+        working-directory: frontend
+        run: npm audit --audit-level=high || echo "::warning::npm audit reporta vulnerabilidades en frontend"
+
+      - name: Buscar secretos filtrados (gitleaks)
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }}
+
