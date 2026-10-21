@@ -6,6 +6,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { validateEnv } from './config/env.validation';
 import { PrismaModule } from './prisma/prisma.module';
+import { HealthModule } from './health/health.module';
 import { AuditoriaModule } from './auditoria/auditoria.module';
 import { AuthModule } from './auth/auth.module';
 import { EmpresasModule } from './empresas/empresas.module';
@@ -30,6 +31,7 @@ import { SuperAdminGuard } from './common/guards/superadmin.guard';
     ConfigModule.forRoot({ isGlobal: true, validate: validateEnv }),
     ThrottlerModule.forRoot([{ ttl: 60000, limit: 120 }]),
     PrismaModule,
+    HealthModule,
     AuditoriaModule,
     AuthModule,
     EmpresasModule,

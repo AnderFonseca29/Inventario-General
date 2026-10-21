@@ -10,6 +10,9 @@ services:
     dockerfilePath: ./backend/Dockerfile
     dockerContext: ./backend
     plan: free
+    region: ohio
+    autoDeploy: true
+    healthCheckPath: /api/health/ready
     envVars:
       - key: DATABASE_URL
         fromDatabase:
@@ -25,9 +28,13 @@ services:
         value: 7d
       - key: NODE_ENV
         value: production
+      # CORS definitivo se define en la Fase 9 con el dominio propio.
+      # PROVISIONAL: incluye los origenes reales en uso. Elimina github.io y el
+      # dominio ajeno inventario-general.vercel.app en cuanto el dominio exista.
       - key: CORS_ORIGINS
-        value: https://anderfonseca29.github.io,https://inventario-general.vercel.app
+        value: https://anderfonseca29.github.io,https://inventario-general-delta.vercel.app,http://localhost:4200
 
 databases:
   - name: inventario-db
     plan: free
+    region: ohio

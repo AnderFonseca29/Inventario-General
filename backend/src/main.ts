@@ -5,7 +5,15 @@ import helmet from 'helmet';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, { bufferLogs: false });
+
+  // Detras de Render hay un proxy inverso: sin esto req.ip es la IP del proxy,
+  // el limite de peticiones se comparte entre TODOS los usuarios y la auditoria
+  // guarda una IP incorrecta (hallazgo C).
+  const express = app.getHttpAdapter().getInstance() as {
+    set: (clave: string, valor: unknown) => void;
+  };
+  express.set('trust proxy', 1);
 
   app.use(helmet());
   app.setGlobalPrefix('api');
