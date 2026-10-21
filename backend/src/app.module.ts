@@ -23,6 +23,7 @@ import { ResumenModule } from './resumen/resumen.module';
 import { PermisosModule } from './permisos/permisos.module';
 import { SuscripcionesModule } from './suscripciones/suscripciones.module';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
+import { EmpresaContextoGuard } from './common/guards/empresa-contexto.guard';
 import { PermisosGuard } from './common/guards/permisos.guard';
 import { SuperAdminGuard } from './common/guards/superadmin.guard';
 import { TenantGuard } from './common/guards/tenant.guard';
@@ -54,6 +55,7 @@ import { TenantGuard } from './common/guards/tenant.guard';
     AppService,
     { provide: APP_GUARD, useClass: ThrottlerGuard },
     { provide: APP_GUARD, useClass: JwtAuthGuard },
+    { provide: APP_GUARD, useClass: EmpresaContextoGuard },
     { provide: APP_GUARD, useClass: PermisosGuard },
     { provide: APP_GUARD, useClass: TenantGuard },
     { provide: APP_GUARD, useClass: SuperAdminGuard },

@@ -124,6 +124,7 @@ export class UsuariosService {
     }
   }
 
+  // Un usuario solo puede asignar roles cuyos permisos no excedan los propios.
   private serialize(usuario: {
     id: string;
     nombre: string;

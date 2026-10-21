@@ -32,7 +32,7 @@ services:
       # PROVISIONAL: incluye los origenes reales en uso. Elimina github.io y el
       # dominio ajeno inventario-general.vercel.app en cuanto el dominio exista.
       - key: CORS_ORIGINS
-        value: https://anderfonseca29.github.io,https://inventario-general-delta.vercel.app,http://localhost:4200
+        value: https://anderfonseca29.github.io,https://inventario-general-delta.vercel.app
 
 databases:
   - name: inventario-db
