@@ -4,7 +4,7 @@ import {
 } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { Observable, catchError, switchMap, throwError } from 'rxjs';
+import { Observable, catchError, finalize, switchMap, throwError, timeout } from 'rxjs';
 import { AuthService } from '../services/auth.service';
 
 let refrescando: Observable<unknown> | null = null;
@@ -32,9 +32,15 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
         return throwError(() => error);
       }
 
+      // Una sola peticion de refresh concurrente para todas las peticiones que
+      // fallaron con 401 (hallazgo V). Antes se limpiaba con un setTimeout fijo
+      // de 1s, lo que dejaba la variable en un estado inconsistente y permitia
+      // refresh duplicados o refresh colgados indefinidamente.
       if (!refrescando) {
-        refrescando = auth.refrescar();
-        setTimeout(() => (refrescando = null), 1000);
+        refrescando = auth.refrescar().pipe(
+          timeout(15000),
+          finalize(() => (refrescando = null)),
+        );
       }
 
       return refrescando.pipe(
