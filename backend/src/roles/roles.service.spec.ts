@@ -27,15 +27,27 @@ function crearServicio(rolExistente?: {
       update: jest.fn(),
     },
     permiso: { findMany: jest.fn().mockResolvedValue([]) },
-    usuarioRol: { count: jest.fn().mockResolvedValue(0) },
+    rolPermiso: {
+      deleteMany: jest.fn().mockResolvedValue({ count: 0 }),
+      createMany: jest.fn().mockResolvedValue({ count: 0 }),
+    },
+    usuarioRol: {
+      count: jest.fn().mockResolvedValue(0),
+      findMany: jest.fn().mockResolvedValue([]),
+    },
     $transaction: jest.fn(),
   };
   const auditoria = { registrar: jest.fn() };
-  const servicio = new RolesService(prisma as never, auditoria as never);
+  const permisosCache = { invalidar: jest.fn(), invalidarVarios: jest.fn() };
+  const servicio = new RolesService(
+    prisma as never,
+    auditoria as never,
+    permisosCache as never,
+  );
   if (rolExistente) {
     jest.spyOn(servicio, 'obtener').mockResolvedValue(rolExistente as never);
   }
-  return { servicio, prisma };
+  return { servicio, prisma, permisosCache };
 }
 
 describe('RolesService - proteccion contra escalada (hallazgo E)', () => {
@@ -133,5 +145,31 @@ describe('RolesService - proteccion contra escalada (hallazgo E)', () => {
         superActor,
       ),
     ).resolves.toMatchObject({ id: 'r1' });
+  });
+
+  it('invalida la cache de permisos de los usuarios del rol al actualizarlo (hallazgo R)', async () => {
+    const { servicio, prisma, permisosCache } = crearServicio({
+      id: 'r-admin',
+      nombre: 'Administrador',
+      esSistema: false,
+      permisos: [],
+    });
+    prisma.usuarioRol.findMany.mockResolvedValue([
+      { usuarioId: 'u1' },
+      { usuarioId: 'u2' },
+    ]);
+    prisma.$transaction.mockImplementation(async (cb: (tx: unknown) => unknown) =>
+      cb(prisma),
+    );
+    prisma.rol.update.mockResolvedValue({ id: 'r-admin' });
+
+    await servicio.actualizar(
+      'empresa-1',
+      'r-admin',
+      { permisos: [] },
+      { ...actorLimitado, esSuperAdmin: true },
+    );
+
+    expect(permisosCache.invalidarVarios).toHaveBeenCalledWith(['u1', 'u2']);
   });
 });

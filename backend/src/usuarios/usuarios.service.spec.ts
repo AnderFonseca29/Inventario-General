@@ -57,11 +57,13 @@ function crearServicio(opciones: MockOptions = {}) {
   };
   const auditoria = { registrar: jest.fn() };
   const suscripciones = { limites: jest.fn() };
+  const permisosCache = { invalidar: jest.fn(), invalidarVarios: jest.fn() };
 
   const servicio = new UsuariosService(
     prisma as never,
     auditoria as never,
     suscripciones as never,
+    permisosCache as never,
   );
   return { servicio, prisma };
 }

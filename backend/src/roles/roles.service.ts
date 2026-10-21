@@ -8,6 +8,7 @@ import {
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditoriaService } from '../auditoria/auditoria.service';
+import { PermisosCacheService } from '../common/cache/permisos-cache.service';
 import { CreateRolDto, UpdateRolDto } from './dto/rol.dto';
 
 /** Actor que ejecuta la operacion: id + permisos efectivos. */
@@ -22,6 +23,7 @@ export class RolesService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly auditoria: AuditoriaService,
+    private readonly permisosCache: PermisosCacheService,
   ) {}
 
   /**
@@ -97,8 +99,22 @@ export class RolesService {
     return rol;
   }
 
-  async crear(
-    empresaId: string,
+  /**
+   * Invalida la cache de permisos de todos los usuarios que tienen asignado
+   * un rol (hallazgo R): cambiar los permisos de un rol surte efecto de
+   * inmediato y no espera al TTL.
+   */
+  private async invalidarPermisosDeUsuariosDelRol(rolId: string): Promise<void> {
+    const asignaciones = await this.prisma.usuarioRol.findMany({
+      where: { rolId },
+      select: { usuarioId: true },
+    });
+    this.permisosCache.invalidarVarios(
+      asignaciones.map((a) => a.usuarioId),
+    );
+  }
+
+  async crear(    empresaId: string,
     dto: CreateRolDto,
     actor: ActorRoles,
     ip?: string,
@@ -183,6 +199,8 @@ export class RolesService {
       datosNuevos: dto as Prisma.InputJsonValue,
       ip,
     });
+
+    await this.invalidarPermisosDeUsuariosDelRol(id);
 
     return this.obtener(empresaId, id);
   }

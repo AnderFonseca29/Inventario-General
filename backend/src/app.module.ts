@@ -3,6 +3,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { ConfigModule } from '@nestjs/config';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { CommonModule } from './common/common.module';
+import { CacheModule } from './common/cache/cache.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { validateEnv } from './config/env.validation';
@@ -32,6 +33,7 @@ import { TenantGuard } from './common/guards/tenant.guard';
 @Module({
   imports: [
     CommonModule,
+    CacheModule,
     ConfigModule.forRoot({ isGlobal: true, validate: validateEnv }),
     ThrottlerModule.forRoot([{ ttl: 60000, limit: 120 }]),
     PrismaModule,

@@ -10,6 +10,7 @@ import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditoriaService } from '../auditoria/auditoria.service';
 import { SuscripcionesService } from '../suscripciones/suscripciones.service';
+import { PermisosCacheService } from '../common/cache/permisos-cache.service';
 import { construirPaginado } from '../common/utils/paginacion';
 import {
   CreateUsuarioDto,
@@ -31,6 +32,7 @@ export class UsuariosService {
     private readonly prisma: PrismaService,
     private readonly auditoria: AuditoriaService,
     private readonly suscripciones: SuscripcionesService,
+    private readonly permisosCache: PermisosCacheService,
   ) {}
 
   private async validarRolesDeEmpresa(empresaId: string, rolIds: string[]) {
@@ -307,6 +309,9 @@ export class UsuariosService {
       ip,
     });
 
+    // Los permisos efectivos cambian si se reasignan roles (hallazgo R).
+    this.permisosCache.invalidar(id);
+
     return this.obtener(empresaId, id);
   }
 
@@ -333,6 +338,7 @@ export class UsuariosService {
       entidadId: id,
       ip,
     });
+    this.permisosCache.invalidar(id);
     return { ok: true };
   }
 

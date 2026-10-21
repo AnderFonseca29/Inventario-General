@@ -11,6 +11,7 @@ import { createHash, randomUUID } from 'crypto';
 import * as argon2 from 'argon2';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditoriaService } from '../auditoria/auditoria.service';
+import { PermisosCacheService } from '../common/cache/permisos-cache.service';
 import { AuthenticatedUser } from '../common/types/authenticated-user';
 import { LoginDto } from './dto/login.dto';
 import { RefreshDto } from './dto/refresh.dto';
@@ -23,6 +24,7 @@ export class AuthService {
     private readonly jwt: JwtService,
     private readonly config: ConfigService,
     private readonly auditoria: AuditoriaService,
+    private readonly permisosCache: PermisosCacheService,
   ) {}
 
   private hashToken(token: string): string {
@@ -115,6 +117,11 @@ export class AuthService {
   }
 
   private async permisosDeUsuario(usuarioId: string): Promise<string[]> {
+    const cacheados = this.permisosCache.obtener(usuarioId);
+    if (cacheados) {
+      return cacheados;
+    }
+
     const roles = await this.prisma.usuarioRol.findMany({
       where: { usuarioId },
       include: {
@@ -128,7 +135,9 @@ export class AuthService {
         set.add(rp.permiso.codigo);
       }
     }
-    return [...set];
+    const permisos = [...set];
+    this.permisosCache.guardar(usuarioId, permisos);
+    return permisos;
   }
 
   async loadAuthenticatedUser(usuarioId: string): Promise<AuthenticatedUser> {
