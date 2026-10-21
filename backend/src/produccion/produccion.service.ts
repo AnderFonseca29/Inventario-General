@@ -561,7 +561,16 @@ export class ProduccionService {
         include: { detalles: true },
       });
       if (!actual) throw new NotFoundException('Orden no encontrada');
-      if (actual.estado !== 'BORRADOR' && actual.estado !== 'PLANIFICADA') {
+      // Transicion atomica: solo una peticion concurrente inicia la orden.
+      const transicion = await tx.ordenProduccion.updateMany({
+        where: {
+          id,
+          empresaId,
+          estado: { in: ['BORRADOR', 'PLANIFICADA'] },
+        },
+        data: { estado: 'EN_PROCESO', iniciadaEn: new Date() },
+      });
+      if (transicion.count === 0) {
         throw new BadRequestException(
           'Solo se inician ordenes en estado borrador o planificada',
         );
@@ -571,21 +580,23 @@ export class ProduccionService {
           where: { id: detalle.materiaPrimaId },
         });
         if (!mp) continue;
-        const libre = new Prisma.Decimal(mp.disponible).minus(mp.reservado);
-        if (libre.lessThan(detalle.cantidadTeorica)) {
+        const reserva = new Prisma.Decimal(detalle.cantidadTeorica);
+        // Reserva atomica con control de disponible: si no alcanza, 0 filas.
+        const reservado = await tx.materiaPrima.updateMany({
+          where: {
+            id: mp.id,
+            empresaId,
+            disponible: { gte: new Prisma.Decimal(mp.reservado).plus(reserva) },
+          },
+          data: { reservado: { increment: reserva } },
+        });
+        if (reservado.count === 0) {
           throw new BadRequestException(
             `Materia prima insuficiente para iniciar la orden (${mp.nombre})`,
           );
         }
-        await tx.materiaPrima.update({
-          where: { id: mp.id },
-          data: { reservado: mp.reservado.plus(detalle.cantidadTeorica) },
-        });
       }
-      return tx.ordenProduccion.update({
-        where: { id },
-        data: { estado: 'EN_PROCESO', iniciadaEn: new Date() },
-      });
+      return tx.ordenProduccion.findUniqueOrThrow({ where: { id } });
     });
 
     await this.auditar(
@@ -607,28 +618,26 @@ export class ProduccionService {
     delta: Prisma.Decimal,
     nombreProducto: string,
   ) {
-    const actual = await tx.existencia.findFirst({
-      where: { empresaId, productoId, bodegaId },
+    const clave = { empresaId, productoId, bodegaId };
+    if (delta.isZero()) return;
+    if (delta.isNegative()) {
+      const requerido = delta.abs();
+      const afectadas = await tx.existencia.updateMany({
+        where: { ...clave, cantidad: { gte: requerido } },
+        data: { cantidad: { decrement: requerido } },
+      });
+      if (afectadas.count === 0) {
+        throw new BadRequestException(
+          `Stock insuficiente de "${nombreProducto}" para completar la operacion`,
+        );
+      }
+      return;
+    }
+    await tx.existencia.upsert({
+      where: { empresaId_productoId_bodegaId: clave },
+      create: { ...clave, cantidad: delta },
+      update: { cantidad: { increment: delta } },
     });
-    const saldo = actual
-      ? new Prisma.Decimal(actual.cantidad)
-      : new Prisma.Decimal(0);
-    const nuevo = saldo.plus(delta);
-    if (nuevo.isNegative()) {
-      throw new BadRequestException(
-        `Stock insuficiente de "${nombreProducto}" para completar la operacion`,
-      );
-    }
-    if (actual) {
-      await tx.existencia.update({
-        where: { id: actual.id },
-        data: { cantidad: nuevo },
-      });
-    } else {
-      await tx.existencia.create({
-        data: { empresaId, productoId, bodegaId, cantidad: nuevo },
-      });
-    }
   }
 
   async completarOrden(
@@ -652,7 +661,17 @@ export class ProduccionService {
         },
       });
       if (!actual) throw new NotFoundException('Orden no encontrada');
-      if (actual.estado !== 'EN_PROCESO') {
+      // Transicion atomica a COMPLETADA: dos completados concurrentes no pueden
+      // consumir ni producir dos veces.
+      const transicion = await tx.ordenProduccion.updateMany({
+        where: { id, empresaId, estado: 'EN_PROCESO' },
+        data: {
+          estado: 'COMPLETADA',
+          cantidadProducida: producida,
+          completadaEn: new Date(),
+        },
+      });
+      if (transicion.count === 0) {
         throw new BadRequestException('Solo se completan ordenes en proceso');
       }
 
@@ -667,21 +686,23 @@ export class ProduccionService {
         if (consumida.lessThan(0)) {
           throw new BadRequestException('El consumo no puede ser negativo');
         }
-        if (consumida.greaterThan(mp.disponible)) {
+        // Descuento atomico con control de disponible.
+        const liberado = Prisma.Decimal.max(
+          new Prisma.Decimal(mp.reservado).minus(teorica),
+          new Prisma.Decimal(0),
+        );
+        const descontado = await tx.materiaPrima.updateMany({
+          where: { id: mp.id, empresaId, disponible: { gte: consumida } },
+          data: {
+            disponible: { decrement: consumida },
+            reservado: liberado,
+          },
+        });
+        if (descontado.count === 0) {
           throw new BadRequestException(
             `Materia prima insuficiente para completar la orden (${mp.nombre})`,
           );
         }
-        await tx.materiaPrima.update({
-          where: { id: mp.id },
-          data: {
-            disponible: new Prisma.Decimal(mp.disponible).minus(consumida),
-            reservado: Prisma.Decimal.max(
-              new Prisma.Decimal(mp.reservado).minus(teorica),
-              new Prisma.Decimal(0),
-            ),
-          },
-        });
         await tx.ordenProduccionDetalle.update({
           where: { id: detalle.id },
           data: { cantidadConsumida: consumida, merma },
@@ -710,14 +731,7 @@ export class ProduccionService {
         },
       });
 
-      return tx.ordenProduccion.update({
-        where: { id },
-        data: {
-          estado: 'COMPLETADA',
-          cantidadProducida: producida,
-          completadaEn: new Date(),
-        },
-      });
+      return tx.ordenProduccion.findUniqueOrThrow({ where: { id } });
     });
 
     await this.auditar(
@@ -741,7 +755,16 @@ export class ProduccionService {
         include: { detalles: true },
       });
       if (!actual) throw new NotFoundException('Orden no encontrada');
-      if (actual.estado === 'COMPLETADA' || actual.estado === 'CANCELADA') {
+      // Transicion atomica: evita doble liberacion de reservas.
+      const transicion = await tx.ordenProduccion.updateMany({
+        where: {
+          id,
+          empresaId,
+          estado: { in: ['BORRADOR', 'PLANIFICADA', 'EN_PROCESO'] },
+        },
+        data: { estado: 'CANCELADA' },
+      });
+      if (transicion.count === 0) {
         throw new BadRequestException(
           'La orden ya esta completada o cancelada',
         );
@@ -752,21 +775,17 @@ export class ProduccionService {
             where: { id: detalle.materiaPrimaId },
           });
           if (!mp) continue;
+          const liberado = Prisma.Decimal.max(
+            new Prisma.Decimal(mp.reservado).minus(detalle.cantidadTeorica),
+            new Prisma.Decimal(0),
+          );
           await tx.materiaPrima.update({
             where: { id: mp.id },
-            data: {
-              reservado: Prisma.Decimal.max(
-                new Prisma.Decimal(mp.reservado).minus(detalle.cantidadTeorica),
-                new Prisma.Decimal(0),
-              ),
-            },
+            data: { reservado: liberado },
           });
         }
       }
-      return tx.ordenProduccion.update({
-        where: { id },
-        data: { estado: 'CANCELADA' },
-      });
+      return tx.ordenProduccion.findUniqueOrThrow({ where: { id } });
     });
 
     await this.auditar(
@@ -855,7 +874,16 @@ export class ProduccionService {
         where: { id, empresaId },
       });
       if (!actual) throw new NotFoundException('Merma no encontrada');
-      if (actual.estado !== 'PENDIENTE') {
+      // Transicion atomica: la merma no puede aprobarse dos veces.
+      const transicion = await tx.merma.updateMany({
+        where: { id, empresaId, estado: 'PENDIENTE' },
+        data: {
+          estado: 'APROBADA',
+          aprobadoPorId: actorId,
+          aprobadoEn: new Date(),
+        },
+      });
+      if (transicion.count === 0) {
         throw new BadRequestException('La merma no esta pendiente');
       }
       if (actual.materiaPrimaId) {
@@ -863,29 +891,23 @@ export class ProduccionService {
           where: { id: actual.materiaPrimaId },
         });
         if (!mp) throw new BadRequestException('Materia prima invalida');
-        const libre = new Prisma.Decimal(mp.disponible).minus(mp.reservado);
-        if (libre.lessThan(actual.cantidad)) {
+        const descontado = await tx.materiaPrima.updateMany({
+          where: {
+            id: mp.id,
+            empresaId,
+            disponible: {
+              gte: new Prisma.Decimal(actual.cantidad),
+            },
+          },
+          data: { disponible: { decrement: actual.cantidad } },
+        });
+        if (descontado.count === 0) {
           throw new BadRequestException(
             `Inventario insuficiente para aprobar la merma (${mp.nombre})`,
           );
         }
-        await tx.materiaPrima.update({
-          where: { id: mp.id },
-          data: {
-            disponible: new Prisma.Decimal(mp.disponible).minus(
-              actual.cantidad,
-            ),
-          },
-        });
       }
-      return tx.merma.update({
-        where: { id },
-        data: {
-          estado: 'APROBADA',
-          aprobadoPorId: actorId,
-          aprobadoEn: new Date(),
-        },
-      });
+      return tx.merma.findUniqueOrThrow({ where: { id } });
     });
 
     await this.auditar(empresaId, actorId, 'merma.aprobada', 'Merma', id, {
@@ -899,17 +921,18 @@ export class ProduccionService {
       where: { id, empresaId },
     });
     if (!actual) throw new NotFoundException('Merma no encontrada');
-    if (actual.estado !== 'PENDIENTE') {
-      throw new BadRequestException('La merma no esta pendiente');
-    }
-    const merma = await this.prisma.merma.update({
-      where: { id },
+    const transicion = await this.prisma.merma.updateMany({
+      where: { id, empresaId, estado: 'PENDIENTE' },
       data: {
         estado: 'RECHAZADA',
         aprobadoPorId: actorId,
         aprobadoEn: new Date(),
       },
     });
+    if (transicion.count === 0) {
+      throw new BadRequestException('La merma no esta pendiente');
+    }
+    const merma = await this.prisma.merma.findUniqueOrThrow({ where: { id } });
     await this.auditar(empresaId, actorId, 'merma.rechazada', 'Merma', id, {
       motivo: actual.motivo,
     });

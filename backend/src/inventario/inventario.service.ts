@@ -3,6 +3,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import { randomUUID } from 'crypto';
 import { EstadoDocumento, Prisma, TipoMovimiento } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditoriaService } from '../auditoria/auditoria.service';
@@ -183,10 +184,21 @@ export class InventarioService {
     const total = await tx.documentoInventario.count({
       where: { empresaId, tipo },
     });
+    // Sufijo aleatorio corto: evita colisiones cuando dos documentos del mismo
+    // tipo se crean al mismo tiempo (count+1 no es atomico entre transacciones).
+    const sufijo = randomUUID().slice(0, 4).toUpperCase();
     const prefijo = PREFIJO_CONSECUTIVO[tipo] ?? 'DOC';
-    return `${prefijo}-${String(total + 1).padStart(6, '0')}`;
+    return `${prefijo}-${String(total + 1).padStart(6, '0')}-${sufijo}`;
   }
 
+  /**
+   * Ajusta la existencia de forma ATOMICA (sin leer-y-escribir en memoria):
+   * - increment/decrement calculados en la base de datos.
+   * - el descuento exige cantidad >= |delta| vía updateMany y falla si no
+   *   afecta ninguna fila (control de stock insuficiente bajo concurrencia).
+   * - la fila se crea con upsert sobre la clave unica
+   *   (empresaId, productoId, bodegaId) para no duplicar existencias.
+   */
   private async ajustarExistencia(
     tx: Prisma.TransactionClient,
     empresaId: string,
@@ -195,25 +207,40 @@ export class InventarioService {
     delta: Prisma.Decimal,
     nombreProducto: string,
   ) {
-    const actual = await tx.existencia.findFirst({
-      where: { empresaId, productoId, bodegaId },
+    const clave = { empresaId, productoId, bodegaId };
+
+    if (delta.isZero()) return;
+
+    if (delta.isNegative()) {
+      const requerido = delta.abs();
+      const afectadas = await tx.existencia.updateMany({
+        where: { ...clave, cantidad: { gte: requerido } },
+        data: { cantidad: { decrement: requerido } },
+      });
+      if (afectadas.count === 0) {
+        throw new BadRequestException(
+          `Stock insuficiente de "${nombreProducto}" para completar la operacion`,
+        );
+      }
+    } else {
+      await tx.existencia.upsert({
+        where: { empresaId_productoId_bodegaId: clave },
+        create: { ...clave, cantidad: delta },
+        update: { cantidad: { increment: delta } },
+      });
+    }
+
+    // Verificacion defensiva: la cantidad nunca puede quedar negativa.
+    const actual = await tx.existencia.findUnique({
+      where: {
+        empresaId_productoId_bodegaId: clave,
+      },
+      select: { cantidad: true },
     });
-    const saldo = actual ? actual.cantidad : new Prisma.Decimal(0);
-    const nuevo = saldo.plus(delta);
-    if (nuevo.isNegative()) {
+    if (actual && actual.cantidad.isNegative()) {
       throw new BadRequestException(
         `Stock insuficiente de "${nombreProducto}" para completar la operacion`,
       );
-    }
-    if (actual) {
-      await tx.existencia.update({
-        where: { id: actual.id },
-        data: { cantidad: nuevo },
-      });
-    } else {
-      await tx.existencia.create({
-        data: { empresaId, productoId, bodegaId, cantidad: nuevo },
-      });
     }
   }
 
@@ -364,11 +391,19 @@ export class InventarioService {
         },
       });
       if (!doc) throw new NotFoundException('Documento no encontrado');
-      if (doc.estado !== 'BORRADOR') {
+
+      // Cambio de estado ATOMICO: solo una peticion concurrente puede pasar de
+      // BORRADOR a CONFIRMADO; las demas afectan 0 filas y fallan.
+      const transicion = await tx.documentoInventario.updateMany({
+        where: { id: doc.id, empresaId, estado: 'BORRADOR' },
+        data: { estado: 'CONFIRMADO', confirmadoEn: new Date() },
+      });
+      if (transicion.count === 0) {
         throw new BadRequestException(
           'Solo se confirman documentos en estado borrador',
         );
       }
+
       if (!doc.bodegaId) {
         throw new BadRequestException('El documento no tiene bodega de origen');
       }
@@ -403,12 +438,8 @@ export class InventarioService {
           },
         });
       }
-      return tx.documentoInventario.update({
+      return tx.documentoInventario.findUniqueOrThrow({
         where: { id: doc.id },
-        data: {
-          estado: 'CONFIRMADO',
-          confirmadoEn: new Date(),
-        },
         include: { detalles: true },
       });
     });
@@ -435,11 +466,21 @@ export class InventarioService {
         },
       });
       if (!doc) throw new NotFoundException('Documento no encontrado');
-      if (doc.estado === 'ANULADO') {
-        throw new BadRequestException('El documento ya esta anulado');
+
+      // Cambio de estado ATOMICO: dos anulaciones concurrentes no pueden
+      // revertir el stock dos veces.
+      const estadoOrigen: EstadoDocumento = doc.estado;
+      const transicion = await tx.documentoInventario.updateMany({
+        where: { id: doc.id, empresaId, estado: estadoOrigen },
+        data: { estado: 'ANULADO' },
+      });
+      if (transicion.count === 0) {
+        throw new BadRequestException(
+          'El documento ya fue modificado por otra operacion',
+        );
       }
 
-      if (doc.estado === 'CONFIRMADO') {
+      if (estadoOrigen === 'CONFIRMADO') {
         const nombres = new Map(
           doc.detalles.map((detalle) => [
             detalle.productoId,
@@ -466,11 +507,8 @@ export class InventarioService {
         }
       }
 
-      return tx.documentoInventario.update({
+      return tx.documentoInventario.findUniqueOrThrow({
         where: { id: doc.id },
-        data: {
-          estado: 'ANULADO',
-        },
         include: { detalles: true },
       });
     });
