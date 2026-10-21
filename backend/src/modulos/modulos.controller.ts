@@ -24,6 +24,10 @@ import { PERMISOS } from '../common/constants/permisos';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import type { AuthenticatedUser } from '../common/types/authenticated-user';
 
+// Menu de la empresa: a nivel de clase NO se exige empresa porque la ruta GET
+// raiz la consume cualquier autenticado y resuelve la empresa en el metodo
+// (el superadmin debe indicar empresaId). Las rutas de gestion si se protegen
+// con @RequiereEmpresa() individualmente.
 @Controller('modulos')
 export class ModulosController {
   constructor(private readonly modulosService: ModulosService) {}

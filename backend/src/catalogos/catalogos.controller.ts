@@ -28,11 +28,16 @@ import {
   UpdateUbicacionDto,
   UpdateUnidadDto,
 } from './dto/catalogo.dto';
-import { Permisos } from '../common/decorators/permisos.decorator';
+import {
+  Permisos,
+  RequiereEmpresa,
+} from '../common/decorators/permisos.decorator';
 import { PERMISOS } from '../common/constants/permisos';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
+import { exigirEmpresa } from '../common/guards/tenant.guard';
 import type { AuthenticatedUser } from '../common/types/authenticated-user';
 
+@RequiereEmpresa()
 @Controller('catalogos')
 export class CatalogosController {
   constructor(private readonly catalogos: CatalogosService) {}
@@ -41,7 +46,7 @@ export class CatalogosController {
   @Get('categorias')
   @Permisos(PERMISOS.CATALOGOS_VER)
   listarCategorias(@CurrentUser() user: AuthenticatedUser) {
-    return this.catalogos.listarCategorias(user.empresaId!);
+    return this.catalogos.listarCategorias(exigirEmpresa(user));
   }
 
   @Post('categorias')
@@ -51,7 +56,12 @@ export class CatalogosController {
     @Body() dto: CreateCategoriaDto,
     @Req() req: Request,
   ) {
-    return this.catalogos.crearCategoria(user.empresaId!, dto, user.id, req.ip);
+    return this.catalogos.crearCategoria(
+      exigirEmpresa(user),
+      dto,
+      user.id,
+      req.ip,
+    );
   }
 
   @Patch('categorias/:id')
@@ -63,7 +73,7 @@ export class CatalogosController {
     @Req() req: Request,
   ) {
     return this.catalogos.actualizarCategoria(
-      user.empresaId!,
+      exigirEmpresa(user),
       id,
       dto,
       user.id,
@@ -77,14 +87,14 @@ export class CatalogosController {
     @CurrentUser() user: AuthenticatedUser,
     @Param('id', new ParseUUIDPipe()) id: string,
   ) {
-    return this.catalogos.eliminarCategoria(user.empresaId!, id);
+    return this.catalogos.eliminarCategoria(exigirEmpresa(user), id);
   }
 
   // -------------------------------- Unidades -------------------------------
   @Get('unidades')
   @Permisos(PERMISOS.CATALOGOS_VER)
   listarUnidades(@CurrentUser() user: AuthenticatedUser) {
-    return this.catalogos.listarUnidades(user.empresaId!);
+    return this.catalogos.listarUnidades(exigirEmpresa(user));
   }
 
   @Post('unidades')
@@ -94,7 +104,12 @@ export class CatalogosController {
     @Body() dto: CreateUnidadDto,
     @Req() req: Request,
   ) {
-    return this.catalogos.crearUnidad(user.empresaId!, dto, user.id, req.ip);
+    return this.catalogos.crearUnidad(
+      exigirEmpresa(user),
+      dto,
+      user.id,
+      req.ip,
+    );
   }
 
   @Patch('unidades/:id')
@@ -106,7 +121,7 @@ export class CatalogosController {
     @Req() req: Request,
   ) {
     return this.catalogos.actualizarUnidad(
-      user.empresaId!,
+      exigirEmpresa(user),
       id,
       dto,
       user.id,
@@ -120,14 +135,14 @@ export class CatalogosController {
     @CurrentUser() user: AuthenticatedUser,
     @Param('id', new ParseUUIDPipe()) id: string,
   ) {
-    return this.catalogos.eliminarUnidad(user.empresaId!, id);
+    return this.catalogos.eliminarUnidad(exigirEmpresa(user), id);
   }
 
   // ----------------------------- Presentaciones ----------------------------
   @Get('presentaciones')
   @Permisos(PERMISOS.CATALOGOS_VER)
   listarPresentaciones(@CurrentUser() user: AuthenticatedUser) {
-    return this.catalogos.listarPresentaciones(user.empresaId!);
+    return this.catalogos.listarPresentaciones(exigirEmpresa(user));
   }
 
   @Post('presentaciones')
@@ -138,7 +153,7 @@ export class CatalogosController {
     @Req() req: Request,
   ) {
     return this.catalogos.crearPresentacion(
-      user.empresaId!,
+      exigirEmpresa(user),
       dto,
       user.id,
       req.ip,
@@ -154,7 +169,7 @@ export class CatalogosController {
     @Req() req: Request,
   ) {
     return this.catalogos.actualizarPresentacion(
-      user.empresaId!,
+      exigirEmpresa(user),
       id,
       dto,
       user.id,
@@ -168,7 +183,7 @@ export class CatalogosController {
     @CurrentUser() user: AuthenticatedUser,
     @Param('id', new ParseUUIDPipe()) id: string,
   ) {
-    return this.catalogos.eliminarPresentacion(user.empresaId!, id);
+    return this.catalogos.eliminarPresentacion(exigirEmpresa(user), id);
   }
 
   // ------------------------------- Productos -------------------------------
@@ -178,7 +193,7 @@ export class CatalogosController {
     @CurrentUser() user: AuthenticatedUser,
     @Query('buscar') buscar?: string,
   ) {
-    return this.catalogos.listarProductos(user.empresaId!, buscar);
+    return this.catalogos.listarProductos(exigirEmpresa(user), buscar);
   }
 
   @Get('productos/:id')
@@ -187,7 +202,7 @@ export class CatalogosController {
     @CurrentUser() user: AuthenticatedUser,
     @Param('id', new ParseUUIDPipe()) id: string,
   ) {
-    return this.catalogos.obtenerProducto(user.empresaId!, id);
+    return this.catalogos.obtenerProducto(exigirEmpresa(user), id);
   }
 
   @Post('productos')
@@ -197,7 +212,12 @@ export class CatalogosController {
     @Body() dto: CreateProductoDto,
     @Req() req: Request,
   ) {
-    return this.catalogos.crearProducto(user.empresaId!, dto, user.id, req.ip);
+    return this.catalogos.crearProducto(
+      exigirEmpresa(user),
+      dto,
+      user.id,
+      req.ip,
+    );
   }
 
   @Patch('productos/:id')
@@ -209,7 +229,7 @@ export class CatalogosController {
     @Req() req: Request,
   ) {
     return this.catalogos.actualizarProducto(
-      user.empresaId!,
+      exigirEmpresa(user),
       id,
       dto,
       user.id,
@@ -223,14 +243,14 @@ export class CatalogosController {
     @CurrentUser() user: AuthenticatedUser,
     @Param('id', new ParseUUIDPipe()) id: string,
   ) {
-    return this.catalogos.eliminarProducto(user.empresaId!, id);
+    return this.catalogos.eliminarProducto(exigirEmpresa(user), id);
   }
 
   // ------------------------------ Proveedores ------------------------------
   @Get('proveedores')
   @Permisos(PERMISOS.CATALOGOS_VER)
   listarProveedores(@CurrentUser() user: AuthenticatedUser) {
-    return this.catalogos.listarProveedores(user.empresaId!);
+    return this.catalogos.listarProveedores(exigirEmpresa(user));
   }
 
   @Post('proveedores')
@@ -240,7 +260,12 @@ export class CatalogosController {
     @Body() dto: CreateProveedorDto,
     @Req() req: Request,
   ) {
-    return this.catalogos.crearProveedor(user.empresaId!, dto, user.id, req.ip);
+    return this.catalogos.crearProveedor(
+      exigirEmpresa(user),
+      dto,
+      user.id,
+      req.ip,
+    );
   }
 
   @Patch('proveedores/:id')
@@ -252,7 +277,7 @@ export class CatalogosController {
     @Req() req: Request,
   ) {
     return this.catalogos.actualizarProveedor(
-      user.empresaId!,
+      exigirEmpresa(user),
       id,
       dto,
       user.id,
@@ -266,14 +291,14 @@ export class CatalogosController {
     @CurrentUser() user: AuthenticatedUser,
     @Param('id', new ParseUUIDPipe()) id: string,
   ) {
-    return this.catalogos.eliminarProveedor(user.empresaId!, id);
+    return this.catalogos.eliminarProveedor(exigirEmpresa(user), id);
   }
 
   // -------------------------------- Bodegas --------------------------------
   @Get('bodegas')
   @Permisos(PERMISOS.CATALOGOS_VER)
   listarBodegas(@CurrentUser() user: AuthenticatedUser) {
-    return this.catalogos.listarBodegas(user.empresaId!);
+    return this.catalogos.listarBodegas(exigirEmpresa(user));
   }
 
   @Post('bodegas')
@@ -283,7 +308,12 @@ export class CatalogosController {
     @Body() dto: CreateBodegaDto,
     @Req() req: Request,
   ) {
-    return this.catalogos.crearBodega(user.empresaId!, dto, user.id, req.ip);
+    return this.catalogos.crearBodega(
+      exigirEmpresa(user),
+      dto,
+      user.id,
+      req.ip,
+    );
   }
 
   @Patch('bodegas/:id')
@@ -295,7 +325,7 @@ export class CatalogosController {
     @Req() req: Request,
   ) {
     return this.catalogos.actualizarBodega(
-      user.empresaId!,
+      exigirEmpresa(user),
       id,
       dto,
       user.id,
@@ -309,7 +339,7 @@ export class CatalogosController {
     @CurrentUser() user: AuthenticatedUser,
     @Param('id', new ParseUUIDPipe()) id: string,
   ) {
-    return this.catalogos.eliminarBodega(user.empresaId!, id);
+    return this.catalogos.eliminarBodega(exigirEmpresa(user), id);
   }
 
   // ------------------------------ Ubicaciones ------------------------------
@@ -319,7 +349,7 @@ export class CatalogosController {
     @CurrentUser() user: AuthenticatedUser,
     @Query('bodegaId') bodegaId?: string,
   ) {
-    return this.catalogos.listarUbicaciones(user.empresaId!, bodegaId);
+    return this.catalogos.listarUbicaciones(exigirEmpresa(user), bodegaId);
   }
 
   @Post('ubicaciones')
@@ -329,7 +359,12 @@ export class CatalogosController {
     @Body() dto: CreateUbicacionDto,
     @Req() req: Request,
   ) {
-    return this.catalogos.crearUbicacion(user.empresaId!, dto, user.id, req.ip);
+    return this.catalogos.crearUbicacion(
+      exigirEmpresa(user),
+      dto,
+      user.id,
+      req.ip,
+    );
   }
 
   @Patch('ubicaciones/:id')
@@ -341,7 +376,7 @@ export class CatalogosController {
     @Req() req: Request,
   ) {
     return this.catalogos.actualizarUbicacion(
-      user.empresaId!,
+      exigirEmpresa(user),
       id,
       dto,
       user.id,
@@ -355,6 +390,6 @@ export class CatalogosController {
     @CurrentUser() user: AuthenticatedUser,
     @Param('id', new ParseUUIDPipe()) id: string,
   ) {
-    return this.catalogos.eliminarUbicacion(user.empresaId!, id);
+    return this.catalogos.eliminarUbicacion(exigirEmpresa(user), id);
   }
 }

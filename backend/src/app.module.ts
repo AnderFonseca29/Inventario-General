@@ -6,6 +6,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { validateEnv } from './config/env.validation';
 import { PrismaModule } from './prisma/prisma.module';
+import { HealthModule } from './health/health.module';
 import { AuditoriaModule } from './auditoria/auditoria.module';
 import { AuthModule } from './auth/auth.module';
 import { EmpresasModule } from './empresas/empresas.module';
@@ -22,14 +23,17 @@ import { ResumenModule } from './resumen/resumen.module';
 import { PermisosModule } from './permisos/permisos.module';
 import { SuscripcionesModule } from './suscripciones/suscripciones.module';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
+import { EmpresaContextoGuard } from './common/guards/empresa-contexto.guard';
 import { PermisosGuard } from './common/guards/permisos.guard';
 import { SuperAdminGuard } from './common/guards/superadmin.guard';
+import { TenantGuard } from './common/guards/tenant.guard';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true, validate: validateEnv }),
     ThrottlerModule.forRoot([{ ttl: 60000, limit: 120 }]),
     PrismaModule,
+    HealthModule,
     AuditoriaModule,
     AuthModule,
     EmpresasModule,
@@ -51,7 +55,9 @@ import { SuperAdminGuard } from './common/guards/superadmin.guard';
     AppService,
     { provide: APP_GUARD, useClass: ThrottlerGuard },
     { provide: APP_GUARD, useClass: JwtAuthGuard },
+    { provide: APP_GUARD, useClass: EmpresaContextoGuard },
     { provide: APP_GUARD, useClass: PermisosGuard },
+    { provide: APP_GUARD, useClass: TenantGuard },
     { provide: APP_GUARD, useClass: SuperAdminGuard },
   ],
 })

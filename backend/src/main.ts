@@ -1,11 +1,20 @@
-import { NestFactory } from '@nestjs/core';
+﻿import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import helmet from 'helmet';
 import { AppModule } from './app.module';
+import { GlobalExceptionFilter } from './common/filters/global-exception.filter';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, { bufferLogs: false });
+
+  // Detras de Render hay un proxy inverso: sin esto req.ip es la IP del proxy,
+  // el limite de peticiones se comparte entre TODOS los usuarios y la auditoria
+  // guarda una IP incorrecta (hallazgo C).
+  const express = app.getHttpAdapter().getInstance() as {
+    set: (clave: string, valor: unknown) => void;
+  };
+  express.set('trust proxy', 1);
 
   app.use(helmet());
   app.setGlobalPrefix('api');
@@ -18,6 +27,8 @@ async function bootstrap() {
       transformOptions: { enableImplicitConversion: true },
     }),
   );
+
+  app.useGlobalFilters(new GlobalExceptionFilter());
 
   const config = app.get(ConfigService);
   const origins = (config.get<string>('CORS_ORIGINS') ?? '')

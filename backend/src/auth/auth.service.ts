@@ -1,10 +1,16 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  HttpException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import type { JwtSignOptions } from '@nestjs/jwt';
 import { createHash, randomUUID } from 'crypto';
 import * as argon2 from 'argon2';
 import { PrismaService } from '../prisma/prisma.service';
+import { AuditoriaService } from '../auditoria/auditoria.service';
 import { AuthenticatedUser } from '../common/types/authenticated-user';
 import { LoginDto } from './dto/login.dto';
 import { RefreshDto } from './dto/refresh.dto';
@@ -16,10 +22,96 @@ export class AuthService {
     private readonly prisma: PrismaService,
     private readonly jwt: JwtService,
     private readonly config: ConfigService,
+    private readonly auditoria: AuditoriaService,
   ) {}
 
   private hashToken(token: string): string {
     return createHash('sha256').update(token).digest('hex');
+  }
+
+  /**
+   * Hash ficticio (mismo algoritmo y parametros que el real) para consumir el
+   * mismo tiempo cuando el correo no existe (hallazgo D: evita enumerar
+   * usuarios por diferencia de tiempos).
+   */
+  private hashFicticio =
+    '$argon2id$v=19$m=65536,t=3,p=4$c2FsdGZha2VzYWx0$0000000000000000000000000000000000000000000000';
+
+  private async consumirTiempoDeHash(password: string): Promise<void> {
+    try {
+      await argon2.verify(this.hashFicticio, password);
+    } catch {
+      // El hash ficticio nunca valida: solo consume tiempo comparable.
+    }
+  }
+
+  // --------------------- Bloqueo progresivo (hallazgo D) --------------------
+
+  private ventanaBloqueoMs = 15 * 60 * 1000;
+
+  /** Numero de intentos fallidos recientes por correo o por IP. */
+  private async fallosRecientes(
+    email: string,
+    ip?: string,
+  ): Promise<{ porEmail: number; porIp: number }> {
+    const desde = new Date(Date.now() - this.ventanaBloqueoMs);
+    const [porEmail, porIp] = await Promise.all([
+      this.prisma.intentoLogin.count({
+        where: { email, exito: false, creadoEn: { gte: desde } },
+      }),
+      ip
+        ? this.prisma.intentoLogin.count({
+            where: { ip, exito: false, creadoEn: { gte: desde } },
+          })
+        : Promise.resolve(0),
+    ]);
+    return { porEmail, porIp };
+  }
+
+  /**
+   * Bloqueo temporal progresivo: a partir de 5 fallos se exige esperar
+   * (5 s, 15 s, 30 s, 60 s...) con un tope de 5 minutos.
+   */
+  private esperaBloqueo(fallos: number): number {
+    if (fallos < 5) return 0;
+    const escalones = [5000, 15000, 30000, 60000, 120000, 300000];
+    const indice = Math.min(fallos - 5, escalones.length - 1);
+    return escalones[indice];
+  }
+
+  private async registrarIntento(
+    email: string,
+    ip: string | undefined,
+    exito: boolean,
+  ): Promise<void> {
+    await this.prisma.intentoLogin.create({
+      data: { email, ip, exito },
+    });
+  }
+
+  private async exigirSinBloqueo(email: string, ip?: string): Promise<void> {
+    const { porEmail, porIp } = await this.fallosRecientes(email, ip);
+    const ultimo = await this.prisma.intentoLogin.findFirst({
+      where: { email, exito: false },
+      orderBy: { creadoEn: 'desc' },
+      select: { creadoEn: true },
+    });
+    const esperaMs = Math.max(
+      this.esperaBloqueo(porEmail),
+      this.esperaBloqueo(porIp),
+    );
+    if (esperaMs === 0 || !ultimo) return;
+    const transcurrido = Date.now() - ultimo.creadoEn.getTime();
+    if (transcurrido < esperaMs) {
+      const segundos = Math.ceil((esperaMs - transcurrido) / 1000);
+      throw new HttpException(
+        {
+          statusCode: 429,
+          message: `Demasiados intentos. Espera ${segundos} segundos e intenta de nuevo.`,
+        },
+        429,
+      );
+    }
   }
 
   private async permisosDeUsuario(usuarioId: string): Promise<string[]> {
@@ -116,26 +208,36 @@ export class AuthService {
   }
 
   async login(dto: LoginDto, ip?: string, userAgent?: string) {
+    const email = dto.email.trim().toLowerCase();
+    await this.exigirSinBloqueo(email, ip);
+
     const usuario = await this.prisma.usuario.findUnique({
-      where: { email: dto.email.toLowerCase() },
+      where: { email },
     });
 
     if (!usuario || !usuario.activo) {
-      throw new UnauthorizedException('Credenciales invalidas');
+      // Tiempo comparable al caso valido y mensaje uniforme (hallazgo D).
+      await this.consumirTiempoDeHash(dto.password);
+      await this.registrarIntento(email, ip, false);
+      throw new UnauthorizedException('Correo o contrasena incorrectos');
     }
 
     const valida = await argon2.verify(usuario.passwordHash, dto.password);
     if (!valida) {
-      throw new UnauthorizedException('Credenciales invalidas');
+      await this.registrarIntento(email, ip, false);
+      throw new UnauthorizedException('Correo o contrasena incorrectos');
     }
 
     const user = await this.loadAuthenticatedUser(usuario.id);
     const tokens = await this.emitirTokens(user, ip, userAgent);
 
-    await this.prisma.usuario.update({
-      where: { id: usuario.id },
-      data: { ultimoLogin: new Date() },
-    });
+    await Promise.all([
+      this.prisma.usuario.update({
+        where: { id: usuario.id },
+        data: { ultimoLogin: new Date() },
+      }),
+      this.registrarIntento(email, ip, true),
+    ]);
 
     return { ...tokens, user };
   }
@@ -154,11 +256,26 @@ export class AuthService {
       where: { tokenHash: this.hashToken(dto.refreshToken) },
     });
 
-    if (
-      !almacenado ||
-      almacenado.revocado ||
-      almacenado.expiresAt < new Date()
-    ) {
+    // Deteccion de reuso (hallazgo H): si el token existe pero ya fue revocado,
+    // alguien esta reutilizando un token rotado (posible robo). Se revocan
+    // TODAS las sesiones del usuario y se rechaza.
+    if (almacenado && almacenado.revocado) {
+      await this.prisma.refreshToken.updateMany({
+        where: { usuarioId: almacenado.usuarioId, revocado: false },
+        data: { revocado: true },
+      });
+      await this.auditoria.registrar({
+        empresaId: null,
+        usuarioId: almacenado.usuarioId,
+        accion: 'auth.refresh_reuso_detectado',
+        entidad: 'RefreshToken',
+        entidadId: almacenado.id,
+        ip,
+      });
+      throw new UnauthorizedException('Refresh token revocado o expirado');
+    }
+
+    if (!almacenado || almacenado.expiresAt < new Date()) {
       throw new UnauthorizedException('Refresh token revocado o expirado');
     }
 
@@ -197,6 +314,20 @@ export class AuthService {
     );
     if (!valida) {
       throw new UnauthorizedException('La contrasena actual no es correcta');
+    }
+
+    // Regla de contrasena: minimo 10 caracteres, mayuscula, minuscula y numero.
+    const nuevas = dto.newPassword ?? '';
+    const reglas = [
+      nuevas.length >= 10,
+      /[a-z]/.test(nuevas),
+      /[A-Z]/.test(nuevas),
+      /[0-9]/.test(nuevas),
+    ];
+    if (!reglas.every(Boolean)) {
+      throw new BadRequestException(
+        'La nueva contrasena debe tener al menos 10 caracteres e incluir mayuscula, minuscula y numero',
+      );
     }
 
     const passwordHash = await argon2.hash(dto.newPassword);

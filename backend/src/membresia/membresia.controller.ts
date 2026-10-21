@@ -23,11 +23,16 @@ import {
   UpdateClienteDto,
   UpdatePlanMembresiaDto,
 } from './dto/membresia.dto';
-import { Permisos } from '../common/decorators/permisos.decorator';
+import {
+  Permisos,
+  RequiereEmpresa,
+} from '../common/decorators/permisos.decorator';
 import { PERMISOS } from '../common/constants/permisos';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
+import { exigirEmpresa } from '../common/guards/tenant.guard';
 import type { AuthenticatedUser } from '../common/types/authenticated-user';
 
+@RequiereEmpresa()
 @Controller('membresia')
 export class MembresiaController {
   constructor(private readonly membresia: MembresiaService) {}
@@ -40,7 +45,7 @@ export class MembresiaController {
     @CurrentUser() user: AuthenticatedUser,
     @Query() filtros: ListarClientesDto,
   ) {
-    return this.membresia.listarClientes(user.empresaId!, filtros);
+    return this.membresia.listarClientes(exigirEmpresa(user), filtros);
   }
 
   @Post('clientes')
@@ -50,7 +55,12 @@ export class MembresiaController {
     @Body() dto: CreateClienteDto,
     @Req() req: Request,
   ) {
-    return this.membresia.crearCliente(user.empresaId!, dto, user.id, req.ip);
+    return this.membresia.crearCliente(
+      exigirEmpresa(user),
+      dto,
+      user.id,
+      req.ip,
+    );
   }
 
   @Patch('clientes/:id')
@@ -62,7 +72,7 @@ export class MembresiaController {
     @Req() req: Request,
   ) {
     return this.membresia.actualizarCliente(
-      user.empresaId!,
+      exigirEmpresa(user),
       id,
       dto,
       user.id,
@@ -76,7 +86,7 @@ export class MembresiaController {
     @CurrentUser() user: AuthenticatedUser,
     @Param('id', new ParseUUIDPipe()) id: string,
   ) {
-    return this.membresia.eliminarCliente(user.empresaId!, id);
+    return this.membresia.eliminarCliente(exigirEmpresa(user), id);
   }
 
   // ----------------------------- Planes de membresia -----------------------
@@ -87,7 +97,7 @@ export class MembresiaController {
     @CurrentUser() user: AuthenticatedUser,
     @Query() filtros: ListarPlanesMembresiaDto,
   ) {
-    return this.membresia.listarPlanesMembresia(user.empresaId!, filtros);
+    return this.membresia.listarPlanesMembresia(exigirEmpresa(user), filtros);
   }
 
   @Post('planes')
@@ -98,7 +108,7 @@ export class MembresiaController {
     @Req() req: Request,
   ) {
     return this.membresia.crearPlanMembresia(
-      user.empresaId!,
+      exigirEmpresa(user),
       dto,
       user.id,
       req.ip,
@@ -114,7 +124,7 @@ export class MembresiaController {
     @Req() req: Request,
   ) {
     return this.membresia.actualizarPlanMembresia(
-      user.empresaId!,
+      exigirEmpresa(user),
       id,
       dto,
       user.id,
@@ -128,7 +138,7 @@ export class MembresiaController {
     @CurrentUser() user: AuthenticatedUser,
     @Param('id', new ParseUUIDPipe()) id: string,
   ) {
-    return this.membresia.eliminarPlanMembresia(user.empresaId!, id);
+    return this.membresia.eliminarPlanMembresia(exigirEmpresa(user), id);
   }
 
   // ------------------------------ Afiliaciones -----------------------------
@@ -139,7 +149,7 @@ export class MembresiaController {
     @CurrentUser() user: AuthenticatedUser,
     @Query() filtros: ListarMembresiasDto,
   ) {
-    return this.membresia.listarMembresias(user.empresaId!, filtros);
+    return this.membresia.listarMembresias(exigirEmpresa(user), filtros);
   }
 
   @Post('membresias')
@@ -149,7 +159,12 @@ export class MembresiaController {
     @Body() dto: CreateMembresiaDto,
     @Req() req: Request,
   ) {
-    return this.membresia.crearMembresia(user.empresaId!, dto, user.id, req.ip);
+    return this.membresia.crearMembresia(
+      exigirEmpresa(user),
+      dto,
+      user.id,
+      req.ip,
+    );
   }
 
   @Post('membresias/:id/renovar')
@@ -161,7 +176,7 @@ export class MembresiaController {
     @Req() req: Request,
   ) {
     return this.membresia.renovarMembresia(
-      user.empresaId!,
+      exigirEmpresa(user),
       id,
       dto,
       user.id,
@@ -177,7 +192,7 @@ export class MembresiaController {
     @Req() req: Request,
   ) {
     return this.membresia.cancelarMembresia(
-      user.empresaId!,
+      exigirEmpresa(user),
       id,
       user.id,
       req.ip,

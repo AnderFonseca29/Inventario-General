@@ -3,9 +3,11 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import { randomUUID } from 'crypto';
 import { EstadoDocumento, Prisma, TipoMovimiento } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditoriaService } from '../auditoria/auditoria.service';
+import { GlobalExceptionFilter } from '../common/filters/global-exception.filter';
 import {
   CreateDocumentoDto,
   ListarExistenciasDto,
@@ -39,6 +41,20 @@ export class InventarioService {
     private readonly prisma: PrismaService,
     private readonly auditoria: AuditoriaService,
   ) {}
+
+  /**
+   * Ejecuta una transaccion traduciendo los errores de Prisma al mismo formato
+   * HTTP del filtro global (hallazgo L): P2002 -> 409, P2003 -> 409, etc.
+   * Evita que violaciones de datos durante la transaccion devuelvan 500.
+   */
+  private async enTransaccion<T>(fn: () => Promise<T>): Promise<T> {
+    try {
+      return await fn();
+    } catch (error) {
+      const httpError = new GlobalExceptionFilter().comoHttpException(error);
+      throw httpError ?? error;
+    }
+  }
 
   // ------------------------------- Consultas -------------------------------
 
@@ -183,10 +199,21 @@ export class InventarioService {
     const total = await tx.documentoInventario.count({
       where: { empresaId, tipo },
     });
+    // Sufijo aleatorio corto: evita colisiones cuando dos documentos del mismo
+    // tipo se crean al mismo tiempo (count+1 no es atomico entre transacciones).
+    const sufijo = randomUUID().slice(0, 4).toUpperCase();
     const prefijo = PREFIJO_CONSECUTIVO[tipo] ?? 'DOC';
-    return `${prefijo}-${String(total + 1).padStart(6, '0')}`;
+    return `${prefijo}-${String(total + 1).padStart(6, '0')}-${sufijo}`;
   }
 
+  /**
+   * Ajusta la existencia de forma ATOMICA (sin leer-y-escribir en memoria):
+   * - increment/decrement calculados en la base de datos.
+   * - el descuento exige cantidad >= |delta| vía updateMany y falla si no
+   *   afecta ninguna fila (control de stock insuficiente bajo concurrencia).
+   * - la fila se crea con upsert sobre la clave unica
+   *   (empresaId, productoId, bodegaId) para no duplicar existencias.
+   */
   private async ajustarExistencia(
     tx: Prisma.TransactionClient,
     empresaId: string,
@@ -195,25 +222,40 @@ export class InventarioService {
     delta: Prisma.Decimal,
     nombreProducto: string,
   ) {
-    const actual = await tx.existencia.findFirst({
-      where: { empresaId, productoId, bodegaId },
+    const clave = { empresaId, productoId, bodegaId };
+
+    if (delta.isZero()) return;
+
+    if (delta.isNegative()) {
+      const requerido = delta.abs();
+      const afectadas = await tx.existencia.updateMany({
+        where: { ...clave, cantidad: { gte: requerido } },
+        data: { cantidad: { decrement: requerido } },
+      });
+      if (afectadas.count === 0) {
+        throw new BadRequestException(
+          `Stock insuficiente de "${nombreProducto}" para completar la operacion`,
+        );
+      }
+    } else {
+      await tx.existencia.upsert({
+        where: { empresaId_productoId_bodegaId: clave },
+        create: { ...clave, cantidad: delta },
+        update: { cantidad: { increment: delta } },
+      });
+    }
+
+    // Verificacion defensiva: la cantidad nunca puede quedar negativa.
+    const actual = await tx.existencia.findUnique({
+      where: {
+        empresaId_productoId_bodegaId: clave,
+      },
+      select: { cantidad: true },
     });
-    const saldo = actual ? actual.cantidad : new Prisma.Decimal(0);
-    const nuevo = saldo.plus(delta);
-    if (nuevo.isNegative()) {
+    if (actual && actual.cantidad.isNegative()) {
       throw new BadRequestException(
         `Stock insuficiente de "${nombreProducto}" para completar la operacion`,
       );
-    }
-    if (actual) {
-      await tx.existencia.update({
-        where: { id: actual.id },
-        data: { cantidad: nuevo },
-      });
-    } else {
-      await tx.existencia.create({
-        data: { empresaId, productoId, bodegaId, cantidad: nuevo },
-      });
     }
   }
 
@@ -308,39 +350,41 @@ export class InventarioService {
     }
     const mapaProductos = new Map(productos.map((p) => [p.id, p]));
 
-    const documento = await this.prisma.$transaction(async (tx) => {
-      const consecutivo = await this.generarConsecutivo(
-        tx,
-        empresaId,
-        dto.tipo,
-      );
-      const creado = await tx.documentoInventario.create({
-        data: {
+    const documento = await this.enTransaccion(async () =>
+      this.prisma.$transaction(async (tx) => {
+        const consecutivo = await this.generarConsecutivo(
+          tx,
           empresaId,
-          tipo: dto.tipo,
-          consecutivo,
-          estado: 'BORRADOR',
-          bodegaId: dto.bodegaId,
-          bodegaDestinoId:
-            dto.tipo === 'TRANSFERENCIA' ? dto.bodegaDestinoId : null,
-          observaciones: dto.observaciones,
-          usuarioId: actorId,
-          detalles: {
-            create: dto.detalles.map((detalle) => ({
-              productoId: detalle.productoId,
-              cantidad: detalle.cantidad,
-              costoUnitario:
-                detalle.costoUnitario ??
-                mapaProductos.get(detalle.productoId)?.costo ??
-                0,
-              nombreSnapshot: mapaProductos.get(detalle.productoId)?.nombre,
-            })),
+          dto.tipo,
+        );
+        const creado = await tx.documentoInventario.create({
+          data: {
+            empresaId,
+            tipo: dto.tipo,
+            consecutivo,
+            estado: 'BORRADOR',
+            bodegaId: dto.bodegaId,
+            bodegaDestinoId:
+              dto.tipo === 'TRANSFERENCIA' ? dto.bodegaDestinoId : null,
+            observaciones: dto.observaciones,
+            usuarioId: actorId,
+            detalles: {
+              create: dto.detalles.map((detalle) => ({
+                productoId: detalle.productoId,
+                cantidad: detalle.cantidad,
+                costoUnitario:
+                  detalle.costoUnitario ??
+                  mapaProductos.get(detalle.productoId)?.costo ??
+                  0,
+                nombreSnapshot: mapaProductos.get(detalle.productoId)?.nombre,
+              })),
+            },
           },
-        },
-        include: { detalles: true },
-      });
-      return creado;
-    });
+          include: { detalles: true },
+        });
+        return creado;
+      }),
+    );
 
     await this.auditoria.registrar({
       empresaId,
@@ -354,64 +398,72 @@ export class InventarioService {
   }
 
   async confirmarDocumento(empresaId: string, id: string, actorId: string) {
-    const documento = await this.prisma.$transaction(async (tx) => {
-      const doc = await tx.documentoInventario.findFirst({
-        where: { id, empresaId },
-        include: {
-          detalles: {
-            include: { producto: { select: { nombre: true } } },
-          },
-        },
-      });
-      if (!doc) throw new NotFoundException('Documento no encontrado');
-      if (doc.estado !== 'BORRADOR') {
-        throw new BadRequestException(
-          'Solo se confirman documentos en estado borrador',
-        );
-      }
-      if (!doc.bodegaId) {
-        throw new BadRequestException('El documento no tiene bodega de origen');
-      }
-      for (const detalle of doc.detalles) {
-        const nombre = detalle.producto?.nombre ?? detalle.productoId;
-        const cantidad = new Prisma.Decimal(detalle.cantidad);
-        await this.aplicarEfecto(
-          tx,
-          empresaId,
-          {
-            tipo: doc.tipo,
-            bodegaId: doc.bodegaId,
-            bodegaDestinoId: doc.bodegaDestinoId,
-            productoId: detalle.productoId,
-            cantidad,
-          },
-          false,
-          nombre,
-        );
-        await tx.movimientoInventario.create({
-          data: {
-            empresaId,
-            productoId: detalle.productoId,
-            bodegaId: doc.bodegaId,
-            bodegaDestinoId:
-              doc.tipo === 'TRANSFERENCIA' ? doc.bodegaDestinoId : null,
-            tipo: doc.tipo,
-            cantidad: detalle.cantidad,
-            costoUnitario: detalle.costoUnitario,
-            documentoId: doc.id,
-            usuarioId: actorId,
+    const documento = await this.enTransaccion(async () =>
+      this.prisma.$transaction(async (tx) => {
+        const doc = await tx.documentoInventario.findFirst({
+          where: { id, empresaId },
+          include: {
+            detalles: {
+              include: { producto: { select: { nombre: true } } },
+            },
           },
         });
-      }
-      return tx.documentoInventario.update({
-        where: { id: doc.id },
-        data: {
-          estado: 'CONFIRMADO',
-          confirmadoEn: new Date(),
-        },
-        include: { detalles: true },
-      });
-    });
+        if (!doc) throw new NotFoundException('Documento no encontrado');
+
+        // Cambio de estado ATOMICO: solo una peticion concurrente puede pasar de
+        // BORRADOR a CONFIRMADO; las demas afectan 0 filas y fallan.
+        const transicion = await tx.documentoInventario.updateMany({
+          where: { id: doc.id, empresaId, estado: 'BORRADOR' },
+          data: { estado: 'CONFIRMADO', confirmadoEn: new Date() },
+        });
+        if (transicion.count === 0) {
+          throw new BadRequestException(
+            'Solo se confirman documentos en estado borrador',
+          );
+        }
+
+        if (!doc.bodegaId) {
+          throw new BadRequestException(
+            'El documento no tiene bodega de origen',
+          );
+        }
+        for (const detalle of doc.detalles) {
+          const nombre = detalle.producto?.nombre ?? detalle.productoId;
+          const cantidad = new Prisma.Decimal(detalle.cantidad);
+          await this.aplicarEfecto(
+            tx,
+            empresaId,
+            {
+              tipo: doc.tipo,
+              bodegaId: doc.bodegaId,
+              bodegaDestinoId: doc.bodegaDestinoId,
+              productoId: detalle.productoId,
+              cantidad,
+            },
+            false,
+            nombre,
+          );
+          await tx.movimientoInventario.create({
+            data: {
+              empresaId,
+              productoId: detalle.productoId,
+              bodegaId: doc.bodegaId,
+              bodegaDestinoId:
+                doc.tipo === 'TRANSFERENCIA' ? doc.bodegaDestinoId : null,
+              tipo: doc.tipo,
+              cantidad: detalle.cantidad,
+              costoUnitario: detalle.costoUnitario,
+              documentoId: doc.id,
+              usuarioId: actorId,
+            },
+          });
+        }
+        return tx.documentoInventario.findUniqueOrThrow({
+          where: { id: doc.id },
+          include: { detalles: true },
+        });
+      }),
+    );
 
     await this.auditoria.registrar({
       empresaId,
@@ -425,55 +477,64 @@ export class InventarioService {
   }
 
   async anularDocumento(empresaId: string, id: string, actorId: string) {
-    const documento = await this.prisma.$transaction(async (tx) => {
-      const doc = await tx.documentoInventario.findFirst({
-        where: { id, empresaId },
-        include: {
-          detalles: {
-            include: { producto: { select: { nombre: true } } },
-          },
-        },
-      });
-      if (!doc) throw new NotFoundException('Documento no encontrado');
-      if (doc.estado === 'ANULADO') {
-        throw new BadRequestException('El documento ya esta anulado');
-      }
-
-      if (doc.estado === 'CONFIRMADO') {
-        const nombres = new Map(
-          doc.detalles.map((detalle) => [
-            detalle.productoId,
-            detalle.producto?.nombre ?? detalle.productoId,
-          ]),
-        );
-        const movimientos = await tx.movimientoInventario.findMany({
-          where: { documentoId: doc.id },
-        });
-        for (const movimiento of movimientos) {
-          await this.aplicarEfecto(
-            tx,
-            empresaId,
-            {
-              tipo: movimiento.tipo,
-              bodegaId: movimiento.bodegaId,
-              bodegaDestinoId: movimiento.bodegaDestinoId,
-              productoId: movimiento.productoId,
-              cantidad: new Prisma.Decimal(movimiento.cantidad),
+    const documento = await this.enTransaccion(async () =>
+      this.prisma.$transaction(async (tx) => {
+        const doc = await tx.documentoInventario.findFirst({
+          where: { id, empresaId },
+          include: {
+            detalles: {
+              include: { producto: { select: { nombre: true } } },
             },
-            true,
-            nombres.get(movimiento.productoId) ?? movimiento.productoId,
+          },
+        });
+        if (!doc) throw new NotFoundException('Documento no encontrado');
+
+        // Cambio de estado ATOMICO: dos anulaciones concurrentes no pueden
+        // revertir el stock dos veces.
+        const estadoOrigen: EstadoDocumento = doc.estado;
+        const transicion = await tx.documentoInventario.updateMany({
+          where: { id: doc.id, empresaId, estado: estadoOrigen },
+          data: { estado: 'ANULADO' },
+        });
+        if (transicion.count === 0) {
+          throw new BadRequestException(
+            'El documento ya fue modificado por otra operacion',
           );
         }
-      }
 
-      return tx.documentoInventario.update({
-        where: { id: doc.id },
-        data: {
-          estado: 'ANULADO',
-        },
-        include: { detalles: true },
-      });
-    });
+        if (estadoOrigen === 'CONFIRMADO') {
+          const nombres = new Map(
+            doc.detalles.map((detalle) => [
+              detalle.productoId,
+              detalle.producto?.nombre ?? detalle.productoId,
+            ]),
+          );
+          const movimientos = await tx.movimientoInventario.findMany({
+            where: { documentoId: doc.id },
+          });
+          for (const movimiento of movimientos) {
+            await this.aplicarEfecto(
+              tx,
+              empresaId,
+              {
+                tipo: movimiento.tipo,
+                bodegaId: movimiento.bodegaId,
+                bodegaDestinoId: movimiento.bodegaDestinoId,
+                productoId: movimiento.productoId,
+                cantidad: new Prisma.Decimal(movimiento.cantidad),
+              },
+              true,
+              nombres.get(movimiento.productoId) ?? movimiento.productoId,
+            );
+          }
+        }
+
+        return tx.documentoInventario.findUniqueOrThrow({
+          where: { id: doc.id },
+          include: { detalles: true },
+        });
+      }),
+    );
 
     await this.auditoria.registrar({
       empresaId,

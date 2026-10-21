@@ -18,7 +18,7 @@ import { IconComponent } from '../../shared/icons';
         <div class="aside-copy">
           <h2>Control total de tu inventario</h2>
           <p>
-            Plataforma multempresa para gestionar bodegas, cargues, botellones y
+            Plataforma multiempresa para gestionar bodegas, cargues, botellones y
             producción con trazabilidad completa.
           </p>
 
@@ -47,7 +47,7 @@ import { IconComponent } from '../../shared/icons';
           </ul>
         </div>
 
-        <div class="aside-foot">© {{ anio }} · Sistema de inventario multempresa</div>
+        <div class="aside-foot">© {{ anio }} · Sistema de inventario multiempresa</div>
       </div>
 
       <div class="login-main">
