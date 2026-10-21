@@ -1,4 +1,4 @@
-import {
+﻿import {
   BadRequestException,
   Injectable,
   NotFoundException,
@@ -209,7 +209,7 @@ export class InventarioService {
   /**
    * Ajusta la existencia de forma ATOMICA (sin leer-y-escribir en memoria):
    * - increment/decrement calculados en la base de datos.
-   * - el descuento exige cantidad >= |delta| vía updateMany y falla si no
+   * - el descuento exige cantidad >= |delta| vÃ­a updateMany y falla si no
    *   afecta ninguna fila (control de stock insuficiente bajo concurrencia).
    * - la fila se crea con upsert sobre la clave unica
    *   (empresaId, productoId, bodegaId) para no duplicar existencias.
@@ -222,46 +222,13 @@ export class InventarioService {
     delta: Prisma.Decimal,
     nombreProducto: string,
   ) {
-<<<<<<< HEAD
-    const clave = { empresaId, productoId, bodegaId };
-
-    if (delta.isZero()) return;
-
-    if (delta.isNegative()) {
-      const requerido = delta.abs();
-      const afectadas = await tx.existencia.updateMany({
-        where: { ...clave, cantidad: { gte: requerido } },
-        data: { cantidad: { decrement: requerido } },
-      });
-      if (afectadas.count === 0) {
-        throw new BadRequestException(
-          `Stock insuficiente de "${nombreProducto}" para completar la operacion`,
-        );
-      }
-    } else {
-      await tx.existencia.upsert({
-        where: { empresaId_productoId_bodegaId: clave },
-        create: { ...clave, cantidad: delta },
-        update: { cantidad: { increment: delta } },
-      });
-    }
-
-    // Verificacion defensiva: la cantidad nunca puede quedar negativa.
-    const actual = await tx.existencia.findUnique({
-      where: {
-        empresaId_productoId_bodegaId: clave,
-      },
-      select: { cantidad: true },
-    });
-    if (actual && actual.cantidad.isNegative()) {
-=======
     const actual = await tx.existencia.findFirst({
       where: { empresaId, productoId, bodegaId },
       select: { id: true, cantidad: true },
     });
 
     if (actual) {
-      // Actualización atómica con validación de stock para evitar carreras.
+      // ActualizaciÃ³n atÃ³mica con validaciÃ³n de stock para evitar carreras.
       const res = await tx.existencia.updateMany({
         where: {
           id: actual.id,
@@ -284,7 +251,7 @@ export class InventarioService {
             `Stock insuficiente de "${nombreProducto}" para completar la operacion`,
           );
         }
-        // Si pasó el chequeo (carrera improbable tras retry), reintentar.
+        // Si pasÃ³ el chequeo (carrera improbable tras retry), reintentar.
         await tx.existencia.update({
           where: { id: actual.id },
           data: { cantidad: { increment: delta } },
@@ -294,28 +261,31 @@ export class InventarioService {
       return;
     }
 
-    // Creación con protección ante carrera (unicidad empresaId+productoId+bodegaId)
+    // CreaciÃ³n con protecciÃ³n ante carrera (unicidad empresaId+productoId+bodegaId)
     if (delta.isNegative()) {
->>>>>>> origin/fix/inventario
       throw new BadRequestException(
         `Stock insuficiente de "${nombreProducto}" para completar la operacion`,
       );
     }
-<<<<<<< HEAD
-=======
     try {
       await tx.existencia.create({
         data: { empresaId, productoId, bodegaId, cantidad: delta },
       });
     } catch (e) {
       if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002') {
-        // Otro proceso creó el registro; aplicar incremento atómico.
-        await this.ajustarExistencia(tx, empresaId, productoId, bodegaId, delta, nombreProducto);
+        // Otro proceso creÃ³ el registro; aplicar incremento atÃ³mico.
+        await this.ajustarExistencia(
+          tx,
+          empresaId,
+          productoId,
+          bodegaId,
+          delta,
+          nombreProducto,
+        );
         return;
       }
       throw e;
     }
->>>>>>> origin/fix/inventario
   }
 
   private async aplicarEfecto(
@@ -606,3 +576,4 @@ export class InventarioService {
     return documento;
   }
 }
+
