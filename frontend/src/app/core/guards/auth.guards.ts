@@ -38,6 +38,22 @@ export function permisoGuard(codigo: string): CanActivateFn {
   };
 }
 
+// Permite el acceso si el usuario tiene al menos uno de los permisos indicados.
+export function permisoAlgunoGuard(codigos: string[]): CanActivateFn {
+  return () => {
+    const auth = inject(AuthService);
+    const router = inject(Router);
+
+    if (auth.esOperativo()) {
+      return router.createUrlTree(['/app/dashboard']);
+    }
+    if (auth.hasAlgunPermiso(codigos)) {
+      return true;
+    }
+    return router.createUrlTree(['/app/dashboard']);
+  };
+}
+
 // Permite el acceso con el permiso indicado o al propietario de plataforma.
 export function permisoOSuperAdminGuard(codigo: string): CanActivateFn {
   return () => {

@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import {
   authGuard,
+  permisoAlgunoGuard,
   permisoGuard,
   permisoOSuperAdminGuard,
   superAdminGuard,
@@ -73,6 +74,16 @@ export const routes: Routes = [
             (m) => m.InventarioComponent,
           ),
         canActivate: [permisoGuard('inventario.ver')],
+      },
+      {
+        path: 'cargues',
+        loadComponent: () =>
+          import('./features/cargues/cargues.component').then(
+            (m) => m.CarguesComponent,
+          ),
+        canActivate: [
+          permisoAlgunoGuard(['cargues.ver.propios', 'cargues.ver.todos']),
+        ],
       },
       {
         path: 'produccion',

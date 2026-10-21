@@ -15,14 +15,19 @@ El proyecto es un **monorepo** con dos aplicaciones:
 
 ## Estado del proyecto
 
-- **Fase 1–2** — Esquema de base de datos (~40 modelos + 12 enums), migraciones y
-  seed (permisos, planes, superadmin).
+- **Fase 1–2** — Esquema de base de datos (~47 modelos + 15 enums), migraciones y
+  seed (permisos, planes, módulos de sistema, superadmin).
 - **Fase 3** — *Seguridad y acceso*: autenticación JWT (access + refresh con
   rotación), roles y permisos, usuarios, gestión de empresas, suscripciones y
   auditoría. Incluye la UI completa (login, layout con menú por permisos,
   dashboard y pantallas de administración).
-- **Fases siguientes** — Catálogos, inventario, cargues, botellones, producción,
-  mermas y reportes (alto nivel en el roadmap del sistema).
+- **Fase 4** — *Módulos operativos*: catálogos, inventario (existencias,
+  movimientos y documentos), **cargues a vendedores**, producción (materias
+  primas, fórmulas, órdenes y mermas), membresías/clientes, reportes, resumen y
+  auditoría, más la landing pública.
+- **Pendiente** — Control de botellones (movimientos, conciliación y casos de
+  diferencia) y solicitudes/comprobantes internos: los modelos y permisos ya
+  existen en el esquema y el seed.
 
 ---
 
@@ -133,13 +138,21 @@ Inventario-General/
 │       ├── roles/         # roles y permisos
 │       ├── permisos/      # catálogo de permisos
 │       ├── suscripciones/ # planes y suscripciones
+│       ├── catalogos/     # productos, categorías, unidades, bodegas
+│       ├── inventario/    # existencias, movimientos y documentos
+│       ├── cargues/       # cargues de productos a vendedores
+│       ├── produccion/    # materias primas, fórmulas, órdenes y mermas
+│       ├── membresia/     # clientes y membresías
+│       ├── reportes/      # indicadores y reportes
+│       ├── resumen/       # resumen personal del vendedor
 │       ├── auditoria/     # trazabilidad
 │       └── common/        # guards, decoradores, guards globales, utilidades
 └── frontend/
     └── src/
         ├── app/
         │   ├── core/      # modelos, servicios, guards, interceptores
-        │   ├── features/  # login, dashboard, usuarios, roles, empresas
+        │   ├── features/  # login, landing, dashboard, catálogos, inventario,
+        │   │              # cargues, producción, membresía, reportes, etc.
         │   ├── layout/    # shell (sidebar + topbar)
         │   └── shared/    # iconos, toasts, componentes reutilizables
         └── styles/        # sistema de diseño (parciales SCSS)
@@ -192,6 +205,17 @@ para que el login funcione desde el sitio publicado debes:
 1. Ejecutar el backend localmente (`npm run start:dev`), o desplegarlo en la nube.
 2. Confirmar que ese origen está en `CORS_ORIGINS` del backend.
 
+### Frontend en Vercel
+
+El repositorio incluye `vercel.json` en la raíz: importa el proyecto en Vercel
+(Root Directory = raíz del repo) y compila `frontend/` hacia
+`frontend/dist/frontend/browser`, con rewrites SPA y cabeceras de seguridad.
+Existe también `frontend/vercel.json` por si el Root Directory se configura
+dentro de `frontend/`.
+
+Recuerda apuntar `frontend/src/environments/environment.prod.ts` → `apiUrl` a la
+URL pública del backend y agregar el dominio de Vercel en `CORS_ORIGINS`.
+
 ### Alternativas de hosting estático
 
 ```bash
@@ -199,7 +223,7 @@ cd frontend
 npm run build           # salida en dist/frontend/browser
 ```
 
-Puedes publicar `dist/frontend/browser` en Vercel, Netlify o Cloudflare Pages
+Puedes publicar `dist/frontend/browser` en Netlify o Cloudflare Pages
 apuntando `environment.prod.ts` a la URL pública del backend.
 
 ---

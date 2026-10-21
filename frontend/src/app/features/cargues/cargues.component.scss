@@ -1,0 +1,123 @@
+// Cargues: filtros, listado, detalle y lineas del cargue.
+
+.filtros {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.filtros .form-control {
+  min-width: 200px;
+}
+
+.ta-right {
+  text-align: right;
+}
+
+.qty {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+.code-pill {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: #eef1f6;
+  color: #344054;
+  font-family: var(--font-mono, monospace);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.detalle-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px 18px;
+  margin-bottom: 14px;
+}
+
+.detalle-grid > div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 13.5px;
+}
+
+.detalle-label {
+  font-size: 11.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: #667085;
+}
+
+.obs {
+  margin: 0 0 14px;
+  font-size: 13.5px;
+  color: #475467;
+}
+
+.hint {
+  display: block;
+  margin-top: 5px;
+  font-size: 12px;
+  color: #667085;
+}
+
+.lineas-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 6px 0 10px;
+}
+
+.lineas-head label {
+  font-size: 13px;
+  font-weight: 700;
+  color: #344054;
+}
+
+.form-row .full {
+  grid-column: 1 / -1;
+}
+
+.lineas {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.linea {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr auto;
+  gap: 8px;
+  align-items: center;
+}
+
+.table-sm td,
+.table-sm th {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  font-size: 13px;
+}
+
+.table-sm tfoot td {
+  font-weight: 700;
+}
+
+@media (max-width: 720px) {
+  .detalle-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .linea {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 520px) {
+  .detalle-grid {
+    grid-template-columns: 1fr;
+  }
+}

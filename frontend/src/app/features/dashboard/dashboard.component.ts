@@ -16,6 +16,7 @@ interface Acceso {
   ruta: string;
   icono: string;
   permiso?: string;
+  permisos?: string[];
   soloSuperAdmin?: boolean;
 }
 
@@ -34,6 +35,13 @@ interface Kpi {
 }
 
 const ACCESOS: Acceso[] = [
+  {
+    titulo: 'Cargues',
+    descripcion: 'Carga productos desde bodega hacia tus vendedores.',
+    ruta: '/app/cargues',
+    icono: 'truck',
+    permisos: ['cargues.ver.propios', 'cargues.ver.todos'],
+  },
   {
     titulo: 'Usuarios',
     descripcion: 'Crea y administra las cuentas de tu empresa.',
@@ -66,11 +74,11 @@ const ACCESOS: Acceso[] = [
 
 const ROADMAP = [
   { nombre: 'Seguridad y acceso', estado: 'listo' },
-  { nombre: 'Catálogos', estado: 'pronto' },
-  { nombre: 'Inventario', estado: 'pronto' },
-  { nombre: 'Cargues', estado: 'pronto' },
+  { nombre: 'Catálogos', estado: 'listo' },
+  { nombre: 'Inventario', estado: 'listo' },
+  { nombre: 'Cargues', estado: 'listo' },
   { nombre: 'Botellones', estado: 'pronto' },
-  { nombre: 'Producción', estado: 'pronto' },
+  { nombre: 'Producción', estado: 'listo' },
 ];
 
 @Component({
@@ -517,6 +525,7 @@ export class DashboardComponent {
   readonly accesos = computed(() =>
     ACCESOS.filter((a) => {
       if (a.soloSuperAdmin) return this.esSuperAdmin();
+      if (a.permisos) return this.auth.hasAlgunPermiso(a.permisos);
       if (a.permiso) return this.auth.hasPermiso(a.permiso);
       return true;
     }),

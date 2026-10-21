@@ -14,6 +14,7 @@ import { RolesModule } from './roles/roles.module';
 import { ModulosModule } from './modulos/modulos.module';
 import { CatalogosModule } from './catalogos/catalogos.module';
 import { InventarioModule } from './inventario/inventario.module';
+import { CarguesModule } from './cargues/cargues.module';
 import { ProduccionModule } from './produccion/produccion.module';
 import { MembresiaModule } from './membresia/membresia.module';
 import { ReportesModule } from './reportes/reportes.module';
@@ -37,6 +38,7 @@ import { SuperAdminGuard } from './common/guards/superadmin.guard';
     ModulosModule,
     CatalogosModule,
     InventarioModule,
+    CarguesModule,
     ProduccionModule,
     MembresiaModule,
     ReportesModule,

@@ -115,8 +115,12 @@ async function main() {
           empresaId_clave: { empresaId: empresa.id, clave: modulo.clave },
         },
         update: {
-          implementado: modulo.implementado,
+          nombre: modulo.nombre,
+          descripcion: modulo.descripcion,
+          icono: modulo.icono,
+          orden: modulo.orden,
           ruta: modulo.ruta,
+          implementado: modulo.implementado,
         },
         create: {
           empresaId: empresa.id,

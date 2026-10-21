@@ -47,10 +47,12 @@ const NAV: NavSeccion[] = [
 const SECCION_OPERACION = 'Operación';
 
 // Permiso necesario para ver cada modulo de sistema en el menu. Un modulo sin
-// mapeo (personalizado) se muestra a quien tenga acceso a la seccion.
-const PERMISO_POR_CLAVE: Record<string, string> = {
+// mapeo (personalizado) se muestra a quien tenga acceso a la seccion. El valor
+// puede ser una lista: basta con poseer alguno de los permisos.
+const PERMISO_POR_CLAVE: Record<string, string | string[]> = {
   catalogo: 'catalogos.ver',
   inventario: 'inventario.ver',
+  cargues: ['cargues.ver.propios', 'cargues.ver.todos'],
   produccion: 'produccion.ver',
   membresia: 'membresia.ver',
   reportes: 'reportes.ver',
@@ -255,7 +257,10 @@ export class ShellComponent {
       .filter((modulo) => {
         if (modulo.tipo !== 'SISTEMA') return true;
         const permiso = PERMISO_POR_CLAVE[modulo.clave];
-        return permiso ? this.auth.hasPermiso(permiso) : false;
+        if (!permiso) return false;
+        return Array.isArray(permiso)
+          ? this.auth.hasAlgunPermiso(permiso)
+          : this.auth.hasPermiso(permiso);
       })
       .map(toNavItem);
   });
