@@ -19,7 +19,7 @@ import {
   UpdateUsuarioDto,
 } from './dto/usuario.dto';
 
-/** Actor que ejecuta la operacion: id + permisos efectivos. */
+/** Actor que ejecuta la operación: id + permisos efectivos. */
 export interface ActorUsuarios {
   id: string;
   permisos: string[];

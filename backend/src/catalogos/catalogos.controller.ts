@@ -42,7 +42,7 @@ import type { AuthenticatedUser } from '../common/types/authenticated-user';
 export class CatalogosController {
   constructor(private readonly catalogos: CatalogosService) {}
 
-  // ------------------------------ Categorias -------------------------------
+  // ------------------------------ Categorías -------------------------------
   @Get('categorias')
   @Permisos(PERMISOS.CATALOGOS_VER)
   listarCategorias(@CurrentUser() user: AuthenticatedUser) {

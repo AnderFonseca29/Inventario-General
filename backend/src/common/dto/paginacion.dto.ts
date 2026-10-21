@@ -23,16 +23,16 @@ export const LIMITE_MAXIMO = 500;
 export class PaginacionDto {
   @IsOptional()
   @Type(() => Number)
-  @IsInt({ message: 'La pagina debe ser un numero entero' })
-  @Min(1, { message: 'La pagina debe ser mayor o igual a 1' })
+  @IsInt({ message: 'La página debe ser un número entero' })
+  @Min(1, { message: 'La página debe ser mayor o igual a 1' })
   pagina?: number = 1;
 
   @IsOptional()
   @Type(() => Number)
-  @IsInt({ message: 'El limite debe ser un numero entero' })
-  @Min(1, { message: 'El limite debe ser mayor o igual a 1' })
+  @IsInt({ message: 'El límite debe ser un número entero' })
+  @Min(1, { message: 'El límite debe ser mayor o igual a 1' })
   @Max(LIMITE_MAXIMO, {
-    message: `El limite no puede superar ${LIMITE_MAXIMO} registros`,
+    message: `El límite no puede superar ${LIMITE_MAXIMO} registros`,
   })
   limite?: number = LIMITE_MAXIMO;
 

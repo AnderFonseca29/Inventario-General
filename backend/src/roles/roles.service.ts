@@ -11,7 +11,7 @@ import { AuditoriaService } from '../auditoria/auditoria.service';
 import { PermisosCacheService } from '../common/cache/permisos-cache.service';
 import { CreateRolDto, UpdateRolDto } from './dto/rol.dto';
 
-/** Actor que ejecuta la operacion: id + permisos efectivos. */
+/** Actor que ejecuta la operación: id + permisos efectivos. */
 export interface ActorRoles {
   id: string;
   permisos: string[];

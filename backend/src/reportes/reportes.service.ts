@@ -21,13 +21,13 @@ export class ReportesService {
     if (desde) {
       const d = new Date(desde);
       if (Number.isNaN(d.getTime()))
-        throw new BadRequestException('Fecha desde invalida');
+        throw new BadRequestException('Fecha desde inválida');
       filtro.gte = d;
     }
     if (hasta) {
       const h = new Date(hasta);
       if (Number.isNaN(h.getTime()))
-        throw new BadRequestException('Fecha hasta invalida');
+        throw new BadRequestException('Fecha hasta inválida');
       h.setHours(23, 59, 59, 999);
       filtro.lte = h;
     }

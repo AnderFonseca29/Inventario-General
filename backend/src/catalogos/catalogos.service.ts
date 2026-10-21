@@ -67,29 +67,29 @@ export class CatalogosService {
 
   private async exigirCategoria(empresaId: string, id: string) {
     if (!(await this.prisma.categoria.count({ where: { id, empresaId } }))) {
-      throw new BadRequestException('Categoria invalida');
+      throw new BadRequestException('Categoría inválida');
     }
   }
 
   private async exigirUnidad(empresaId: string, id: string) {
     if (!(await this.prisma.unidad.count({ where: { id, empresaId } }))) {
-      throw new BadRequestException('Unidad invalida');
+      throw new BadRequestException('Unidad inválida');
     }
   }
 
   private async exigirPresentacion(empresaId: string, id: string) {
     if (!(await this.prisma.presentacion.count({ where: { id, empresaId } }))) {
-      throw new BadRequestException('Presentacion invalida');
+      throw new BadRequestException('Presentacion inválida');
     }
   }
 
   private async exigirBodega(empresaId: string, id: string) {
     if (!(await this.prisma.bodega.count({ where: { id, empresaId } }))) {
-      throw new BadRequestException('Bodega invalida');
+      throw new BadRequestException('Bodega inválida');
     }
   }
 
-  // ------------------------------- Categorias ------------------------------
+  // ------------------------------- Categorías ------------------------------
 
   listarCategorias(empresaId: string) {
     return this.prisma.categoria.findMany({
@@ -134,7 +134,7 @@ export class CatalogosService {
     const actual = await this.prisma.categoria.findFirst({
       where: { id, empresaId },
     });
-    if (!actual) throw new NotFoundException('Categoria no encontrada');
+    if (!actual) throw new NotFoundException('Categoría no encontrada');
     const creado = await this.ejecutar(
       () => this.prisma.categoria.update({ where: { id }, data: dto }),
       'Ya existe una categoria con ese nombre',
@@ -155,12 +155,12 @@ export class CatalogosService {
     const actual = await this.prisma.categoria.findFirst({
       where: { id, empresaId },
     });
-    if (!actual) throw new NotFoundException('Categoria no encontrada');
+    if (!actual) throw new NotFoundException('Categoría no encontrada');
     const usados = await this.prisma.producto.count({
       where: { categoriaId: id },
     });
     if (usados > 0) {
-      throw new ConflictException('La categoria tiene productos asociados');
+      throw new ConflictException('La categoría tiene productos asociados');
     }
     await this.prisma.categoria.delete({ where: { id } });
     return { ok: true };

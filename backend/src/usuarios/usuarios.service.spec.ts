@@ -117,7 +117,7 @@ describe('UsuariosService - proteccion contra escalada (hallazgo E)', () => {
       ],
     });
     // El flujo real continua en $transaction; basta confirmar que paso la
-    // validacion de roles y llego a la transaccion.
+    // validación de roles y llegó a la transacción.
     prisma.$transaction.mockRejectedValue(new Error('LLEGO_A_TRANSACCION'));
     await expect(
       servicio.crear(
@@ -161,7 +161,7 @@ describe('UsuariosService - proteccion contra escalada (hallazgo E)', () => {
       permisosDelObjetivo: ['usuarios.ver'],
     });
     prisma.$transaction.mockResolvedValue([]);
-    // Solo comprobamos que la validacion de privilegios NO lanza: la operacion
+    // Solo comprobamos que la validación de privilegios NO lanza: la operación
     // llega a la transaccion.
     await expect(
       servicio.resetPassword(

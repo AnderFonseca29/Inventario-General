@@ -32,7 +32,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
         return throwError(() => error);
       }
 
-      // Una sola peticion de refresh concurrente para todas las peticiones que
+      // Una sola petición de refresh concurrente para todas las peticiones que
       // fallaron con 401 (hallazgo V). Antes se limpiaba con un setTimeout fijo
       // de 1s, lo que dejaba la variable en un estado inconsistente y permitia
       // refresh duplicados o refresh colgados indefinidamente.

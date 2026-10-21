@@ -1,4 +1,4 @@
-﻿import {
+import {
   BadRequestException,
   Injectable,
   NotFoundException,
@@ -210,7 +210,7 @@ export class InventarioService {
 
   private async exigirBodega(empresaId: string, id: string) {
     if (!(await this.prisma.bodega.count({ where: { id, empresaId } }))) {
-      throw new BadRequestException('Bodega invalida');
+      throw new BadRequestException('Bodega inválida');
     }
   }
 
@@ -223,18 +223,18 @@ export class InventarioService {
       where: { empresaId, tipo },
     });
     // Sufijo aleatorio corto: evita colisiones cuando dos documentos del mismo
-    // tipo se crean al mismo tiempo (count+1 no es atomico entre transacciones).
+    // tipo se crean al mismo tiempo (count+1 no es atómico entre transacciones).
     const sufijo = randomUUID().slice(0, 4).toUpperCase();
     const prefijo = PREFIJO_CONSECUTIVO[tipo] ?? 'DOC';
     return `${prefijo}-${String(total + 1).padStart(6, '0')}-${sufijo}`;
   }
 
   /**
-   * Ajusta la existencia de forma ATOMICA (sin leer-y-escribir en memoria):
+   * Ajusta la existencia de forma ATÓMICA (sin leer-y-escribir en memoria):
    * - increment/decrement calculados en la base de datos.
-   * - el descuento exige cantidad >= |delta| vÃ­a updateMany y falla si no
+   * - el descuento exige cantidad >= |delta| vía updateMany y falla si no
    *   afecta ninguna fila (control de stock insuficiente bajo concurrencia).
-   * - la fila se crea con upsert sobre la clave unica
+   * - la fila se crea con upsert sobre la clave única
    *   (empresaId, productoId, bodegaId) para no duplicar existencias.
    */
   private async ajustarExistencia(
@@ -251,7 +251,7 @@ export class InventarioService {
     });
 
     if (actual) {
-      // ActualizaciÃ³n atÃ³mica con validaciÃ³n de stock para evitar carreras.
+      // Actualización atómica con validación de stock para evitar carreras.
       const res = await tx.existencia.updateMany({
         where: {
           id: actual.id,
@@ -271,10 +271,10 @@ export class InventarioService {
         const nuevo = saldo ? new Prisma.Decimal(saldo.cantidad).plus(delta) : delta;
         if (nuevo.isNegative()) {
           throw new BadRequestException(
-            `Stock insuficiente de "${nombreProducto}" para completar la operacion`,
+            `Stock insuficiente de "${nombreProducto}" para completar la operación`,
           );
         }
-        // Si pasÃ³ el chequeo (carrera improbable tras retry), reintentar.
+        // Si pasó el chequeo (carrera improbable tras retry), reintentar.
         await tx.existencia.update({
           where: { id: actual.id },
           data: { cantidad: { increment: delta } },
@@ -284,10 +284,10 @@ export class InventarioService {
       return;
     }
 
-    // CreaciÃ³n con protecciÃ³n ante carrera (unicidad empresaId+productoId+bodegaId)
+    // Creación con protección ante carrera (unicidad empresaId+productoId+bodegaId)
     if (delta.isNegative()) {
       throw new BadRequestException(
-        `Stock insuficiente de "${nombreProducto}" para completar la operacion`,
+        `Stock insuficiente de "${nombreProducto}" para completar la operación`,
       );
     }
     try {
@@ -296,7 +296,7 @@ export class InventarioService {
       });
     } catch (e) {
       if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002') {
-        // Otro proceso creÃ³ el registro; aplicar incremento atÃ³mico.
+        // Otro proceso creó el registro; aplicar incremento atómico.
         await this.ajustarExistencia(
           tx,
           empresaId,
@@ -398,7 +398,7 @@ export class InventarioService {
       select: { id: true, nombre: true, costo: true },
     });
     if (productos.length !== new Set(productoIds).size) {
-      throw new BadRequestException('Uno o mas productos son invalidos');
+      throw new BadRequestException('Uno o mas productos son inválidos');
     }
     const mapaProductos = new Map(productos.map((p) => [p.id, p]));
 
@@ -462,7 +462,7 @@ export class InventarioService {
         });
         if (!doc) throw new NotFoundException('Documento no encontrado');
 
-        // Cambio de estado ATOMICO: solo una peticion concurrente puede pasar de
+        // Cambio de estado ATÓMICO: solo una petición concurrente puede pasar de
         // BORRADOR a CONFIRMADO; las demas afectan 0 filas y fallan.
         const transicion = await tx.documentoInventario.updateMany({
           where: { id: doc.id, empresaId, estado: 'BORRADOR' },
@@ -541,7 +541,7 @@ export class InventarioService {
         });
         if (!doc) throw new NotFoundException('Documento no encontrado');
 
-        // Cambio de estado ATOMICO: dos anulaciones concurrentes no pueden
+        // Cambio de estado ATÓMICO: dos anulaciones concurrentes no pueden
         // revertir el stock dos veces.
         const estadoOrigen: EstadoDocumento = doc.estado;
         const transicion = await tx.documentoInventario.updateMany({
@@ -550,7 +550,7 @@ export class InventarioService {
         });
         if (transicion.count === 0) {
           throw new BadRequestException(
-            'El documento ya fue modificado por otra operacion',
+            'El documento ya fue modificado por otra operación',
           );
         }
 

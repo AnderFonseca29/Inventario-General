@@ -14,15 +14,15 @@ const REFRESH_KEY = 'inv_refresh_token';
 const USER_KEY = 'inv_user';
 
 // Permisos "de terreno": identifican a un usuario operativo (vendedor) que solo
-// debe ver su propio resumen y no los modulos de gestion de la empresa.
+// debe ver su propio resumen y no los modulos de gestión de la empresa.
 const PERMISOS_TERRENO = [
   'cargues.ver.propios',
   'botellones.registrar',
   'botellones.ver.propios',
 ];
 
-// Permisos de gestion/vision de empresa: si el usuario tiene alguno, no es un
-// usuario operativo aunque tambien registre cargues o botellones.
+// Permisos de gestión/vision de empresa: si el usuario tiene alguno, no es un
+// usuario operativo aunque también registre cargues o botellones.
 const PERMISOS_EMPRESA = [
   'usuarios.ver',
   'roles.ver',

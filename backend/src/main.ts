@@ -9,7 +9,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule, { bufferLogs: false });
 
   // Detras de Render hay un proxy inverso: sin esto req.ip es la IP del proxy,
-  // el limite de peticiones se comparte entre TODOS los usuarios y la auditoria
+  // el límite de peticiones se comparte entre TODOS los usuarios y la auditoría
   // guarda una IP incorrecta (hallazgo C).
   const express = app.getHttpAdapter().getInstance() as {
     set: (clave: string, valor: unknown) => void;
