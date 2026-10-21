@@ -10,6 +10,7 @@ import {
   IsUUID,
   MinLength,
 } from 'class-validator';
+import { TransformDecimal } from '../../common/utils/decimal';
 
 // ------------------------------ Categorias ---------------------------------
 
@@ -74,7 +75,8 @@ export class CreatePresentacionDto {
   nombre!: string;
 
   @IsOptional()
-  @IsNumber()
+  @IsNumber({ maxDecimalPlaces: 4 })
+  @TransformDecimal()
   @IsPositive()
   factor?: number;
 
@@ -90,7 +92,8 @@ export class UpdatePresentacionDto {
   nombre?: string;
 
   @IsOptional()
-  @IsNumber()
+  @IsNumber({ maxDecimalPlaces: 4 })
+  @TransformDecimal()
   @IsPositive()
   factor?: number;
 
@@ -135,11 +138,13 @@ export class CreateProductoDto {
   controlaInventario?: boolean;
 
   @IsOptional()
-  @IsNumber()
+  @IsNumber({ maxDecimalPlaces: 4 })
+  @TransformDecimal()
   costo?: number;
 
   @IsOptional()
-  @IsNumber()
+  @IsNumber({ maxDecimalPlaces: 4 })
+  @TransformDecimal()
   precioVenta?: number;
 
   @IsOptional()
@@ -183,11 +188,13 @@ export class UpdateProductoDto {
   controlaInventario?: boolean;
 
   @IsOptional()
-  @IsNumber()
+  @IsNumber({ maxDecimalPlaces: 4 })
+  @TransformDecimal()
   costo?: number;
 
   @IsOptional()
-  @IsNumber()
+  @IsNumber({ maxDecimalPlaces: 4 })
+  @TransformDecimal()
   precioVenta?: number;
 
   @IsOptional()

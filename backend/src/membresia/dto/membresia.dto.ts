@@ -1,6 +1,7 @@
 import { EstadoMembresia } from '@prisma/client';
 import { PaginacionDto } from '../../common/dto/paginacion.dto';
 import {
+  IsInt,
   IsBoolean,
   IsDateString,
   IsEmail,
@@ -12,6 +13,7 @@ import {
   Min,
   MinLength,
 } from 'class-validator';
+import { TransformDecimal } from '../../common/utils/decimal';
 
 // -------------------------------- Clientes ---------------------------------
 
@@ -86,11 +88,12 @@ export class CreatePlanMembresiaDto {
   descripcion?: string;
 
   @IsOptional()
-  @IsNumber()
+  @IsNumber({ maxDecimalPlaces: 4 })
+  @TransformDecimal()
   @Min(0)
   precio?: number;
 
-  @IsNumber()
+  @IsInt()
   @Min(1)
   duracionDias!: number;
 
@@ -110,12 +113,13 @@ export class UpdatePlanMembresiaDto {
   descripcion?: string;
 
   @IsOptional()
-  @IsNumber()
+  @IsNumber({ maxDecimalPlaces: 4 })
+  @TransformDecimal()
   @Min(0)
   precio?: number;
 
   @IsOptional()
-  @IsNumber()
+  @IsInt()
   @Min(1)
   duracionDias?: number;
 

@@ -9,6 +9,7 @@ import {
   IsUUID,
   ValidateNested,
 } from 'class-validator';
+import { TransformDecimal } from '../../common/utils/decimal';
 import { TipoMovimiento } from '@prisma/client';
 import { PaginacionDto } from '../../common/dto/paginacion.dto';
 
@@ -16,11 +17,13 @@ export class DocumentoDetalleDto {
   @IsUUID()
   productoId!: string;
 
-  @IsNumber()
+  @IsNumber({ maxDecimalPlaces: 4 })
+  @TransformDecimal()
   cantidad!: number;
 
   @IsOptional()
-  @IsNumber()
+  @IsNumber({ maxDecimalPlaces: 4 })
+  @TransformDecimal()
   costoUnitario?: number;
 }
 

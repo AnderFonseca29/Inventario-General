@@ -17,6 +17,7 @@ import {
   Recepcion,
 } from '../../core/models/produccion.model';
 import { IconComponent } from '../../shared/icons';
+import { aNumero } from '../../core/utils/numeros';
 
 type Tab = 'materias' | 'recepciones' | 'formulas' | 'ordenes' | 'mermas';
 type Modo =
@@ -846,7 +847,7 @@ export class ProduccionComponent {
     this.formMateria.reset({
       nombre: m.nombre,
       unidadId: m.unidadId ?? '',
-      costo: Number(m.costo),
+      costo: aNumero(m.costo) ?? 0,
       activo: m.activo,
     });
     this.modo.set('materia');
@@ -862,7 +863,7 @@ export class ProduccionComponent {
     const dto = {
       nombre: v.nombre,
       unidadId: v.unidadId || undefined,
-      costo: Number(v.costo),
+      costo: aNumero(v.costo) ?? 0,
       activo: v.activo,
     };
     this.guardando.set(true);
@@ -913,9 +914,9 @@ export class ProduccionComponent {
     this.produccion
       .crearRecepcion({
         materiaPrimaId: v.materiaPrimaId,
-        cantidad: Number(v.cantidad),
+        cantidad: aNumero(v.cantidad) ?? 0,
         costoUnitario:
-          v.costoUnitario === '' ? undefined : Number(v.costoUnitario),
+          v.costoUnitario === '' ? undefined : aNumero(v.costoUnitario),
         proveedorId: v.proveedorId || undefined,
         lote: v.lote || undefined,
         observaciones: v.observaciones || undefined,
@@ -982,7 +983,7 @@ export class ProduccionComponent {
       .filter((d) => d.materiaPrimaId)
       .map((d) => ({
         materiaPrimaId: d.materiaPrimaId,
-        cantidad: Number(d.cantidad),
+        cantidad: aNumero(d.cantidad) ?? 0,
       }));
     if (detalles.length === 0) {
       this.errorModal.set('Agrega al menos un insumo');
@@ -1051,7 +1052,7 @@ export class ProduccionComponent {
       .crearOrden({
         productoId: v.productoId,
         formulaId: v.formulaId || undefined,
-        cantidadPlanificada: Number(v.cantidadPlanificada),
+        cantidadPlanificada: aNumero(v.cantidadPlanificada) ?? 0,
         observaciones: v.observaciones || undefined,
       })
       .subscribe({
@@ -1139,14 +1140,14 @@ export class ProduccionComponent {
       }[]
     ).map((c) => ({
       materiaPrimaId: c.materiaPrimaId,
-      cantidadConsumida: Number(c.cantidadConsumida),
-      merma: Number(c.merma),
+      cantidadConsumida: aNumero(c.cantidadConsumida) ?? 0,
+      merma: aNumero(c.merma) ?? 0,
     }));
     this.guardando.set(true);
     this.produccion
       .completarOrden(orden.id, {
         bodegaId: v.bodegaId,
-        cantidadProducida: Number(v.cantidadProducida),
+        cantidadProducida: aNumero(v.cantidadProducida) ?? 0,
         consumos,
       })
       .subscribe({
@@ -1202,7 +1203,7 @@ export class ProduccionComponent {
         materiaPrimaId: esMateria ? v.materiaPrimaId : undefined,
         productoId: esMateria ? undefined : v.productoId,
         ordenId: v.ordenId || undefined,
-        cantidad: Number(v.cantidad),
+        cantidad: aNumero(v.cantidad) ?? 0,
         motivo: v.motivo,
       })
       .subscribe({

@@ -19,6 +19,7 @@ import {
   TipoMovimientoManual,
 } from '../../core/models/inventario.model';
 import { IconComponent } from '../../shared/icons';
+import { aNumero } from '../../core/utils/numeros';
 
 @Component({
   selector: 'app-inventario',
@@ -505,11 +506,11 @@ export class InventarioComponent {
       .filter((d) => d.productoId)
       .map((d) => ({
         productoId: d.productoId,
-        cantidad: Number(d.cantidad),
+        cantidad: aNumero(d.cantidad) ?? 0,
         costoUnitario:
           d.costoUnitario === '' || d.costoUnitario == null
             ? undefined
-            : Number(d.costoUnitario),
+            : aNumero(d.costoUnitario),
       }));
     if (detalles.length === 0) {
       this.errorModal.set('Agrega al menos un producto');

@@ -16,6 +16,7 @@ import {
   Unidad,
 } from '../../core/models/catalogo.model';
 import { IconComponent } from '../../shared/icons';
+import { aNumero } from '../../core/utils/numeros';
 
 interface Opcion {
   value: string;
@@ -619,7 +620,10 @@ export class CatalogosComponent {
       if (c.tipo === 'checkbox') {
         payload[c.key] = Boolean(v);
       } else if (c.tipo === 'number') {
-        if (v !== '' && v !== null && v !== undefined) payload[c.key] = Number(v);
+        if (v !== '' && v !== null && v !== undefined) {
+          const numero = aNumero(v);
+          if (numero !== undefined) payload[c.key] = numero;
+        }
       } else if (c.tipo === 'select') {
         payload[c.key] = v === '' ? null : v;
       } else {

@@ -1,5 +1,6 @@
 ﻿import { Type } from 'class-transformer';
 import {
+  IsInt,
   ArrayNotEmpty,
   IsArray,
   IsBoolean,
@@ -12,6 +13,7 @@ import {
   MinLength,
   ValidateNested,
 } from 'class-validator';
+import { TransformDecimal } from '../../common/utils/decimal';
 import { EstadoMerma } from '@prisma/client';
 import { PaginacionDto } from '../../common/dto/paginacion.dto';
 
@@ -27,7 +29,8 @@ export class CreateMateriaPrimaDto {
   unidadId?: string;
 
   @IsOptional()
-  @IsNumber()
+  @IsNumber({ maxDecimalPlaces: 4 })
+  @TransformDecimal()
   @Min(0)
   costo?: number;
 
@@ -47,7 +50,8 @@ export class UpdateMateriaPrimaDto {
   unidadId?: string;
 
   @IsOptional()
-  @IsNumber()
+  @IsNumber({ maxDecimalPlaces: 4 })
+  @TransformDecimal()
   @Min(0)
   costo?: number;
 
@@ -68,7 +72,8 @@ export class CreateRecepcionDto {
   @IsUUID()
   materiaPrimaId!: string;
 
-  @IsNumber()
+  @IsNumber({ maxDecimalPlaces: 4 })
+  @TransformDecimal()
   @Min(0.0001)
   cantidad!: number;
 
@@ -85,7 +90,8 @@ export class CreateRecepcionDto {
   lote?: string;
 
   @IsOptional()
-  @IsNumber()
+  @IsNumber({ maxDecimalPlaces: 4 })
+  @TransformDecimal()
   @Min(0)
   costoUnitario?: number;
 
@@ -106,7 +112,8 @@ export class FormulaDetalleDto {
   @IsUUID()
   materiaPrimaId!: string;
 
-  @IsNumber()
+  @IsNumber({ maxDecimalPlaces: 4 })
+  @TransformDecimal()
   @Min(0.0001)
   cantidad!: number;
 }
@@ -120,7 +127,7 @@ export class CreateFormulaDto {
   nombre!: string;
 
   @IsOptional()
-  @IsNumber()
+  @IsInt()
   @Min(1)
   version?: number;
 
@@ -159,7 +166,8 @@ export class CreateOrdenDto {
   @IsUUID()
   formulaId?: string;
 
-  @IsNumber()
+  @IsNumber({ maxDecimalPlaces: 4 })
+  @TransformDecimal()
   @Min(0.0001)
   cantidadPlanificada!: number;
 
@@ -173,12 +181,14 @@ export class ConsumoOrdenDto {
   materiaPrimaId!: string;
 
   @IsOptional()
-  @IsNumber()
+  @IsNumber({ maxDecimalPlaces: 4 })
+  @TransformDecimal()
   @Min(0)
   cantidadConsumida?: number;
 
   @IsOptional()
-  @IsNumber()
+  @IsNumber({ maxDecimalPlaces: 4 })
+  @TransformDecimal()
   @Min(0)
   merma?: number;
 }
@@ -187,7 +197,8 @@ export class CompletarOrdenDto {
   @IsUUID()
   bodegaId!: string;
 
-  @IsNumber()
+  @IsNumber({ maxDecimalPlaces: 4 })
+  @TransformDecimal()
   @Min(0.0001)
   cantidadProducida!: number;
 
@@ -219,7 +230,8 @@ export class CreateMermaDto {
   @IsUUID()
   materiaPrimaId?: string;
 
-  @IsNumber()
+  @IsNumber({ maxDecimalPlaces: 4 })
+  @TransformDecimal()
   @Min(0.0001)
   cantidad!: number;
 

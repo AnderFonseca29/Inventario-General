@@ -17,6 +17,7 @@ import {
   PlanMembresia,
 } from '../../core/models/membresia.model';
 import { IconComponent } from '../../shared/icons';
+import { aNumero } from '../../core/utils/numeros';
 
 type Tab = 'clientes' | 'planes' | 'membresias';
 type Modo = 'cliente' | 'plan' | 'membresia' | 'renovar';
@@ -602,7 +603,7 @@ export class MembresiaComponent {
     this.base({
       nombre: [p.nombre, Validators.required],
       descripcion: p.descripcion ?? '',
-      precio: Number(p.precio),
+      precio: aNumero(p.precio) ?? 0,
       duracionDias: [p.duracionDias, Validators.required],
       activo: p.activo,
     });
@@ -682,7 +683,7 @@ export class MembresiaComponent {
         const dto = {
           nombre: String(v['nombre']).trim(),
           descripcion: this.limpiar(v['descripcion']),
-          precio: Number(v['precio']) || 0,
+          precio: aNumero(v['precio']) ?? 0,
           duracionDias: Number(v['duracionDias']),
           activo: Boolean(v['activo']),
         };

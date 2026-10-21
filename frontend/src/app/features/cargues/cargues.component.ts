@@ -13,6 +13,7 @@ import {
   VendedorOpcion,
 } from '../../core/models/cargues.model';
 import { IconComponent } from '../../shared/icons';
+import { aNumero } from '../../core/utils/numeros';
 
 @Component({
   selector: 'app-cargues',
@@ -390,11 +391,11 @@ export class CarguesComponent {
       .filter((d) => d.productoId)
       .map((d) => ({
         productoId: d.productoId,
-        cantidad: Number(d.cantidad),
+        cantidad: aNumero(d.cantidad) ?? 0,
         costoUnitario:
           d.costoUnitario === '' || d.costoUnitario == null
             ? undefined
-            : Number(d.costoUnitario),
+            : aNumero(d.costoUnitario),
       }));
     if (lineas.length === 0) {
       this.errorModal.set('Agrega al menos un producto');
