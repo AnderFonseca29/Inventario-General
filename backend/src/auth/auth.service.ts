@@ -10,6 +10,7 @@ import type { JwtSignOptions } from '@nestjs/jwt';
 import { createHash, randomUUID } from 'crypto';
 import * as argon2 from 'argon2';
 import { PrismaService } from '../prisma/prisma.service';
+import { AuditoriaService } from '../auditoria/auditoria.service';
 import { AuthenticatedUser } from '../common/types/authenticated-user';
 import { LoginDto } from './dto/login.dto';
 import { RefreshDto } from './dto/refresh.dto';
@@ -21,6 +22,7 @@ export class AuthService {
     private readonly prisma: PrismaService,
     private readonly jwt: JwtService,
     private readonly config: ConfigService,
+    private readonly auditoria: AuditoriaService,
   ) {}
 
   private hashToken(token: string): string {
@@ -254,11 +256,26 @@ export class AuthService {
       where: { tokenHash: this.hashToken(dto.refreshToken) },
     });
 
-    if (
-      !almacenado ||
-      almacenado.revocado ||
-      almacenado.expiresAt < new Date()
-    ) {
+    // Deteccion de reuso (hallazgo H): si el token existe pero ya fue revocado,
+    // alguien esta reutilizando un token rotado (posible robo). Se revocan
+    // TODAS las sesiones del usuario y se rechaza.
+    if (almacenado && almacenado.revocado) {
+      await this.prisma.refreshToken.updateMany({
+        where: { usuarioId: almacenado.usuarioId, revocado: false },
+        data: { revocado: true },
+      });
+      await this.auditoria.registrar({
+        empresaId: null,
+        usuarioId: almacenado.usuarioId,
+        accion: 'auth.refresh_reuso_detectado',
+        entidad: 'RefreshToken',
+        entidadId: almacenado.id,
+        ip,
+      });
+      throw new UnauthorizedException('Refresh token revocado o expirado');
+    }
+
+    if (!almacenado || almacenado.expiresAt < new Date()) {
       throw new UnauthorizedException('Refresh token revocado o expirado');
     }
 

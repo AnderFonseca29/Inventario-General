@@ -9,6 +9,10 @@ import { PrismaService } from '../prisma/prisma.service';
 import { AuditoriaService } from '../auditoria/auditoria.service';
 import { GlobalExceptionFilter } from '../common/filters/global-exception.filter';
 import {
+  conReintentoConsecutivo,
+  generarConsecutivo,
+} from '../common/utils/consecutivos';
+import {
   CompletarOrdenDto,
   CreateFormulaDto,
   CreateMateriaPrimaDto,
@@ -532,29 +536,38 @@ export class ProduccionService {
     }
 
     const planificada = new Prisma.Decimal(dto.cantidadPlanificada);
-    const orden = await this.prisma.$transaction(async (tx) => {
-      const total = await tx.ordenProduccion.count({ where: { empresaId } });
-      const consecutivo = `OP-${String(total + 1).padStart(6, '0')}`;
-      return tx.ordenProduccion.create({
-        data: {
-          empresaId,
-          productoId: dto.productoId,
-          formulaId: dto.formulaId,
-          consecutivo,
-          estado: 'BORRADOR',
-          cantidadPlanificada: dto.cantidadPlanificada,
-          observaciones: dto.observaciones,
-          creadoPorId: actorId,
-          detalles: {
-            create: detallesFormula.map((detalle) => ({
-              materiaPrimaId: detalle.materiaPrimaId,
-              cantidadTeorica: detalle.cantidad.mul(planificada),
-            })),
+    const orden = await conReintentoConsecutivo(() =>
+      this.prisma.$transaction(async (tx) => {
+        const consecutivo = await generarConsecutivo(
+          'OP',
+          () => tx.ordenProduccion.count({ where: { empresaId } }),
+          async (c) =>
+            (await tx.ordenProduccion.findFirst({
+              where: { empresaId, consecutivo: c },
+              select: { id: true },
+            })) !== null,
+        );
+        return tx.ordenProduccion.create({
+          data: {
+            empresaId,
+            productoId: dto.productoId,
+            formulaId: dto.formulaId,
+            consecutivo,
+            estado: 'BORRADOR',
+            cantidadPlanificada: dto.cantidadPlanificada,
+            observaciones: dto.observaciones,
+            creadoPorId: actorId,
+            detalles: {
+              create: detallesFormula.map((detalle) => ({
+                materiaPrimaId: detalle.materiaPrimaId,
+                cantidadTeorica: detalle.cantidad.mul(planificada),
+              })),
+            },
           },
-        },
-        include: { detalles: true },
-      });
-    });
+          include: { detalles: true },
+        });
+      }),
+    );
 
     await this.auditar(
       empresaId,

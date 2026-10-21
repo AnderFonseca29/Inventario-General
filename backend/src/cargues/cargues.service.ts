@@ -7,6 +7,10 @@ import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditoriaService } from '../auditoria/auditoria.service';
 import { PERMISOS } from '../common/constants/permisos';
+import {
+  conReintentoConsecutivo,
+  generarConsecutivo,
+} from '../common/utils/consecutivos';
 import type { AuthenticatedUser } from '../common/types/authenticated-user';
 import { CrearCargueDto, ListarCarguesDto } from './dto/cargues.dto';
 
@@ -137,18 +141,14 @@ export class CarguesService {
     tx: Prisma.TransactionClient,
     empresaId: string,
   ) {
-    const total = await tx.cargue.count({ where: { empresaId } });
-    let consecutivo = '';
-    let intento = total + 1;
-    // Evita colisiones ante registros previos con numeracion no correlativa.
-    do {
-      consecutivo = `CAR-${String(intento).padStart(6, '0')}`;
-      intento += 1;
-    } while (
-      await tx.cargue.findFirst({
-        where: { empresaId, consecutivo },
-        select: { id: true },
-      })
+    const consecutivo = await generarConsecutivo(
+      'CAR',
+      () => tx.cargue.count({ where: { empresaId } }),
+      async (c) =>
+        (await tx.cargue.findFirst({
+          where: { empresaId, consecutivo: c },
+          select: { id: true },
+        })) !== null,
     );
     return consecutivo;
   }
@@ -188,42 +188,44 @@ export class CarguesService {
     }
     const mapaProductos = new Map(productos.map((p) => [p.id, p]));
 
-    const cargue = await this.prisma.$transaction(async (tx) => {
-      const consecutivo = await this.generarConsecutivo(tx, empresaId);
+    const cargue = await conReintentoConsecutivo(() =>
+      this.prisma.$transaction(async (tx) => {
+        const consecutivo = await this.generarConsecutivo(tx, empresaId);
 
-      let totalCosto = new Prisma.Decimal(0);
-      const detalles = dto.detalles.map((detalle) => {
-        const costoUnitario = new Prisma.Decimal(
-          detalle.costoUnitario ??
-            mapaProductos.get(detalle.productoId)?.costo ??
-            0,
-        );
-        const cantidad = new Prisma.Decimal(detalle.cantidad);
-        const subtotal = costoUnitario.times(cantidad);
-        totalCosto = totalCosto.plus(subtotal);
-        return {
-          productoId: detalle.productoId,
-          cantidad,
-          costoUnitario,
-          subtotal,
-          nombreSnapshot: mapaProductos.get(detalle.productoId)?.nombre,
-        };
-      });
+        let totalCosto = new Prisma.Decimal(0);
+        const detalles = dto.detalles.map((detalle) => {
+          const costoUnitario = new Prisma.Decimal(
+            detalle.costoUnitario ??
+              mapaProductos.get(detalle.productoId)?.costo ??
+              0,
+          );
+          const cantidad = new Prisma.Decimal(detalle.cantidad);
+          const subtotal = costoUnitario.times(cantidad);
+          totalCosto = totalCosto.plus(subtotal);
+          return {
+            productoId: detalle.productoId,
+            cantidad,
+            costoUnitario,
+            subtotal,
+            nombreSnapshot: mapaProductos.get(detalle.productoId)?.nombre,
+          };
+        });
 
-      return tx.cargue.create({
-        data: {
-          empresaId,
-          bodegaOrigenId: dto.bodegaOrigenId,
-          vendedorId: dto.vendedorId,
-          usuarioId: actorId,
-          consecutivo,
-          observaciones: dto.observaciones,
-          totalCosto,
-          detalles: { create: detalles },
-        },
-        include: { detalles: true },
-      });
-    });
+        return tx.cargue.create({
+          data: {
+            empresaId,
+            bodegaOrigenId: dto.bodegaOrigenId,
+            vendedorId: dto.vendedorId,
+            usuarioId: actorId,
+            consecutivo,
+            observaciones: dto.observaciones,
+            totalCosto,
+            detalles: { create: detalles },
+          },
+          include: { detalles: true },
+        });
+      }),
+    );
 
     await this.auditoria.registrar({
       empresaId,
