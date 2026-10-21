@@ -5,10 +5,11 @@ import { EmpresasService } from '../../core/services/empresas.service';
 import { ToastService } from '../../core/services/toast.service';
 import { Empresa, EstadoEmpresa } from '../../core/models/empresa.model';
 import { IconComponent } from '../../shared/icons';
+import { FechaColPipe } from '../../shared/fecha-col.pipe';
 
 @Component({
   selector: 'app-empresas',
-  imports: [ReactiveFormsModule, DatePipe, IconComponent],
+  imports: [ReactiveFormsModule, DatePipe, IconComponent, FechaColPipe],
   template: `
     <div class="page-header">
       <div>
@@ -110,7 +111,7 @@ import { IconComponent } from '../../shared/icons';
                       }
                     }
                   </td>
-                  <td class="cell-muted">{{ e.createdAt | date: 'shortDate' }}</td>
+                  <td class="cell-muted">{{ e.createdAt | fechaCol: 'shortDate' }}</td>
                   <td class="actions">
                     @if (e.estado !== 'ACTIVA') {
                       <button class="btn btn-ghost btn-sm" (click)="cambiarEstado(e, 'ACTIVA')" title="Activar">

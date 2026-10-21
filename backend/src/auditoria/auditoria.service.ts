@@ -3,6 +3,7 @@ import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { ListarAuditoriaDto } from './dto/auditoria.dto';
 import { construirPaginado } from '../common/utils/paginacion';
+import { aInstanteUtc, finDelDiaUtc } from '../common/utils/fechas';
 
 export interface RegistrarAuditoria {
   empresaId?: string | null;
@@ -57,12 +58,10 @@ export class AuditoriaService {
     const buscar = filtros.buscar?.trim();
     const rango: Prisma.DateTimeFilter = {};
     if (filtros.desde) {
-      rango.gte = new Date(filtros.desde);
+      rango.gte = aInstanteUtc(filtros.desde);
     }
     if (filtros.hasta) {
-      const hasta = new Date(filtros.hasta);
-      hasta.setHours(23, 59, 59, 999);
-      rango.lte = hasta;
+      rango.lte = finDelDiaUtc(filtros.hasta);
     }
 
     const where: Prisma.AuditoriaWhereInput = {

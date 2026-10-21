@@ -9,6 +9,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { AuditoriaService } from '../auditoria/auditoria.service';
 import { GlobalExceptionFilter } from '../common/filters/global-exception.filter';
 import { construirPaginado } from '../common/utils/paginacion';
+import { aInstanteUtc, finDelDiaUtc } from '../common/utils/fechas';
 import {
   CreateDocumentoDto,
   ListarExistenciasDto,
@@ -104,8 +105,8 @@ export class InventarioService {
     if (filtros.documentoId) where.documentoId = filtros.documentoId;
     if (filtros.desde || filtros.hasta) {
       const creadoEn: Prisma.DateTimeFilter = {};
-      if (filtros.desde) creadoEn.gte = new Date(filtros.desde);
-      if (filtros.hasta) creadoEn.lte = new Date(filtros.hasta);
+      if (filtros.desde) creadoEn.gte = aInstanteUtc(filtros.desde);
+      if (filtros.hasta) creadoEn.lte = finDelDiaUtc(filtros.hasta);
       where.creadoEn = creadoEn;
     }
     const [movimientos, total] = await Promise.all([

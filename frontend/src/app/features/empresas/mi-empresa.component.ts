@@ -6,10 +6,11 @@ import { AuthService } from '../../core/services/auth.service';
 import { ToastService } from '../../core/services/toast.service';
 import { Empresa } from '../../core/models/empresa.model';
 import { IconComponent } from '../../shared/icons';
+import { FechaColPipe } from '../../shared/fecha-col.pipe';
 
 @Component({
   selector: 'app-mi-empresa',
-  imports: [ReactiveFormsModule, IconComponent, DatePipe],
+  imports: [ReactiveFormsModule, IconComponent, DatePipe, FechaColPipe],
   template: `
     <div class="page-header">
       <div>
@@ -102,7 +103,7 @@ import { IconComponent } from '../../shared/icons';
             <div class="info-line"><app-icon name="mail" /><span>{{ empresa()!.email || 'Sin correo' }}</span></div>
             <div class="info-line"><app-icon name="phone" /><span>{{ empresa()!.telefono || 'Sin teléfono' }}</span></div>
             <div class="info-line"><app-icon name="location" /><span>{{ empresa()!.direccion || 'Sin dirección' }}</span></div>
-            <div class="info-line"><app-icon name="calendar" /><span>Creada el {{ empresa()!.createdAt | date: 'longDate' }}</span></div>
+            <div class="info-line"><app-icon name="calendar" /><span>Creada el {{ empresa()!.createdAt | fechaCol: 'longDate' }}</span></div>
           </div>
         }
       </div>

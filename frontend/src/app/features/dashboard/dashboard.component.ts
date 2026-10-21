@@ -9,6 +9,7 @@ import { ResumenService } from '../../core/services/resumen.service';
 import { Empresa } from '../../core/models/empresa.model';
 import { MiResumen } from '../../core/models/resumen.model';
 import { IconComponent } from '../../shared/icons';
+import { formatearFecha, formatearFechaHora } from '../../core/utils/fechas';
 
 interface Acceso {
   titulo: string;
@@ -579,12 +580,12 @@ export class DashboardComponent {
 
   fecha(valor: string): string {
     if (!valor) return '—';
-    return new Date(valor).toLocaleString('es-CO');
+    return formatearFechaHora(valor);
   }
 
   fechaCorta(valor: string): string {
     if (!valor) return '—';
-    return new Date(valor).toLocaleDateString('es-CO');
+    return formatearFecha(valor);
   }
 
   moneda(valor: number): string {

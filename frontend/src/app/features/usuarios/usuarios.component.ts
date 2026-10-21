@@ -8,12 +8,13 @@ import { ToastService } from '../../core/services/toast.service';
 import { Rol } from '../../core/models/rol.model';
 import { Usuario } from '../../core/models/usuario.model';
 import { IconComponent } from '../../shared/icons';
+import { FechaColPipe } from '../../shared/fecha-col.pipe';
 
 type Filtro = 'todos' | 'activos' | 'inactivos';
 
 @Component({
   selector: 'app-usuarios',
-  imports: [ReactiveFormsModule, DatePipe, IconComponent],
+  imports: [ReactiveFormsModule, DatePipe, IconComponent, FechaColPipe],
   template: `
     <div class="page-header">
       <div>
@@ -109,7 +110,7 @@ type Filtro = 'todos' | 'activos' | 'inactivos';
                     }
                   </td>
                   <td class="cell-muted">
-                    {{ u.ultimoLogin ? (u.ultimoLogin | date: 'short') : 'Nunca' }}
+                    {{ u.ultimoLogin ? (u.ultimoLogin | fechaCol: 'short') : 'Nunca' }}
                   </td>
                   <td class="actions">
                     @if (puedeEditar()) {

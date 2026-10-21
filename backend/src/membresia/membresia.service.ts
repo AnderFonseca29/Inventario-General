@@ -7,6 +7,7 @@ import {
 import { EstadoMembresia, Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { construirPaginado } from '../common/utils/paginacion';
+import { aInstanteUtc } from '../common/utils/fechas';
 import { AuditoriaService } from '../auditoria/auditoria.service';
 import {
   CreateClienteDto,
@@ -387,7 +388,7 @@ export class MembresiaService {
     await this.exigirCliente(empresaId, dto.clienteId);
     const plan = await this.exigirPlanMembresia(empresaId, dto.planId);
     const fechaInicio = dto.fechaInicio
-      ? new Date(dto.fechaInicio)
+      ? (aInstanteUtc(dto.fechaInicio) ?? new Date())
       : new Date();
     const fechaFin = this.fechaFinDesde(fechaInicio, plan.duracionDias);
 
@@ -433,7 +434,7 @@ export class MembresiaService {
     const planId = dto.planId ?? anterior.planId;
     const plan = await this.exigirPlanMembresia(empresaId, planId);
     const fechaInicio = dto.fechaInicio
-      ? new Date(dto.fechaInicio)
+      ? (aInstanteUtc(dto.fechaInicio) ?? new Date())
       : new Date();
     const fechaFin = this.fechaFinDesde(fechaInicio, plan.duracionDias);
 

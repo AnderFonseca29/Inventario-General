@@ -4,6 +4,7 @@ import { AuditoriaService } from '../../core/services/auditoria.service';
 import { ToastService } from '../../core/services/toast.service';
 import { AuditoriaRegistro } from '../../core/models/auditoria.model';
 import { IconComponent } from '../../shared/icons';
+import { formatearFechaHora } from '../../core/utils/fechas';
 
 @Component({
   selector: 'app-auditorias',
@@ -207,7 +208,7 @@ export class AuditoriasComponent {
 
   fecha(valor: string): string {
     if (!valor) return '—';
-    return new Date(valor).toLocaleString('es-CO');
+    return formatearFechaHora(valor);
   }
 
   json(valor: unknown): string {

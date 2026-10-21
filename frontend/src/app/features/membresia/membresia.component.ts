@@ -18,6 +18,7 @@ import {
 } from '../../core/models/membresia.model';
 import { IconComponent } from '../../shared/icons';
 import { aNumero } from '../../core/utils/numeros';
+import { formatearFecha } from '../../core/utils/fechas';
 
 type Tab = 'clientes' | 'planes' | 'membresias';
 type Modo = 'cliente' | 'plan' | 'membresia' | 'renovar';
@@ -482,7 +483,7 @@ export class MembresiaComponent {
 
   fecha(valor: string): string {
     if (!valor) return '—';
-    return new Date(valor).toLocaleDateString('es-CO');
+    return formatearFecha(valor);
   }
 
   etiquetaEstado(estado: EstadoMembresia): string {
