@@ -56,12 +56,22 @@ describeSiHayBase('Concurrencia de inventario (hallazgo A)', () => {
     usuarioId = usuario.id;
 
     const bodega = await prisma.bodega.create({
-      data: { empresaId, nombre: 'Bodega principal', tipo: 'PRINCIPAL' },
+      data: {
+        empresaId,
+        codigo: 'BOD-PRINC',
+        nombre: 'Bodega principal',
+        tipo: 'PRINCIPAL',
+      },
     });
     bodegaId = bodega.id;
 
     const destino = await prisma.bodega.create({
-      data: { empresaId, nombre: 'Bodega destino', tipo: 'SECUNDARIA' },
+      data: {
+        empresaId,
+        codigo: 'BOD-DEST',
+        nombre: 'Bodega destino',
+        tipo: 'VENDEDOR',
+      },
     });
     bodegaDestinoId = destino.id;
 

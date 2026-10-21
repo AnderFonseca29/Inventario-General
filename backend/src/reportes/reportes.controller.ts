@@ -1,11 +1,16 @@
 import { Controller, Get, Query } from '@nestjs/common';
 import { ReportesService } from './reportes.service';
 import { RangoFechasDto } from './dto/reportes.dto';
-import { Permisos } from '../common/decorators/permisos.decorator';
+import {
+  Permisos,
+  RequiereEmpresa,
+} from '../common/decorators/permisos.decorator';
 import { PERMISOS } from '../common/constants/permisos';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
+import { exigirEmpresa } from '../common/guards/tenant.guard';
 import type { AuthenticatedUser } from '../common/types/authenticated-user';
 
+@RequiereEmpresa()
 @Controller('reportes')
 export class ReportesController {
   constructor(private readonly reportes: ReportesService) {}
@@ -13,13 +18,13 @@ export class ReportesController {
   @Get('resumen')
   @Permisos(PERMISOS.REPORTES_VER)
   resumen(@CurrentUser() user: AuthenticatedUser) {
-    return this.reportes.resumen(user.empresaId!);
+    return this.reportes.resumen(exigirEmpresa(user));
   }
 
   @Get('inventario')
   @Permisos(PERMISOS.REPORTES_VER)
   inventario(@CurrentUser() user: AuthenticatedUser) {
-    return this.reportes.inventario(user.empresaId!);
+    return this.reportes.inventario(exigirEmpresa(user));
   }
 
   @Get('movimientos')
@@ -28,7 +33,7 @@ export class ReportesController {
     @CurrentUser() user: AuthenticatedUser,
     @Query() filtros: RangoFechasDto,
   ) {
-    return this.reportes.movimientos(user.empresaId!, filtros);
+    return this.reportes.movimientos(exigirEmpresa(user), filtros);
   }
 
   @Get('produccion')
@@ -37,12 +42,12 @@ export class ReportesController {
     @CurrentUser() user: AuthenticatedUser,
     @Query() filtros: RangoFechasDto,
   ) {
-    return this.reportes.produccion(user.empresaId!, filtros);
+    return this.reportes.produccion(exigirEmpresa(user), filtros);
   }
 
   @Get('membresias')
   @Permisos(PERMISOS.REPORTES_VER)
   membresias(@CurrentUser() user: AuthenticatedUser) {
-    return this.reportes.membresias(user.empresaId!);
+    return this.reportes.membresias(exigirEmpresa(user));
   }
 }

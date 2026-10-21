@@ -6,9 +6,13 @@ import { LoginDto } from './dto/login.dto';
 import { RefreshDto } from './dto/refresh.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { Public } from '../common/decorators/public.decorator';
+import { RequiereEmpresa } from '../common/decorators/permisos.decorator';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import type { AuthenticatedUser } from '../common/types/authenticated-user';
 
+// El superadministrador de plataforma (empresaId null) usa login, refresh y
+// cambio de contrasena: no son endpoints operativos de empresa.
+@RequiereEmpresa(false)
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
@@ -44,6 +48,7 @@ export class AuthController {
 
   @Post('change-password')
   @HttpCode(200)
+  @RequiereEmpresa(false)
   changePassword(
     @CurrentUser() user: AuthenticatedUser,
     @Body() dto: ChangePasswordDto,

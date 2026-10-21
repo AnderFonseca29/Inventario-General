@@ -26,11 +26,16 @@ import {
   UpdateFormulaDto,
   UpdateMateriaPrimaDto,
 } from './dto/produccion.dto';
-import { Permisos } from '../common/decorators/permisos.decorator';
+import {
+  Permisos,
+  RequiereEmpresa,
+} from '../common/decorators/permisos.decorator';
 import { PERMISOS } from '../common/constants/permisos';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
+import { exigirEmpresa } from '../common/guards/tenant.guard';
 import type { AuthenticatedUser } from '../common/types/authenticated-user';
 
+@RequiereEmpresa()
 @Controller('produccion')
 export class ProduccionController {
   constructor(private readonly produccion: ProduccionService) {}
@@ -43,7 +48,7 @@ export class ProduccionController {
     @CurrentUser() user: AuthenticatedUser,
     @Query() filtros: ListarMateriasPrimasDto,
   ) {
-    return this.produccion.listarMateriasPrimas(user.empresaId!, filtros);
+    return this.produccion.listarMateriasPrimas(exigirEmpresa(user), filtros);
   }
 
   @Post('materias-primas')
@@ -54,7 +59,7 @@ export class ProduccionController {
     @Req() req: Request,
   ) {
     return this.produccion.crearMateriaPrima(
-      user.empresaId!,
+      exigirEmpresa(user),
       dto,
       user.id,
       req.ip,
@@ -70,7 +75,7 @@ export class ProduccionController {
     @Req() req: Request,
   ) {
     return this.produccion.actualizarMateriaPrima(
-      user.empresaId!,
+      exigirEmpresa(user),
       id,
       dto,
       user.id,
@@ -84,7 +89,7 @@ export class ProduccionController {
     @CurrentUser() user: AuthenticatedUser,
     @Param('id', new ParseUUIDPipe()) id: string,
   ) {
-    return this.produccion.eliminarMateriaPrima(user.empresaId!, id);
+    return this.produccion.eliminarMateriaPrima(exigirEmpresa(user), id);
   }
 
   // ------------------------------- Recepciones -----------------------------
@@ -95,7 +100,7 @@ export class ProduccionController {
     @CurrentUser() user: AuthenticatedUser,
     @Query() filtros: ListarRecepcionesDto,
   ) {
-    return this.produccion.listarRecepciones(user.empresaId!, filtros);
+    return this.produccion.listarRecepciones(exigirEmpresa(user), filtros);
   }
 
   @Post('recepciones')
@@ -106,7 +111,7 @@ export class ProduccionController {
     @Req() req: Request,
   ) {
     return this.produccion.crearRecepcion(
-      user.empresaId!,
+      exigirEmpresa(user),
       dto,
       user.id,
       req.ip,
@@ -118,7 +123,7 @@ export class ProduccionController {
   @Get('formulas')
   @Permisos(PERMISOS.PRODUCCION_VER)
   listarFormulas(@CurrentUser() user: AuthenticatedUser) {
-    return this.produccion.listarFormulas(user.empresaId!);
+    return this.produccion.listarFormulas(exigirEmpresa(user));
   }
 
   @Get('formulas/:id')
@@ -127,7 +132,7 @@ export class ProduccionController {
     @CurrentUser() user: AuthenticatedUser,
     @Param('id', new ParseUUIDPipe()) id: string,
   ) {
-    return this.produccion.obtenerFormula(user.empresaId!, id);
+    return this.produccion.obtenerFormula(exigirEmpresa(user), id);
   }
 
   @Post('formulas')
@@ -137,7 +142,12 @@ export class ProduccionController {
     @Body() dto: CreateFormulaDto,
     @Req() req: Request,
   ) {
-    return this.produccion.crearFormula(user.empresaId!, dto, user.id, req.ip);
+    return this.produccion.crearFormula(
+      exigirEmpresa(user),
+      dto,
+      user.id,
+      req.ip,
+    );
   }
 
   @Patch('formulas/:id')
@@ -149,7 +159,7 @@ export class ProduccionController {
     @Req() req: Request,
   ) {
     return this.produccion.actualizarFormula(
-      user.empresaId!,
+      exigirEmpresa(user),
       id,
       dto,
       user.id,
@@ -163,7 +173,7 @@ export class ProduccionController {
     @CurrentUser() user: AuthenticatedUser,
     @Param('id', new ParseUUIDPipe()) id: string,
   ) {
-    return this.produccion.eliminarFormula(user.empresaId!, id);
+    return this.produccion.eliminarFormula(exigirEmpresa(user), id);
   }
 
   // --------------------------- Ordenes de produccion -----------------------
@@ -174,7 +184,7 @@ export class ProduccionController {
     @CurrentUser() user: AuthenticatedUser,
     @Query() filtros: ListarOrdenesDto,
   ) {
-    return this.produccion.listarOrdenes(user.empresaId!, filtros);
+    return this.produccion.listarOrdenes(exigirEmpresa(user), filtros);
   }
 
   @Get('ordenes/:id')
@@ -183,7 +193,7 @@ export class ProduccionController {
     @CurrentUser() user: AuthenticatedUser,
     @Param('id', new ParseUUIDPipe()) id: string,
   ) {
-    return this.produccion.obtenerOrden(user.empresaId!, id);
+    return this.produccion.obtenerOrden(exigirEmpresa(user), id);
   }
 
   @Post('ordenes')
@@ -193,7 +203,12 @@ export class ProduccionController {
     @Body() dto: CreateOrdenDto,
     @Req() req: Request,
   ) {
-    return this.produccion.crearOrden(user.empresaId!, dto, user.id, req.ip);
+    return this.produccion.crearOrden(
+      exigirEmpresa(user),
+      dto,
+      user.id,
+      req.ip,
+    );
   }
 
   @Post('ordenes/:id/iniciar')
@@ -202,7 +217,7 @@ export class ProduccionController {
     @CurrentUser() user: AuthenticatedUser,
     @Param('id', new ParseUUIDPipe()) id: string,
   ) {
-    return this.produccion.iniciarOrden(user.empresaId!, id, user.id);
+    return this.produccion.iniciarOrden(exigirEmpresa(user), id, user.id);
   }
 
   @Post('ordenes/:id/completar')
@@ -212,7 +227,12 @@ export class ProduccionController {
     @Param('id', new ParseUUIDPipe()) id: string,
     @Body() dto: CompletarOrdenDto,
   ) {
-    return this.produccion.completarOrden(user.empresaId!, id, dto, user.id);
+    return this.produccion.completarOrden(
+      exigirEmpresa(user),
+      id,
+      dto,
+      user.id,
+    );
   }
 
   @Post('ordenes/:id/cancelar')
@@ -221,7 +241,7 @@ export class ProduccionController {
     @CurrentUser() user: AuthenticatedUser,
     @Param('id', new ParseUUIDPipe()) id: string,
   ) {
-    return this.produccion.cancelarOrden(user.empresaId!, id, user.id);
+    return this.produccion.cancelarOrden(exigirEmpresa(user), id, user.id);
   }
 
   // --------------------------------- Mermas --------------------------------
@@ -232,7 +252,7 @@ export class ProduccionController {
     @CurrentUser() user: AuthenticatedUser,
     @Query() filtros: ListarMermasDto,
   ) {
-    return this.produccion.listarMermas(user.empresaId!, filtros);
+    return this.produccion.listarMermas(exigirEmpresa(user), filtros);
   }
 
   @Post('mermas')
@@ -242,7 +262,12 @@ export class ProduccionController {
     @Body() dto: CreateMermaDto,
     @Req() req: Request,
   ) {
-    return this.produccion.crearMerma(user.empresaId!, dto, user.id, req.ip);
+    return this.produccion.crearMerma(
+      exigirEmpresa(user),
+      dto,
+      user.id,
+      req.ip,
+    );
   }
 
   @Post('mermas/:id/aprobar')
@@ -251,7 +276,7 @@ export class ProduccionController {
     @CurrentUser() user: AuthenticatedUser,
     @Param('id', new ParseUUIDPipe()) id: string,
   ) {
-    return this.produccion.aprobarMerma(user.empresaId!, id, user.id);
+    return this.produccion.aprobarMerma(exigirEmpresa(user), id, user.id);
   }
 
   @Post('mermas/:id/rechazar')
@@ -260,6 +285,6 @@ export class ProduccionController {
     @CurrentUser() user: AuthenticatedUser,
     @Param('id', new ParseUUIDPipe()) id: string,
   ) {
-    return this.produccion.rechazarMerma(user.empresaId!, id, user.id);
+    return this.produccion.rechazarMerma(exigirEmpresa(user), id, user.id);
   }
 }

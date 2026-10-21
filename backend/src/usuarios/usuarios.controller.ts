@@ -15,11 +15,16 @@ import {
   ResetPasswordDto,
   UpdateUsuarioDto,
 } from './dto/usuario.dto';
-import { Permisos } from '../common/decorators/permisos.decorator';
+import {
+  Permisos,
+  RequiereEmpresa,
+} from '../common/decorators/permisos.decorator';
 import { PERMISOS } from '../common/constants/permisos';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
+import { exigirEmpresa } from '../common/guards/tenant.guard';
 import type { AuthenticatedUser } from '../common/types/authenticated-user';
 
+@RequiereEmpresa()
 @Controller('usuarios')
 export class UsuariosController {
   constructor(private readonly usuariosService: UsuariosService) {}
@@ -27,7 +32,7 @@ export class UsuariosController {
   @Get()
   @Permisos(PERMISOS.USUARIOS_VER)
   listar(@CurrentUser() user: AuthenticatedUser) {
-    return this.usuariosService.listar(user.empresaId!);
+    return this.usuariosService.listar(exigirEmpresa(user));
   }
 
   @Get(':id')
@@ -36,7 +41,7 @@ export class UsuariosController {
     @CurrentUser() user: AuthenticatedUser,
     @Param('id', new ParseUUIDPipe()) id: string,
   ) {
-    return this.usuariosService.obtener(user.empresaId!, id);
+    return this.usuariosService.obtener(exigirEmpresa(user), id);
   }
 
   @Post()
@@ -46,7 +51,12 @@ export class UsuariosController {
     @Body() dto: CreateUsuarioDto,
     @Req() req: Request,
   ) {
-    return this.usuariosService.crear(user.empresaId!, dto, user.id, req.ip);
+    return this.usuariosService.crear(
+      exigirEmpresa(user),
+      dto,
+      user.id,
+      req.ip,
+    );
   }
 
   @Patch(':id')
@@ -58,7 +68,7 @@ export class UsuariosController {
     @Req() req: Request,
   ) {
     return this.usuariosService.actualizar(
-      user.empresaId!,
+      exigirEmpresa(user),
       id,
       dto,
       user.id,
@@ -74,7 +84,7 @@ export class UsuariosController {
     @Req() req: Request,
   ) {
     return this.usuariosService.desactivar(
-      user.empresaId!,
+      exigirEmpresa(user),
       id,
       user.id,
       req.ip,
@@ -90,7 +100,7 @@ export class UsuariosController {
     @Req() req: Request,
   ) {
     return this.usuariosService.resetPassword(
-      user.empresaId!,
+      exigirEmpresa(user),
       id,
       dto,
       user.id,

@@ -14,11 +14,16 @@ import {
   ListarExistenciasDto,
   ListarMovimientosDto,
 } from './dto/inventario.dto';
-import { Permisos } from '../common/decorators/permisos.decorator';
+import {
+  Permisos,
+  RequiereEmpresa,
+} from '../common/decorators/permisos.decorator';
 import { PERMISOS } from '../common/constants/permisos';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
+import { exigirEmpresa } from '../common/guards/tenant.guard';
 import type { AuthenticatedUser } from '../common/types/authenticated-user';
 
+@RequiereEmpresa()
 @Controller('inventario')
 export class InventarioController {
   constructor(private readonly inventario: InventarioService) {}
@@ -29,7 +34,7 @@ export class InventarioController {
     @CurrentUser() user: AuthenticatedUser,
     @Query() filtros: ListarExistenciasDto,
   ) {
-    return this.inventario.listarExistencias(user.empresaId!, filtros);
+    return this.inventario.listarExistencias(exigirEmpresa(user), filtros);
   }
 
   @Get('movimientos')
@@ -38,7 +43,7 @@ export class InventarioController {
     @CurrentUser() user: AuthenticatedUser,
     @Query() filtros: ListarMovimientosDto,
   ) {
-    return this.inventario.listarMovimientos(user.empresaId!, filtros);
+    return this.inventario.listarMovimientos(exigirEmpresa(user), filtros);
   }
 
   @Get('documentos')
@@ -47,7 +52,7 @@ export class InventarioController {
     @CurrentUser() user: AuthenticatedUser,
     @Query('estado') estado?: EstadoDocumento,
   ) {
-    return this.inventario.listarDocumentos(user.empresaId!, estado);
+    return this.inventario.listarDocumentos(exigirEmpresa(user), estado);
   }
 
   @Get('documentos/:id')
@@ -56,7 +61,7 @@ export class InventarioController {
     @CurrentUser() user: AuthenticatedUser,
     @Param('id', new ParseUUIDPipe()) id: string,
   ) {
-    return this.inventario.obtenerDocumento(user.empresaId!, id);
+    return this.inventario.obtenerDocumento(exigirEmpresa(user), id);
   }
 
   @Post('documentos')
@@ -65,7 +70,7 @@ export class InventarioController {
     @CurrentUser() user: AuthenticatedUser,
     @Body() dto: CreateDocumentoDto,
   ) {
-    return this.inventario.crearDocumento(user.empresaId!, dto, user.id);
+    return this.inventario.crearDocumento(exigirEmpresa(user), dto, user.id);
   }
 
   @Post('documentos/:id/confirmar')
@@ -74,7 +79,7 @@ export class InventarioController {
     @CurrentUser() user: AuthenticatedUser,
     @Param('id', new ParseUUIDPipe()) id: string,
   ) {
-    return this.inventario.confirmarDocumento(user.empresaId!, id, user.id);
+    return this.inventario.confirmarDocumento(exigirEmpresa(user), id, user.id);
   }
 
   @Post('documentos/:id/anular')
@@ -83,6 +88,6 @@ export class InventarioController {
     @CurrentUser() user: AuthenticatedUser,
     @Param('id', new ParseUUIDPipe()) id: string,
   ) {
-    return this.inventario.anularDocumento(user.empresaId!, id, user.id);
+    return this.inventario.anularDocumento(exigirEmpresa(user), id, user.id);
   }
 }
