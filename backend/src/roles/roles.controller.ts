@@ -21,6 +21,15 @@ import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { exigirEmpresa } from '../common/guards/tenant.guard';
 import type { AuthenticatedUser } from '../common/types/authenticated-user';
 
+/** Actor con sus permisos efectivos, para evitar escalada de privilegios (E). */
+function actorDe(user: AuthenticatedUser) {
+  return {
+    id: user.id,
+    permisos: user.permisos,
+    esSuperAdmin: user.esSuperAdmin,
+  };
+}
+
 @RequiereEmpresa()
 @Controller('roles')
 export class RolesController {
@@ -48,7 +57,12 @@ export class RolesController {
     @Body() dto: CreateRolDto,
     @Req() req: Request,
   ) {
-    return this.rolesService.crear(exigirEmpresa(user), dto, user.id, req.ip);
+    return this.rolesService.crear(
+      exigirEmpresa(user),
+      dto,
+      actorDe(user),
+      req.ip,
+    );
   }
 
   @Patch(':id')
@@ -63,7 +77,7 @@ export class RolesController {
       exigirEmpresa(user),
       id,
       dto,
-      user.id,
+      actorDe(user),
       req.ip,
     );
   }
@@ -75,6 +89,11 @@ export class RolesController {
     @Param('id', new ParseUUIDPipe()) id: string,
     @Req() req: Request,
   ) {
-    return this.rolesService.eliminar(exigirEmpresa(user), id, user.id, req.ip);
+    return this.rolesService.eliminar(
+      exigirEmpresa(user),
+      id,
+      actorDe(user),
+      req.ip,
+    );
   }
 }

@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   ConflictException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -9,12 +10,55 @@ import { PrismaService } from '../prisma/prisma.service';
 import { AuditoriaService } from '../auditoria/auditoria.service';
 import { CreateRolDto, UpdateRolDto } from './dto/rol.dto';
 
+/** Actor que ejecuta la operacion: id + permisos efectivos. */
+export interface ActorRoles {
+  id: string;
+  permisos: string[];
+  esSuperAdmin: boolean;
+}
+
 @Injectable()
 export class RolesService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly auditoria: AuditoriaService,
   ) {}
+
+  /**
+   * Evita la escalada de privilegios (hallazgo E): el actor no puede crear ni
+   * modificar roles con permisos que el mismo no posee; de lo contrario podia
+   * fabricar un rol "Administrador" y asignarselo.
+   */
+  private exigirPermisosNoSuperiores(
+    actor: ActorRoles,
+    codigos: string[],
+  ): void {
+    if (actor.esSuperAdmin) return;
+    const propios = new Set(actor.permisos);
+    const excedidos = codigos.filter((codigo) => !propios.has(codigo));
+    if (excedidos.length > 0) {
+      throw new ForbiddenException(
+        `No puede otorgar permisos que usted no tiene: ${excedidos.join(', ')}`,
+      );
+    }
+  }
+
+  /** Comprueba que un rol existente no exceda los permisos del actor. */
+  private exigirRolNoSuperior(
+    actor: ActorRoles,
+    rol: { nombre: string; permisos: { permiso: { codigo: string } }[] },
+  ): void {
+    if (actor.esSuperAdmin) return;
+    const propios = new Set(actor.permisos);
+    const excedidos = rol.permisos
+      .map((p) => p.permiso.codigo)
+      .filter((codigo) => !propios.has(codigo));
+    if (excedidos.length > 0) {
+      throw new ForbiddenException(
+        `No puede administrar el rol "${rol.nombre}": contiene permisos que usted no tiene`,
+      );
+    }
+  }
 
   private async resolverPermisoIds(codigos: string[]): Promise<string[]> {
     const permisos = await this.prisma.permiso.findMany({
@@ -56,7 +100,7 @@ export class RolesService {
   async crear(
     empresaId: string,
     dto: CreateRolDto,
-    actorId: string,
+    actor: ActorRoles,
     ip?: string,
   ) {
     const existe = await this.prisma.rol.findFirst({
@@ -66,6 +110,7 @@ export class RolesService {
       throw new ConflictException('Ya existe un rol con ese nombre');
     }
 
+    this.exigirPermisosNoSuperiores(actor, dto.permisos);
     const permisoIds = await this.resolverPermisoIds(dto.permisos);
 
     const rol = await this.prisma.rol.create({
@@ -80,7 +125,7 @@ export class RolesService {
 
     await this.auditoria.registrar({
       empresaId,
-      usuarioId: actorId,
+      usuarioId: actor.id,
       accion: 'rol.creado',
       entidad: 'Rol',
       entidadId: rol.id,
@@ -95,13 +140,18 @@ export class RolesService {
     empresaId: string,
     id: string,
     dto: UpdateRolDto,
-    actorId: string,
+    actor: ActorRoles,
     ip?: string,
   ) {
     const rol = await this.obtener(empresaId, id);
 
     if (rol.esSistema && dto.nombre && dto.nombre !== rol.nombre) {
       throw new BadRequestException('No se puede renombrar un rol de sistema');
+    }
+
+    this.exigirRolNoSuperior(actor, rol);
+    if (dto.permisos) {
+      this.exigirPermisosNoSuperiores(actor, dto.permisos);
     }
 
     const data: Prisma.RolUpdateInput = {};
@@ -122,7 +172,7 @@ export class RolesService {
 
     await this.auditoria.registrar({
       empresaId,
-      usuarioId: actorId,
+      usuarioId: actor.id,
       accion: 'rol.actualizado',
       entidad: 'Rol',
       entidadId: id,
@@ -137,11 +187,17 @@ export class RolesService {
     return this.obtener(empresaId, id);
   }
 
-  async eliminar(empresaId: string, id: string, actorId: string, ip?: string) {
+  async eliminar(
+    empresaId: string,
+    id: string,
+    actor: ActorRoles,
+    ip?: string,
+  ) {
     const rol = await this.obtener(empresaId, id);
     if (rol.esSistema) {
       throw new BadRequestException('No se puede eliminar un rol de sistema');
     }
+    this.exigirRolNoSuperior(actor, rol);
 
     const asignados = await this.prisma.usuarioRol.count({
       where: { rolId: id },
@@ -153,7 +209,7 @@ export class RolesService {
     await this.prisma.rol.delete({ where: { id } });
     await this.auditoria.registrar({
       empresaId,
-      usuarioId: actorId,
+      usuarioId: actor.id,
       accion: 'rol.eliminado',
       entidad: 'Rol',
       entidadId: id,

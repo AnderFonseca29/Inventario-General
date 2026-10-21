@@ -16,6 +16,13 @@ import {
   UpdateUsuarioDto,
 } from './dto/usuario.dto';
 
+/** Actor que ejecuta la operacion: id + permisos efectivos. */
+export interface ActorUsuarios {
+  id: string;
+  permisos: string[];
+  esSuperAdmin: boolean;
+}
+
 @Injectable()
 export class UsuariosService {
   constructor(
@@ -30,14 +37,91 @@ export class UsuariosService {
     }
     const roles = await this.prisma.rol.findMany({
       where: { id: { in: rolIds }, empresaId },
-      select: { id: true },
+      select: {
+        id: true,
+        nombre: true,
+        permisos: { select: { permiso: { select: { codigo: true } } } },
+      },
     });
     if (roles.length !== rolIds.length) {
       throw new BadRequestException(
         'Uno o mas roles no pertenecen a la empresa',
       );
     }
-    return roles.map((r) => r.id);
+    return roles;
+  }
+
+  /**
+   * Evita la escalada de privilegios (hallazgo E): el actor no puede asignar
+   * roles cuyos permisos excedan los que el mismo posee. Sin esto, un usuario
+   * con "usuarios.crear" o "usuarios.editar" podia asignarse (o asignar a otra
+   * cuenta) el rol Administrador, que incluye todos los permisos.
+   */
+  private exigirRolesNoSuperiores(
+    actor: ActorUsuarios,
+    roles: { nombre: string; permisos: { permiso: { codigo: string } }[] }[],
+  ): void {
+    if (actor.esSuperAdmin) return;
+    const propios = new Set(actor.permisos);
+    for (const rol of roles) {
+      const excedidos = rol.permisos
+        .map((p) => p.permiso.codigo)
+        .filter((codigo) => !propios.has(codigo));
+      if (excedidos.length > 0) {
+        throw new ForbiddenException(
+          `No puede asignar el rol "${rol.nombre}": contiene permisos que usted no tiene (${excedidos.join(', ')})`,
+        );
+      }
+    }
+  }
+
+  /** Permisos efectivos de un usuario objetivo (para comparar privilegios). */
+  private async permisosDeUsuario(usuarioId: string): Promise<Set<string>> {
+    const filas = await this.prisma.usuarioRol.findMany({
+      where: { usuarioId },
+      select: {
+        rol: {
+          select: {
+            permisos: { select: { permiso: { select: { codigo: true } } } },
+          },
+        },
+      },
+    });
+    const set = new Set<string>();
+    for (const fila of filas) {
+      for (const rp of fila.rol.permisos) set.add(rp.permiso.codigo);
+    }
+    return set;
+  }
+
+  /**
+   * Impide operar sobre cuentas con mas privilegios que el actor (hallazgo E):
+   * sin esto, alguien con "usuarios.editar" podia resetear la contrasena del
+   * Administrador y tomar su cuenta (robo de sesion permanente).
+   */
+  private async exigirNoSuperaAlObjetivo(
+    actor: ActorUsuarios,
+    empresaId: string,
+    objetivoId: string,
+  ): Promise<void> {
+    if (actor.esSuperAdmin || objetivoId === actor.id) return;
+    const objetivo = await this.prisma.usuario.findFirst({
+      where: { id: objetivoId, empresaId },
+      select: { esSuperAdmin: true },
+    });
+    if (objetivo?.esSuperAdmin) {
+      throw new ForbiddenException(
+        'No puede modificar una cuenta de administracion de plataforma',
+      );
+    }
+    const permisosObjetivo = await this.permisosDeUsuario(objetivoId);
+    const propios = new Set(actor.permisos);
+    const excedidos = [...permisosObjetivo].filter((c) => !propios.has(c));
+    if (excedidos.length > 0) {
+      throw new ForbiddenException(
+        'No puede modificar un usuario con mas privilegios que usted',
+      );
+    }
   }
 
   private serialize(usuario: {
@@ -91,7 +175,7 @@ export class UsuariosService {
   async crear(
     empresaId: string,
     dto: CreateUsuarioDto,
-    actorId: string,
+    actor: ActorUsuarios,
     ip?: string,
   ) {
     const email = dto.email.toLowerCase();
@@ -100,7 +184,9 @@ export class UsuariosService {
       throw new ConflictException('El correo ya esta registrado');
     }
 
-    const rolIds = await this.validarRolesDeEmpresa(empresaId, dto.roles);
+    const roles = await this.validarRolesDeEmpresa(empresaId, dto.roles);
+    this.exigirRolesNoSuperiores(actor, roles);
+    const rolIds = roles.map((r) => r.id);
     const passwordHash = await argon2.hash(dto.password);
 
     const usuario = await this.prisma.$transaction(async (tx) => {
@@ -140,7 +226,7 @@ export class UsuariosService {
 
     await this.auditoria.registrar({
       empresaId,
-      usuarioId: actorId,
+      usuarioId: actor.id,
       accion: 'usuario.creado',
       entidad: 'Usuario',
       entidadId: usuario.id,
@@ -155,17 +241,21 @@ export class UsuariosService {
     empresaId: string,
     id: string,
     dto: UpdateUsuarioDto,
-    actorId: string,
+    actor: ActorUsuarios,
     ip?: string,
   ) {
     await this.obtener(empresaId, id);
+    await this.exigirNoSuperaAlObjetivo(actor, empresaId, id);
 
-    if (id === actorId && dto.activo === false) {
+    if (id === actor.id && dto.activo === false) {
       throw new BadRequestException('No puede desactivar su propio usuario');
     }
 
+    let rolIds: string[] | undefined;
     if (dto.roles) {
-      await this.validarRolesDeEmpresa(empresaId, dto.roles);
+      const roles = await this.validarRolesDeEmpresa(empresaId, dto.roles);
+      this.exigirRolesNoSuperiores(actor, roles);
+      rolIds = roles.map((r) => r.id);
     }
 
     await this.prisma.$transaction(async (tx) => {
@@ -174,17 +264,17 @@ export class UsuariosService {
         data: { nombre: dto.nombre, activo: dto.activo },
       });
 
-      if (dto.roles) {
+      if (rolIds) {
         await tx.usuarioRol.deleteMany({ where: { usuarioId: id } });
         await tx.usuarioRol.createMany({
-          data: dto.roles.map((rolId) => ({ usuarioId: id, rolId })),
+          data: rolIds.map((rolId) => ({ usuarioId: id, rolId })),
         });
       }
     });
 
     await this.auditoria.registrar({
       empresaId,
-      usuarioId: actorId,
+      usuarioId: actor.id,
       accion: 'usuario.actualizado',
       entidad: 'Usuario',
       entidadId: id,
@@ -198,20 +288,21 @@ export class UsuariosService {
   async desactivar(
     empresaId: string,
     id: string,
-    actorId: string,
+    actor: ActorUsuarios,
     ip?: string,
   ) {
-    if (id === actorId) {
+    if (id === actor.id) {
       throw new BadRequestException('No puede desactivar su propio usuario');
     }
     await this.obtener(empresaId, id);
+    await this.exigirNoSuperaAlObjetivo(actor, empresaId, id);
     await this.prisma.usuario.update({
       where: { id },
       data: { activo: false },
     });
     await this.auditoria.registrar({
       empresaId,
-      usuarioId: actorId,
+      usuarioId: actor.id,
       accion: 'usuario.desactivado',
       entidad: 'Usuario',
       entidadId: id,
@@ -224,10 +315,11 @@ export class UsuariosService {
     empresaId: string,
     id: string,
     dto: ResetPasswordDto,
-    actorId: string,
+    actor: ActorUsuarios,
     ip?: string,
   ) {
     await this.obtener(empresaId, id);
+    await this.exigirNoSuperaAlObjetivo(actor, empresaId, id);
     const passwordHash = await argon2.hash(dto.newPassword);
     await this.prisma.$transaction([
       this.prisma.usuario.update({ where: { id }, data: { passwordHash } }),
@@ -238,7 +330,7 @@ export class UsuariosService {
     ]);
     await this.auditoria.registrar({
       empresaId,
-      usuarioId: actorId,
+      usuarioId: actor.id,
       accion: 'usuario.password_reseteado',
       entidad: 'Usuario',
       entidadId: id,

@@ -24,6 +24,15 @@ import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { exigirEmpresa } from '../common/guards/tenant.guard';
 import type { AuthenticatedUser } from '../common/types/authenticated-user';
 
+/** Actor con sus permisos efectivos, para evitar escalada de privilegios (E). */
+function actorDe(user: AuthenticatedUser) {
+  return {
+    id: user.id,
+    permisos: user.permisos,
+    esSuperAdmin: user.esSuperAdmin,
+  };
+}
+
 @RequiereEmpresa()
 @Controller('usuarios')
 export class UsuariosController {
@@ -54,7 +63,7 @@ export class UsuariosController {
     return this.usuariosService.crear(
       exigirEmpresa(user),
       dto,
-      user.id,
+      actorDe(user),
       req.ip,
     );
   }
@@ -71,7 +80,7 @@ export class UsuariosController {
       exigirEmpresa(user),
       id,
       dto,
-      user.id,
+      actorDe(user),
       req.ip,
     );
   }
@@ -86,7 +95,7 @@ export class UsuariosController {
     return this.usuariosService.desactivar(
       exigirEmpresa(user),
       id,
-      user.id,
+      actorDe(user),
       req.ip,
     );
   }
@@ -103,7 +112,7 @@ export class UsuariosController {
       exigirEmpresa(user),
       id,
       dto,
-      user.id,
+      actorDe(user),
       req.ip,
     );
   }
