@@ -8,6 +8,7 @@ import { EstadoOrdenProduccion, Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditoriaService } from '../auditoria/auditoria.service';
 import { GlobalExceptionFilter } from '../common/filters/global-exception.filter';
+import { construirPaginado } from '../common/utils/paginacion';
 import {
   conReintentoConsecutivo,
   generarConsecutivo,
@@ -101,21 +102,31 @@ export class ProduccionService {
 
   // ----------------------------- Materias primas ---------------------------
 
-  listarMateriasPrimas(empresaId: string, filtros: ListarMateriasPrimasDto) {
+  async listarMateriasPrimas(
+    empresaId: string,
+    filtros: ListarMateriasPrimasDto,
+  ) {
     const buscar = filtros.buscar?.trim();
-    return this.prisma.materiaPrima.findMany({
-      where: {
-        empresaId,
-        ...(buscar
-          ? { nombre: { contains: buscar, mode: 'insensitive' as const } }
-          : {}),
-      },
-      orderBy: { nombre: 'asc' },
-      include: {
-        unidad: { select: { id: true, nombre: true, abreviatura: true } },
-        _count: { select: { recepciones: true, formulaDetalles: true } },
-      },
-    });
+    const where: Prisma.MateriaPrimaWhereInput = {
+      empresaId,
+      ...(buscar
+        ? { nombre: { contains: buscar, mode: 'insensitive' as const } }
+        : {}),
+    };
+    const [materias, total] = await Promise.all([
+      this.prisma.materiaPrima.findMany({
+        where,
+        orderBy: { nombre: 'asc' },
+        skip: filtros.skip,
+        take: filtros.take,
+        include: {
+          unidad: { select: { id: true, nombre: true, abreviatura: true } },
+          _count: { select: { recepciones: true, formulaDetalles: true } },
+        },
+      }),
+      this.prisma.materiaPrima.count({ where }),
+    ]);
+    return construirPaginado(materias, total, filtros.pagina, filtros.limite);
   }
 
   async crearMateriaPrima(
@@ -216,22 +227,28 @@ export class ProduccionService {
 
   // ------------------------------- Recepciones -----------------------------
 
-  listarRecepciones(empresaId: string, filtros: ListarRecepcionesDto) {
-    return this.prisma.recepcionMateriaPrima.findMany({
-      where: {
-        empresaId,
-        ...(filtros.materiaPrimaId
-          ? { materiaPrimaId: filtros.materiaPrimaId }
-          : {}),
-      },
-      orderBy: { recibidoEn: 'desc' },
-      take: 200,
-      include: {
-        materiaPrima: { select: { id: true, nombre: true } },
-        proveedor: { select: { id: true, nombre: true } },
-        responsable: { select: { id: true, nombre: true, email: true } },
-      },
-    });
+  async listarRecepciones(empresaId: string, filtros: ListarRecepcionesDto) {
+    const where: Prisma.RecepcionMateriaPrimaWhereInput = {
+      empresaId,
+      ...(filtros.materiaPrimaId
+        ? { materiaPrimaId: filtros.materiaPrimaId }
+        : {}),
+    };
+    const [recepciones, total] = await Promise.all([
+      this.prisma.recepcionMateriaPrima.findMany({
+        where,
+        orderBy: { recibidoEn: 'desc' },
+        skip: filtros.skip,
+        take: filtros.take,
+        include: {
+          materiaPrima: { select: { id: true, nombre: true } },
+          proveedor: { select: { id: true, nombre: true } },
+          responsable: { select: { id: true, nombre: true, email: true } },
+        },
+      }),
+      this.prisma.recepcionMateriaPrima.count({ where }),
+    ]);
+    return construirPaginado(recepciones, total, filtros.pagina, filtros.limite);
   }
 
   async crearRecepcion(
@@ -460,19 +477,28 @@ export class ProduccionService {
 
   // --------------------------- Ordenes de produccion -----------------------
 
-  listarOrdenes(empresaId: string, filtros: ListarOrdenesDto) {
+  async listarOrdenes(empresaId: string, filtros: ListarOrdenesDto) {
     const estado = this.parseEstadoOrden(filtros.estado);
-    return this.prisma.ordenProduccion.findMany({
-      where: { empresaId, ...(estado ? { estado } : {}) },
-      orderBy: { creadoEn: 'desc' },
-      take: 200,
-      include: {
-        producto: { select: { id: true, sku: true, nombre: true } },
-        formula: { select: { id: true, nombre: true, version: true } },
-        creadoPor: { select: { id: true, nombre: true, email: true } },
-        _count: { select: { detalles: true, mermas: true } },
-      },
-    });
+    const where: Prisma.OrdenProduccionWhereInput = {
+      empresaId,
+      ...(estado ? { estado } : {}),
+    };
+    const [ordenes, total] = await Promise.all([
+      this.prisma.ordenProduccion.findMany({
+        where,
+        orderBy: { creadoEn: 'desc' },
+        skip: filtros.skip,
+        take: filtros.take,
+        include: {
+          producto: { select: { id: true, sku: true, nombre: true } },
+          formula: { select: { id: true, nombre: true, version: true } },
+          creadoPor: { select: { id: true, nombre: true, email: true } },
+          _count: { select: { detalles: true, mermas: true } },
+        },
+      }),
+      this.prisma.ordenProduccion.count({ where }),
+    ]);
+    return construirPaginado(ordenes, total, filtros.pagina, filtros.limite);
   }
 
   async obtenerOrden(empresaId: string, id: string) {
@@ -836,22 +862,28 @@ export class ProduccionService {
 
   // --------------------------------- Mermas --------------------------------
 
-  listarMermas(empresaId: string, filtros: ListarMermasDto) {
-    return this.prisma.merma.findMany({
-      where: {
-        empresaId,
-        ...(filtros.estado ? { estado: filtros.estado } : {}),
-      },
-      orderBy: { creadoEn: 'desc' },
-      take: 200,
-      include: {
-        orden: { select: { id: true, consecutivo: true } },
-        producto: { select: { id: true, nombre: true } },
-        materiaPrima: { select: { id: true, nombre: true } },
-        creadoPor: { select: { id: true, nombre: true, email: true } },
-        aprobadoPor: { select: { id: true, nombre: true, email: true } },
-      },
-    });
+  async listarMermas(empresaId: string, filtros: ListarMermasDto) {
+    const where: Prisma.MermaWhereInput = {
+      empresaId,
+      ...(filtros.estado ? { estado: filtros.estado } : {}),
+    };
+    const [mermas, total] = await Promise.all([
+      this.prisma.merma.findMany({
+        where,
+        orderBy: { creadoEn: 'desc' },
+        skip: filtros.skip,
+        take: filtros.take,
+        include: {
+          orden: { select: { id: true, consecutivo: true } },
+          producto: { select: { id: true, nombre: true } },
+          materiaPrima: { select: { id: true, nombre: true } },
+          creadoPor: { select: { id: true, nombre: true, email: true } },
+          aprobadoPor: { select: { id: true, nombre: true, email: true } },
+        },
+      }),
+      this.prisma.merma.count({ where }),
+    ]);
+    return construirPaginado(mermas, total, filtros.pagina, filtros.limite);
   }
 
   async crearMerma(

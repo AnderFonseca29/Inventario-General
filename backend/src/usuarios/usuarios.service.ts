@@ -6,12 +6,14 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import * as argon2 from 'argon2';
-import type { Prisma } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditoriaService } from '../auditoria/auditoria.service';
 import { SuscripcionesService } from '../suscripciones/suscripciones.service';
+import { construirPaginado } from '../common/utils/paginacion';
 import {
   CreateUsuarioDto,
+  ListarUsuariosDto,
   ResetPasswordDto,
   UpdateUsuarioDto,
 } from './dto/usuario.dto';
@@ -149,15 +151,37 @@ export class UsuariosService {
     };
   }
 
-  async listar(empresaId: string) {
-    const usuarios = await this.prisma.usuario.findMany({
-      where: { empresaId },
-      orderBy: { nombre: 'asc' },
-      include: {
-        roles: { include: { rol: { select: { id: true, nombre: true } } } },
-      },
-    });
-    return usuarios.map((u) => this.serialize(u));
+  async listar(empresaId: string, filtros: ListarUsuariosDto) {
+    const buscar = filtros.buscar?.trim();
+    const where: Prisma.UsuarioWhereInput = {
+      empresaId,
+      ...(buscar
+        ? {
+            OR: [
+              { nombre: { contains: buscar, mode: 'insensitive' as const } },
+              { email: { contains: buscar, mode: 'insensitive' as const } },
+            ],
+          }
+        : {}),
+    };
+    const [usuarios, total] = await Promise.all([
+      this.prisma.usuario.findMany({
+        where,
+        orderBy: { nombre: 'asc' },
+        skip: filtros.skip,
+        take: filtros.take,
+        include: {
+          roles: { include: { rol: { select: { id: true, nombre: true } } } },
+        },
+      }),
+      this.prisma.usuario.count({ where }),
+    ]);
+    return construirPaginado(
+      usuarios.map((u) => this.serialize(u)),
+      total,
+      filtros.pagina,
+      filtros.limite,
+    );
   }
 
   async obtener(empresaId: string, id: string) {

@@ -6,9 +6,12 @@ import {
   ParseUUIDPipe,
   Post,
   Query,
+  Res,
 } from '@nestjs/common';
+import type { Response } from 'express';
 import { CarguesService } from './cargues.service';
 import { CrearCargueDto, ListarCarguesDto } from './dto/cargues.dto';
+import { responderPaginado } from '../common/utils/responder-paginado';
 import {
   Permisos,
   PermisosAlguno,
@@ -26,11 +29,17 @@ export class CarguesController {
 
   @Get()
   @PermisosAlguno(PERMISOS.CARGUES_VER_PROPIOS, PERMISOS.CARGUES_VER_TODOS)
-  listar(
+  async listar(
     @CurrentUser() user: AuthenticatedUser,
     @Query() filtros: ListarCarguesDto,
+    @Res({ passthrough: true }) res: Response,
   ) {
-    return this.cargues.listar(exigirEmpresa(user), user, filtros);
+    const resultado = await this.cargues.listar(
+      exigirEmpresa(user),
+      user,
+      filtros,
+    );
+    return responderPaginado(res, resultado);
   }
 
   @Get('vendedores')

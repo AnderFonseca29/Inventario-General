@@ -10,6 +10,7 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { EstadoCargue } from '@prisma/client';
+import { PaginacionDto } from '../../common/dto/paginacion.dto';
 
 export class CargueDetalleDto {
   @IsUUID()
@@ -41,7 +42,7 @@ export class CrearCargueDto {
   detalles!: CargueDetalleDto[];
 }
 
-export class ListarCarguesDto {
+export class ListarCarguesDto extends PaginacionDto {
   @IsOptional()
   @IsEnum(EstadoCargue)
   estado?: EstadoCargue;

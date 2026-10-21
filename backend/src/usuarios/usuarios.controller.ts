@@ -6,12 +6,16 @@ import {
   ParseUUIDPipe,
   Patch,
   Post,
+  Query,
   Req,
+  Res,
 } from '@nestjs/common';
-import type { Request } from 'express';
+import type { Request, Response } from 'express';
+import { responderPaginado } from '../common/utils/responder-paginado';
 import { UsuariosService } from './usuarios.service';
 import {
   CreateUsuarioDto,
+  ListarUsuariosDto,
   ResetPasswordDto,
   UpdateUsuarioDto,
 } from './dto/usuario.dto';
@@ -40,8 +44,16 @@ export class UsuariosController {
 
   @Get()
   @Permisos(PERMISOS.USUARIOS_VER)
-  listar(@CurrentUser() user: AuthenticatedUser) {
-    return this.usuariosService.listar(exigirEmpresa(user));
+  async listar(
+    @CurrentUser() user: AuthenticatedUser,
+    @Query() filtros: ListarUsuariosDto,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const resultado = await this.usuariosService.listar(
+      exigirEmpresa(user),
+      filtros,
+    );
+    return responderPaginado(res, resultado);
   }
 
   @Get(':id')

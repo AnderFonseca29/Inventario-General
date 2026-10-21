@@ -9,8 +9,10 @@ import {
   Post,
   Query,
   Req,
+  Res,
 } from '@nestjs/common';
-import type { Request } from 'express';
+import type { Request, Response } from 'express';
+import { responderPaginado } from '../common/utils/responder-paginado';
 import { MembresiaService } from './membresia.service';
 import {
   CreateClienteDto,
@@ -41,11 +43,16 @@ export class MembresiaController {
 
   @Get('clientes')
   @Permisos(PERMISOS.MEMBRESIA_VER)
-  listarClientes(
+  async listarClientes(
     @CurrentUser() user: AuthenticatedUser,
     @Query() filtros: ListarClientesDto,
+    @Res({ passthrough: true }) res: Response,
   ) {
-    return this.membresia.listarClientes(exigirEmpresa(user), filtros);
+    const resultado = await this.membresia.listarClientes(
+      exigirEmpresa(user),
+      filtros,
+    );
+    return responderPaginado(res, resultado);
   }
 
   @Post('clientes')
@@ -93,11 +100,16 @@ export class MembresiaController {
 
   @Get('planes')
   @Permisos(PERMISOS.MEMBRESIA_VER)
-  listarPlanes(
+  async listarPlanes(
     @CurrentUser() user: AuthenticatedUser,
     @Query() filtros: ListarPlanesMembresiaDto,
+    @Res({ passthrough: true }) res: Response,
   ) {
-    return this.membresia.listarPlanesMembresia(exigirEmpresa(user), filtros);
+    const resultado = await this.membresia.listarPlanesMembresia(
+      exigirEmpresa(user),
+      filtros,
+    );
+    return responderPaginado(res, resultado);
   }
 
   @Post('planes')
@@ -145,11 +157,16 @@ export class MembresiaController {
 
   @Get('membresias')
   @Permisos(PERMISOS.MEMBRESIA_VER)
-  listarMembresias(
+  async listarMembresias(
     @CurrentUser() user: AuthenticatedUser,
     @Query() filtros: ListarMembresiasDto,
+    @Res({ passthrough: true }) res: Response,
   ) {
-    return this.membresia.listarMembresias(exigirEmpresa(user), filtros);
+    const resultado = await this.membresia.listarMembresias(
+      exigirEmpresa(user),
+      filtros,
+    );
+    return responderPaginado(res, resultado);
   }
 
   @Post('membresias')

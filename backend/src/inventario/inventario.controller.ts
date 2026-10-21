@@ -6,7 +6,9 @@ import {
   ParseUUIDPipe,
   Post,
   Query,
+  Res,
 } from '@nestjs/common';
+import type { Response } from 'express';
 import { EstadoDocumento } from '@prisma/client';
 import { InventarioService } from './inventario.service';
 import {
@@ -14,6 +16,7 @@ import {
   ListarExistenciasDto,
   ListarMovimientosDto,
 } from './dto/inventario.dto';
+import { responderPaginado } from '../common/utils/responder-paginado';
 import {
   Permisos,
   RequiereEmpresa,
@@ -30,20 +33,30 @@ export class InventarioController {
 
   @Get('existencias')
   @Permisos(PERMISOS.INVENTARIO_VER)
-  listarExistencias(
+  async listarExistencias(
     @CurrentUser() user: AuthenticatedUser,
     @Query() filtros: ListarExistenciasDto,
+    @Res({ passthrough: true }) res: Response,
   ) {
-    return this.inventario.listarExistencias(exigirEmpresa(user), filtros);
+    const resultado = await this.inventario.listarExistencias(
+      exigirEmpresa(user),
+      filtros,
+    );
+    return responderPaginado(res, resultado);
   }
 
   @Get('movimientos')
   @Permisos(PERMISOS.INVENTARIO_VER)
-  listarMovimientos(
+  async listarMovimientos(
     @CurrentUser() user: AuthenticatedUser,
     @Query() filtros: ListarMovimientosDto,
+    @Res({ passthrough: true }) res: Response,
   ) {
-    return this.inventario.listarMovimientos(exigirEmpresa(user), filtros);
+    const resultado = await this.inventario.listarMovimientos(
+      exigirEmpresa(user),
+      filtros,
+    );
+    return responderPaginado(res, resultado);
   }
 
   @Get('documentos')

@@ -12,6 +12,7 @@ import {
   generarConsecutivo,
 } from '../common/utils/consecutivos';
 import type { AuthenticatedUser } from '../common/types/authenticated-user';
+import { construirPaginado } from '../common/utils/paginacion';
 import { CrearCargueDto, ListarCarguesDto } from './dto/cargues.dto';
 
 @Injectable()
@@ -49,17 +50,27 @@ export class CarguesService {
     }
     if (this.soloPropios(user)) where.vendedorId = user.id;
 
-    const cargues = await this.prisma.cargue.findMany({
-      where,
-      orderBy: { creadoEn: 'desc' },
-      take: 200,
-      include: {
-        vendedor: { select: { id: true, nombre: true, email: true } },
-        usuario: { select: { id: true, nombre: true, email: true } },
-        _count: { select: { detalles: true } },
-      },
-    });
-    return this.adjuntarBodegas(empresaId, cargues);
+    const [cargues, total] = await Promise.all([
+      this.prisma.cargue.findMany({
+        where,
+        orderBy: { creadoEn: 'desc' },
+        skip: filtros.skip,
+        take: filtros.take,
+        include: {
+          vendedor: { select: { id: true, nombre: true, email: true } },
+          usuario: { select: { id: true, nombre: true, email: true } },
+          _count: { select: { detalles: true } },
+        },
+      }),
+      this.prisma.cargue.count({ where }),
+    ]);
+
+    return construirPaginado(
+      await this.adjuntarBodegas(empresaId, cargues),
+      total,
+      filtros.pagina,
+      filtros.limite,
+    );
   }
 
   async obtener(empresaId: string, id: string, user: AuthenticatedUser) {

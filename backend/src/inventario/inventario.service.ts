@@ -8,6 +8,7 @@ import { EstadoDocumento, Prisma, TipoMovimiento } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditoriaService } from '../auditoria/auditoria.service';
 import { GlobalExceptionFilter } from '../common/filters/global-exception.filter';
+import { construirPaginado } from '../common/utils/paginacion';
 import {
   CreateDocumentoDto,
   ListarExistenciasDto,
@@ -73,16 +74,27 @@ export class InventarioService {
     if (filtros.soloConStock === 'true') {
       where.cantidad = { gt: 0 };
     }
-    return this.prisma.existencia.findMany({
-      where,
-      orderBy: [{ producto: { nombre: 'asc' } }],
-      include: {
-        producto: {
-          select: { id: true, sku: true, nombre: true, esBotellon: true },
+    const [existencias, total] = await Promise.all([
+      this.prisma.existencia.findMany({
+        where,
+        orderBy: [{ producto: { nombre: 'asc' } }],
+        skip: filtros.skip,
+        take: filtros.take,
+        include: {
+          producto: {
+            select: { id: true, sku: true, nombre: true, esBotellon: true },
+          },
+          bodega: { select: { id: true, nombre: true, tipo: true } },
         },
-        bodega: { select: { id: true, nombre: true, tipo: true } },
-      },
-    });
+      }),
+      this.prisma.existencia.count({ where }),
+    ]);
+    return construirPaginado(
+      existencias,
+      total,
+      filtros.pagina,
+      filtros.limite,
+    );
   }
 
   async listarMovimientos(empresaId: string, filtros: ListarMovimientosDto) {
@@ -96,18 +108,28 @@ export class InventarioService {
       if (filtros.hasta) creadoEn.lte = new Date(filtros.hasta);
       where.creadoEn = creadoEn;
     }
-    return this.prisma.movimientoInventario.findMany({
-      where,
-      orderBy: { creadoEn: 'desc' },
-      take: 200,
-      include: {
-        producto: { select: { id: true, sku: true, nombre: true } },
-        bodega: { select: { id: true, nombre: true } },
-        usuario: {
-          select: { id: true, nombre: true, email: true },
+    const [movimientos, total] = await Promise.all([
+      this.prisma.movimientoInventario.findMany({
+        where,
+        orderBy: { creadoEn: 'desc' },
+        skip: filtros.skip,
+        take: filtros.take,
+        include: {
+          producto: { select: { id: true, sku: true, nombre: true } },
+          bodega: { select: { id: true, nombre: true } },
+          usuario: {
+            select: { id: true, nombre: true, email: true },
+          },
         },
-      },
-    });
+      }),
+      this.prisma.movimientoInventario.count({ where }),
+    ]);
+    return construirPaginado(
+      movimientos,
+      total,
+      filtros.pagina,
+      filtros.limite,
+    );
   }
 
   async listarDocumentos(empresaId: string, estado?: EstadoDocumento) {

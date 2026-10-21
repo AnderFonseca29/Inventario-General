@@ -1,6 +1,15 @@
-import { Controller, Get, Param, ParseUUIDPipe, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Param,
+  ParseUUIDPipe,
+  Query,
+  Res,
+} from '@nestjs/common';
+import type { Response } from 'express';
 import { AuditoriaService } from './auditoria.service';
 import { ListarAuditoriaDto } from './dto/auditoria.dto';
+import { responderPaginado } from '../common/utils/responder-paginado';
 import {
   Permisos,
   RequiereEmpresa,
@@ -17,11 +26,16 @@ export class AuditoriaController {
 
   @Get()
   @Permisos(PERMISOS.AUDITORIA_VER)
-  listar(
+  async listar(
     @CurrentUser() user: AuthenticatedUser,
     @Query() filtros: ListarAuditoriaDto,
+    @Res({ passthrough: true }) res: Response,
   ) {
-    return this.auditoria.listarConFiltros(exigirEmpresa(user), filtros);
+    const resultado = await this.auditoria.listarConFiltros(
+      exigirEmpresa(user),
+      filtros,
+    );
+    return responderPaginado(res, resultado);
   }
 
   @Get(':id')

@@ -7,6 +7,13 @@ import {
   IsString,
   MinLength,
 } from 'class-validator';
+import { PaginacionDto } from '../../common/dto/paginacion.dto';
+
+export class ListarUsuariosDto extends PaginacionDto {
+  @IsOptional()
+  @IsString()
+  buscar?: string;
+}
 
 export class CreateUsuarioDto {
   @IsString()

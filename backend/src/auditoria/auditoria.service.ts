@@ -2,6 +2,7 @@ import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { ListarAuditoriaDto } from './dto/auditoria.dto';
+import { construirPaginado } from '../common/utils/paginacion';
 
 export interface RegistrarAuditoria {
   empresaId?: string | null;
@@ -52,7 +53,7 @@ export class AuditoriaService {
     });
   }
 
-  listarConFiltros(empresaId: string, filtros: ListarAuditoriaDto) {
+  async listarConFiltros(empresaId: string, filtros: ListarAuditoriaDto) {
     const buscar = filtros.buscar?.trim();
     const rango: Prisma.DateTimeFilter = {};
     if (filtros.desde) {
@@ -64,32 +65,40 @@ export class AuditoriaService {
       rango.lte = hasta;
     }
 
-    return this.prisma.auditoria.findMany({
-      where: {
-        empresaId,
-        ...(filtros.usuarioId ? { usuarioId: filtros.usuarioId } : {}),
-        ...(filtros.desde || filtros.hasta ? { creadoEn: rango } : {}),
-        ...(buscar
-          ? {
-              OR: [
-                { accion: { contains: buscar, mode: 'insensitive' as const } },
-                { entidad: { contains: buscar, mode: 'insensitive' as const } },
-                {
-                  entidadId: {
-                    contains: buscar,
-                    mode: 'insensitive' as const,
-                  },
+    const where: Prisma.AuditoriaWhereInput = {
+      empresaId,
+      ...(filtros.usuarioId ? { usuarioId: filtros.usuarioId } : {}),
+      ...(filtros.desde || filtros.hasta ? { creadoEn: rango } : {}),
+      ...(buscar
+        ? {
+            OR: [
+              { accion: { contains: buscar, mode: 'insensitive' as const } },
+              { entidad: { contains: buscar, mode: 'insensitive' as const } },
+              {
+                entidadId: {
+                  contains: buscar,
+                  mode: 'insensitive' as const,
                 },
-              ],
-            }
-          : {}),
-      },
-      orderBy: { creadoEn: 'desc' },
-      take: filtros.limite ?? 200,
-      include: {
-        usuario: { select: { id: true, nombre: true, email: true } },
-      },
-    });
+              },
+            ],
+          }
+        : {}),
+    };
+
+    const [registros, total] = await Promise.all([
+      this.prisma.auditoria.findMany({
+        where,
+        orderBy: { creadoEn: 'desc' },
+        skip: filtros.skip,
+        take: filtros.take,
+        include: {
+          usuario: { select: { id: true, nombre: true, email: true } },
+        },
+      }),
+      this.prisma.auditoria.count({ where }),
+    ]);
+
+    return construirPaginado(registros, total, filtros.pagina, filtros.limite);
   }
 
   async obtener(empresaId: string, id: string) {

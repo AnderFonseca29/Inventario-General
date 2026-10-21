@@ -1,4 +1,4 @@
-import { Type } from 'class-transformer';
+﻿import { Type } from 'class-transformer';
 import {
   ArrayNotEmpty,
   IsArray,
@@ -13,6 +13,7 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { EstadoMerma } from '@prisma/client';
+import { PaginacionDto } from '../../common/dto/paginacion.dto';
 
 // ----------------------------- Materias primas -----------------------------
 
@@ -55,7 +56,7 @@ export class UpdateMateriaPrimaDto {
   activo?: boolean;
 }
 
-export class ListarMateriasPrimasDto {
+export class ListarMateriasPrimasDto extends PaginacionDto {
   @IsOptional()
   @IsString()
   buscar?: string;
@@ -93,7 +94,7 @@ export class CreateRecepcionDto {
   observaciones?: string;
 }
 
-export class ListarRecepcionesDto {
+export class ListarRecepcionesDto extends PaginacionDto {
   @IsOptional()
   @IsUUID()
   materiaPrimaId?: string;
@@ -197,7 +198,7 @@ export class CompletarOrdenDto {
   consumos?: ConsumoOrdenDto[];
 }
 
-export class ListarOrdenesDto {
+export class ListarOrdenesDto extends PaginacionDto {
   @IsOptional()
   @IsString()
   estado?: string;
@@ -227,8 +228,9 @@ export class CreateMermaDto {
   motivo!: string;
 }
 
-export class ListarMermasDto {
+export class ListarMermasDto extends PaginacionDto {
   @IsOptional()
   @IsEnum(EstadoMerma)
   estado?: EstadoMerma;
 }
+

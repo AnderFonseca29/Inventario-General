@@ -9,8 +9,10 @@ import {
   Post,
   Query,
   Req,
+  Res,
 } from '@nestjs/common';
-import type { Request } from 'express';
+import type { Request, Response } from 'express';
+import { responderPaginado } from '../common/utils/responder-paginado';
 import { ProduccionService } from './produccion.service';
 import {
   CompletarOrdenDto,
@@ -44,11 +46,16 @@ export class ProduccionController {
 
   @Get('materias-primas')
   @Permisos(PERMISOS.PRODUCCION_VER)
-  listarMateriasPrimas(
+  async listarMateriasPrimas(
     @CurrentUser() user: AuthenticatedUser,
     @Query() filtros: ListarMateriasPrimasDto,
+    @Res({ passthrough: true }) res: Response,
   ) {
-    return this.produccion.listarMateriasPrimas(exigirEmpresa(user), filtros);
+    const resultado = await this.produccion.listarMateriasPrimas(
+      exigirEmpresa(user),
+      filtros,
+    );
+    return responderPaginado(res, resultado);
   }
 
   @Post('materias-primas')
@@ -96,11 +103,16 @@ export class ProduccionController {
 
   @Get('recepciones')
   @Permisos(PERMISOS.PRODUCCION_VER)
-  listarRecepciones(
+  async listarRecepciones(
     @CurrentUser() user: AuthenticatedUser,
     @Query() filtros: ListarRecepcionesDto,
+    @Res({ passthrough: true }) res: Response,
   ) {
-    return this.produccion.listarRecepciones(exigirEmpresa(user), filtros);
+    const resultado = await this.produccion.listarRecepciones(
+      exigirEmpresa(user),
+      filtros,
+    );
+    return responderPaginado(res, resultado);
   }
 
   @Post('recepciones')
@@ -180,11 +192,16 @@ export class ProduccionController {
 
   @Get('ordenes')
   @Permisos(PERMISOS.PRODUCCION_VER)
-  listarOrdenes(
+  async listarOrdenes(
     @CurrentUser() user: AuthenticatedUser,
     @Query() filtros: ListarOrdenesDto,
+    @Res({ passthrough: true }) res: Response,
   ) {
-    return this.produccion.listarOrdenes(exigirEmpresa(user), filtros);
+    const resultado = await this.produccion.listarOrdenes(
+      exigirEmpresa(user),
+      filtros,
+    );
+    return responderPaginado(res, resultado);
   }
 
   @Get('ordenes/:id')
@@ -248,11 +265,16 @@ export class ProduccionController {
 
   @Get('mermas')
   @Permisos(PERMISOS.PRODUCCION_VER)
-  listarMermas(
+  async listarMermas(
     @CurrentUser() user: AuthenticatedUser,
     @Query() filtros: ListarMermasDto,
+    @Res({ passthrough: true }) res: Response,
   ) {
-    return this.produccion.listarMermas(exigirEmpresa(user), filtros);
+    const resultado = await this.produccion.listarMermas(
+      exigirEmpresa(user),
+      filtros,
+    );
+    return responderPaginado(res, resultado);
   }
 
   @Post('mermas')

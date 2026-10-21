@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { EstadoMembresia, Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
+import { construirPaginado } from '../common/utils/paginacion';
 import { AuditoriaService } from '../auditoria/auditoria.service';
 import {
   CreateClienteDto,
@@ -76,29 +77,36 @@ export class MembresiaService {
 
   // -------------------------------- Clientes -------------------------------
 
-  listarClientes(empresaId: string, filtros: ListarClientesDto) {
+  async listarClientes(empresaId: string, filtros: ListarClientesDto) {
     const buscar = filtros.buscar?.trim();
-    return this.prisma.cliente.findMany({
-      where: {
-        empresaId,
-        ...(buscar
-          ? {
-              OR: [
-                { nombre: { contains: buscar, mode: 'insensitive' as const } },
-                {
-                  documento: { contains: buscar, mode: 'insensitive' as const },
-                },
-                { email: { contains: buscar, mode: 'insensitive' as const } },
-                {
-                  telefono: { contains: buscar, mode: 'insensitive' as const },
-                },
-              ],
-            }
-          : {}),
-      },
-      orderBy: { nombre: 'asc' },
-      include: { _count: { select: { membresias: true } } },
-    });
+    const where: Prisma.ClienteWhereInput = {
+      empresaId,
+      ...(buscar
+        ? {
+            OR: [
+              { nombre: { contains: buscar, mode: 'insensitive' as const } },
+              {
+                documento: { contains: buscar, mode: 'insensitive' as const },
+              },
+              { email: { contains: buscar, mode: 'insensitive' as const } },
+              {
+                telefono: { contains: buscar, mode: 'insensitive' as const },
+              },
+            ],
+          }
+        : {}),
+    };
+    const [clientes, total] = await Promise.all([
+      this.prisma.cliente.findMany({
+        where,
+        orderBy: { nombre: 'asc' },
+        skip: filtros.skip,
+        take: filtros.take,
+        include: { _count: { select: { membresias: true } } },
+      }),
+      this.prisma.cliente.count({ where }),
+    ]);
+    return construirPaginado(clientes, total, filtros.pagina, filtros.limite);
   }
 
   async crearCliente(
@@ -188,18 +196,28 @@ export class MembresiaService {
 
   // ----------------------------- Planes de membresia -----------------------
 
-  listarPlanesMembresia(empresaId: string, filtros: ListarPlanesMembresiaDto) {
+  async listarPlanesMembresia(
+    empresaId: string,
+    filtros: ListarPlanesMembresiaDto,
+  ) {
     const buscar = filtros.buscar?.trim();
-    return this.prisma.planMembresia.findMany({
-      where: {
-        empresaId,
-        ...(buscar
-          ? { nombre: { contains: buscar, mode: 'insensitive' as const } }
-          : {}),
-      },
-      orderBy: { nombre: 'asc' },
-      include: { _count: { select: { membresias: true } } },
-    });
+    const where: Prisma.PlanMembresiaWhereInput = {
+      empresaId,
+      ...(buscar
+        ? { nombre: { contains: buscar, mode: 'insensitive' as const } }
+        : {}),
+    };
+    const [planes, total] = await Promise.all([
+      this.prisma.planMembresia.findMany({
+        where,
+        orderBy: { nombre: 'asc' },
+        skip: filtros.skip,
+        take: filtros.take,
+        include: { _count: { select: { membresias: true } } },
+      }),
+      this.prisma.planMembresia.count({ where }),
+    ]);
+    return construirPaginado(planes, total, filtros.pagina, filtros.limite);
   }
 
   async crearPlanMembresia(
@@ -291,30 +309,73 @@ export class MembresiaService {
   // ------------------------------ Afiliaciones -----------------------------
 
   async listarMembresias(empresaId: string, filtros: ListarMembresiasDto) {
-    const membresias = await this.prisma.membresiaCliente.findMany({
-      where: {
-        empresaId,
-        ...(filtros.clienteId ? { clienteId: filtros.clienteId } : {}),
-      },
-      orderBy: { createdAt: 'desc' },
-      take: 300,
-      include: {
-        cliente: {
-          select: { id: true, nombre: true, documento: true, telefono: true },
-        },
-        plan: {
-          select: { id: true, nombre: true, precio: true, duracionDias: true },
-        },
-      },
-    });
-    const lista = membresias.map((m) => ({
-      ...m,
-      estado: this.estadoEfectivo(m.estado, m.fechaFin),
-    }));
+    const where: Prisma.MembresiaClienteWhereInput = {
+      empresaId,
+      ...(filtros.clienteId ? { clienteId: filtros.clienteId } : {}),
+    };
+
+    // El estado efectivo se calcula en memoria (depende de fechaFin), por lo
+    // que cuando se filtra por estado la paginacion se aplica despues del
+    // filtro para no devolver paginas incompletas (hallazgo Q).
     if (filtros.estado) {
-      return lista.filter((m) => m.estado === filtros.estado);
+      const todas = await this.prisma.membresiaCliente.findMany({
+        where,
+        orderBy: { createdAt: 'desc' },
+        take: 2000,
+        include: {
+          cliente: {
+            select: {
+              id: true,
+              nombre: true,
+              documento: true,
+              telefono: true,
+            },
+          },
+          plan: {
+            select: { id: true, nombre: true, precio: true, duracionDias: true },
+          },
+        },
+      });
+      const filtradas = todas
+        .map((m) => ({ ...m, estado: this.estadoEfectivo(m.estado, m.fechaFin) }))
+        .filter((m) => m.estado === filtros.estado);
+      const inicio = filtros.skip;
+      const items = filtradas.slice(inicio, inicio + filtros.take);
+      return construirPaginado(items, filtradas.length, filtros.pagina, filtros.limite);
     }
-    return lista;
+
+    const [membresias, total] = await Promise.all([
+      this.prisma.membresiaCliente.findMany({
+        where,
+        orderBy: { createdAt: 'desc' },
+        skip: filtros.skip,
+        take: filtros.take,
+        include: {
+          cliente: {
+            select: {
+              id: true,
+              nombre: true,
+              documento: true,
+              telefono: true,
+            },
+          },
+          plan: {
+            select: { id: true, nombre: true, precio: true, duracionDias: true },
+          },
+        },
+      }),
+      this.prisma.membresiaCliente.count({ where }),
+    ]);
+
+    return construirPaginado(
+      membresias.map((m) => ({
+        ...m,
+        estado: this.estadoEfectivo(m.estado, m.fechaFin),
+      })),
+      total,
+      filtros.pagina,
+      filtros.limite,
+    );
   }
 
   async crearMembresia(

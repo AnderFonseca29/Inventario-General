@@ -1,4 +1,5 @@
 import { EstadoMembresia } from '@prisma/client';
+import { PaginacionDto } from '../../common/dto/paginacion.dto';
 import {
   IsBoolean,
   IsDateString,
@@ -67,7 +68,7 @@ export class UpdateClienteDto {
   activo?: boolean;
 }
 
-export class ListarClientesDto {
+export class ListarClientesDto extends PaginacionDto {
   @IsOptional()
   @IsString()
   buscar?: string;
@@ -123,7 +124,7 @@ export class UpdatePlanMembresiaDto {
   activo?: boolean;
 }
 
-export class ListarPlanesMembresiaDto {
+export class ListarPlanesMembresiaDto extends PaginacionDto {
   @IsOptional()
   @IsString()
   buscar?: string;
@@ -153,7 +154,7 @@ export class RenovarMembresiaDto {
   fechaInicio?: string;
 }
 
-export class ListarMembresiasDto {
+export class ListarMembresiasDto extends PaginacionDto {
   @IsOptional()
   @IsEnum(EstadoMembresia)
   estado?: EstadoMembresia;

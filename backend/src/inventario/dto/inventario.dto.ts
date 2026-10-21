@@ -10,6 +10,7 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { TipoMovimiento } from '@prisma/client';
+import { PaginacionDto } from '../../common/dto/paginacion.dto';
 
 export class DocumentoDetalleDto {
   @IsUUID()
@@ -45,7 +46,7 @@ export class CreateDocumentoDto {
   detalles!: DocumentoDetalleDto[];
 }
 
-export class ListarMovimientosDto {
+export class ListarMovimientosDto extends PaginacionDto {
   @IsOptional()
   @IsUUID()
   productoId?: string;
@@ -67,7 +68,7 @@ export class ListarMovimientosDto {
   hasta?: string;
 }
 
-export class ListarExistenciasDto {
+export class ListarExistenciasDto extends PaginacionDto {
   @IsOptional()
   @IsUUID()
   bodegaId?: string;

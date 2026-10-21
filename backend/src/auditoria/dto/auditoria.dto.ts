@@ -1,15 +1,13 @@
 import { Type } from 'class-transformer';
 import {
   IsDateString,
-  IsInt,
   IsOptional,
   IsString,
   IsUUID,
-  Max,
-  Min,
 } from 'class-validator';
+import { PaginacionDto } from '../../common/dto/paginacion.dto';
 
-export class ListarAuditoriaDto {
+export class ListarAuditoriaDto extends PaginacionDto {
   @IsOptional()
   @IsString()
   buscar?: string;
@@ -25,11 +23,4 @@ export class ListarAuditoriaDto {
   @IsOptional()
   @IsDateString()
   hasta?: string;
-
-  @IsOptional()
-  @Type(() => Number)
-  @IsInt()
-  @Min(1)
-  @Max(500)
-  limite?: number;
 }
