@@ -270,6 +270,10 @@ const PASOS: Paso[] = [
         <span class="lp-eyebrow">Planes</span>
         <h2>Precios simples que crecen contigo</h2>
         <p>Sin costos ocultos. Cambia de plan cuando quieras.</p>
+        <p class="lp-note">
+          Precios mensuales en pesos colombianos (COP).
+          [DATO PENDIENTE: confirmar con el contador si el IVA está incluido]
+        </p>
       </div>
       <div class="lp-plans">
         @for (pl of planes; track pl.nombre) {
@@ -353,15 +357,15 @@ export class LandingComponent {
     {
       nombre: 'Básico',
       descripcion: 'Para equipos pequeños que inician.',
-      precio: '$—',
+      precio: '$60.000',
       periodo: '/ mes',
       destacado: false,
       incluye: ['Catálogo e inventario', 'Hasta 5 usuarios', 'Reportes esenciales'],
     },
     {
-      nombre: 'Pro',
+      nombre: 'Medio',
       descripcion: 'Para operaciones en crecimiento.',
-      precio: '$—',
+      precio: '$90.000',
       periodo: '/ mes',
       destacado: true,
       incluye: [
@@ -372,13 +376,13 @@ export class LandingComponent {
       ],
     },
     {
-      nombre: 'Empresa',
+      nombre: 'Premium',
       descripcion: 'Para operaciones multisede.',
-      precio: '$—',
+      precio: '$120.000',
       periodo: '/ mes',
       destacado: false,
       incluye: [
-        'Todo lo del plan Pro',
+        'Todo lo del plan Medio',
         'Módulos ilimitados',
         'Usuarios ilimitados',
         'Soporte prioritario',
