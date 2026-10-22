@@ -121,8 +121,15 @@ const COLLAPSE_KEY = 'inv_sidebar_collapsed';
       <div class="main">
         <header class="topbar">
           <div class="topbar-left">
-          <button class="icon-btn" (click)="toggleSidebar()" title="Menú" aria-label="Abrir o cerrar menú" [attr.aria-expanded]="!esMovil() ? !colapsado() : movilAbierto()">
-            </button>
+          <button
+            class="icon-btn sidebar-toggle"
+            (click)="toggleSidebar()"
+            [title]="colapsado() ? 'Expandir el menú' : 'Contraer el menú'"
+            [attr.aria-label]="colapsado() ? 'Expandir el menú' : 'Contraer el menú'"
+            [attr.aria-expanded]="!esMovil() ? !colapsado() : movilAbierto()"
+          >
+            <app-icon [name]="colapsado() ? 'chevron' : 'menu'" />
+          </button>
             <div class="breadcrumb">
               <span class="crumb-root">Panel</span>
               <app-icon name="chevron" class="crumb-sep" />

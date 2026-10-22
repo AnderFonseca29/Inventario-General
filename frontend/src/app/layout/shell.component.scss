@@ -234,6 +234,26 @@
   gap: 12px;
 }
 
+// ---- Botón de collapse del menú lateral ----
+.sidebar-toggle {
+  flex-shrink: 0;
+  color: var(--color-text);
+}
+
+.sidebar-toggle app-icon {
+  transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+// Colapsado: el chevron gira y apunta a la izquierda, como flecha de volver.
+.layout.collapsed .sidebar-toggle app-icon {
+  transform: rotate(-90deg);
+}
+
+.sidebar-toggle:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
 // ---- Migas de pan ----
 .breadcrumb {
   display: flex;
