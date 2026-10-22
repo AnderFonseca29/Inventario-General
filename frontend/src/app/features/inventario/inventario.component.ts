@@ -6,6 +6,7 @@ import {
 import { CatalogosService } from '../../core/services/catalogos.service';
 import { AuthService } from '../../core/services/auth.service';
 import { ToastService } from '../../core/services/toast.service';
+import { DialogoService } from '../../core/services/dialogo.service';
 import { Bodega, Producto } from '../../core/models/catalogo.model';
 import {
   Documento,
@@ -322,6 +323,7 @@ export class InventarioComponent {
   private readonly catalogos = inject(CatalogosService);
   private readonly auth = inject(AuthService);
   private readonly toast = inject(ToastService);
+  private readonly dialogo = inject(DialogoService);
   private readonly fb = inject(FormBuilder);
 
   readonly tiposManuales: TipoMovimientoManual[] = [
@@ -569,7 +571,20 @@ export class InventarioComponent {
   }
 
   anular(doc: DocumentoResumen, enModal = false): void {
-    if (!confirm(`¿Anular el documento ${doc.consecutivo}?`)) return;
+    void this.confirmarAnular(doc, enModal);
+  }
+
+  private async confirmarAnular(
+    doc: DocumentoResumen,
+    enModal: boolean,
+  ): Promise<void> {
+    const ok = await this.dialogo.confirmar({
+      titulo: 'Anular documento',
+      mensaje: `¿Anular el documento ${doc.consecutivo}?`,
+      textoConfirmar: 'Anular documento',
+      peligro: true,
+    });
+    if (!ok) return;
     this.inventario.anularDocumento(doc.id).subscribe({
       next: () => {
         this.toast.exito('Documento anulado');
