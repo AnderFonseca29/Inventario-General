@@ -4,6 +4,7 @@ import { CarguesService } from '../../core/services/cargues.service';
 import { CatalogosService } from '../../core/services/catalogos.service';
 import { AuthService } from '../../core/services/auth.service';
 import { ToastService } from '../../core/services/toast.service';
+import { DialogoService } from '../../core/services/dialogo.service';
 import { Bodega, Producto } from '../../core/models/catalogo.model';
 import {
   Cargue,
@@ -280,6 +281,7 @@ export class CarguesComponent {
   private readonly catalogos = inject(CatalogosService);
   private readonly auth = inject(AuthService);
   private readonly toast = inject(ToastService);
+  private readonly dialogo = inject(DialogoService);
   private readonly fb = inject(FormBuilder);
 
   readonly bodegas = signal<Bodega[]>([]);
@@ -455,7 +457,23 @@ export class CarguesComponent {
   }
 
   anular(cargue: CargueResumen, enModal = false): void {
-    if (!confirm(`¿Anular el cargue ${cargue.consecutivo}?`)) return;
+    void this.confirmarAnular(cargue, enModal);
+  }
+
+  private async confirmarAnular(
+    cargue: CargueResumen,
+    enModal: boolean,
+  ): Promise<void> {
+    const ok = await this.dialogo.confirmar({
+      titulo: 'Anular cargue',
+      mensaje:
+        cargue.estado === 'CONFIRMADO'
+          ? `¿Anular el cargue ${cargue.consecutivo}? El stock descontado volverá a la bodega.`
+          : `¿Anular el cargue ${cargue.consecutivo}?`,
+      textoConfirmar: 'Anular cargue',
+      peligro: true,
+    });
+    if (!ok) return;
     this.carguesSrv.anular(cargue.id).subscribe({
       next: () => {
         this.toast.exito('Cargue anulado');
