@@ -5,6 +5,7 @@ import { AuthService } from '../core/services/auth.service';
 import { ModulosStateService } from '../core/services/modulos-state.service';
 import { Modulo } from '../core/models/modulo.model';
 import { IconComponent } from '../shared/icons';
+import { CambiarContrasenaComponent } from '../features/auth/cambiar-contrasena.component';
 
 interface NavItem {
   label: string;
@@ -63,7 +64,13 @@ const COLLAPSE_KEY = 'inv_sidebar_collapsed';
 
 @Component({
   selector: 'app-shell',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, IconComponent],
+  imports: [
+    RouterOutlet,
+    RouterLink,
+    RouterLinkActive,
+    IconComponent,
+    CambiarContrasenaComponent,
+  ],
   template: `
     <div class="layout" [class.collapsed]="colapsado()" [class.movil-abierto]="movilAbierto()">
       <aside class="sidebar" [attr.aria-hidden]="esMovil() ? !movilAbierto() : null">
@@ -211,6 +218,9 @@ const COLLAPSE_KEY = 'inv_sidebar_collapsed';
                       <app-icon name="building" /> Mi empresa
                     </a>
                   }
+                  <button class="dropdown-item" (click)="abrirCambioContrasena()">
+                    <app-icon name="key" /> Cambiar contraseña
+                  </button>
                   <button class="dropdown-item danger" (click)="salir()">
                     <app-icon name="logout" /> Cerrar sesión
                   </button>
@@ -231,6 +241,8 @@ const COLLAPSE_KEY = 'inv_sidebar_collapsed';
         <div class="menu-overlay" (click)="cerrarMenus()" tabindex="-1" aria-hidden="true"></div>
       }
     </div>
+
+    <app-cambiar-contrasena [(abierto)]="modalContrasena" />
   `,
   styleUrl: './shell.component.scss',
 })
@@ -248,6 +260,7 @@ export class ShellComponent {
   readonly notifAbierto = signal(false);
   readonly movilAbierto = signal(false);
   readonly busqueda = signal('');
+  readonly modalContrasena = signal(false);
 
   // El usuario operativo (vendedor) solo ve Inicio: se oculta toda la seccion
   // de operación. Para el resto se filtra cada modulo por su permiso.
@@ -396,6 +409,11 @@ export class ShellComponent {
   salir(): void {
     this.cerrarMenus();
     this.auth.cerrarSesion();
+  }
+
+  abrirCambioContrasena(): void {
+    this.cerrarMenus();
+    this.modalContrasena.set(true);
   }
 }
 
