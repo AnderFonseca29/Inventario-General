@@ -158,7 +158,7 @@ export class AuthService {
     }
 
     if (usuario.empresa && usuario.empresa.estado === 'CANCELADA') {
-      throw new UnauthorizedException('La empresa esta cancelada');
+      throw new UnauthorizedException('La empresa está cancelada');
     }
 
     const permisos = await this.permisosDeUsuario(usuario.id);

@@ -49,7 +49,7 @@ export class UsuariosService {
     });
     if (roles.length !== rolIds.length) {
       throw new BadRequestException(
-        'Uno o mas roles no pertenecen a la empresa',
+        'Uno o más roles no pertenecen a la empresa',
       );
     }
     return roles;
@@ -115,7 +115,7 @@ export class UsuariosService {
     });
     if (objetivo?.esSuperAdmin) {
       throw new ForbiddenException(
-        'No puede modificar una cuenta de administracion de plataforma',
+        'No puede modificar una cuenta de administración de plataforma',
       );
     }
     const permisosObjetivo = await this.permisosDeUsuario(objetivoId);
@@ -123,7 +123,7 @@ export class UsuariosService {
     const excedidos = [...permisosObjetivo].filter((c) => !propios.has(c));
     if (excedidos.length > 0) {
       throw new ForbiddenException(
-        'No puede modificar un usuario con mas privilegios que usted',
+        'No puede modificar un usuario con más privilegios que usted',
       );
     }
   }
@@ -208,7 +208,7 @@ export class UsuariosService {
     const email = dto.email.toLowerCase();
     const existe = await this.prisma.usuario.findUnique({ where: { email } });
     if (existe) {
-      throw new ConflictException('El correo ya esta registrado');
+      throw new ConflictException('El correo ya está registrado');
     }
 
     const roles = await this.validarRolesDeEmpresa(empresaId, dto.roles);

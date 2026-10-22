@@ -18,7 +18,7 @@ const MAX_INTENTOS = 5;
 /** Crea un error sintetico de unicidad (para el generador inyectable). */
 function errorUnicidad(): Prisma.PrismaClientKnownRequestError {
   return new Prisma.PrismaClientKnownRequestError(
-    'Restriccion unica violada (consecutivo duplicado)',
+    'Restricción única violada (consecutivo duplicado)',
     { code: 'P2002', clientVersion: 'consecutivos' },
   );
 }

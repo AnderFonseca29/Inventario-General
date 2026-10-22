@@ -31,7 +31,7 @@ export class ModulosService {
       where: { id, empresaId },
     });
     if (!modulo) {
-      throw new NotFoundException('Modulo no encontrado');
+      throw new NotFoundException('Módulo no encontrado');
     }
     return modulo;
   }
@@ -151,7 +151,7 @@ export class ModulosService {
     const modulo = await this.obtener(empresaId, id);
     if (modulo.tipo === 'SISTEMA') {
       throw new BadRequestException(
-        'No se puede eliminar un modulo del sistema',
+        'No se puede eliminar un módulo del sistema',
       );
     }
 
@@ -181,7 +181,7 @@ export class ModulosService {
     });
     if (existentes !== ids.length) {
       throw new BadRequestException(
-        'Alguno de los modulos no pertenece a la empresa',
+        'Algún de los módulos no pertenece a la empresa',
       );
     }
 

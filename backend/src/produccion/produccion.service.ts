@@ -366,7 +366,7 @@ export class ProduccionService {
       where: { empresaId, id: { in: ids } },
     });
     if (encontradas !== ids.length) {
-      throw new BadRequestException('Una o mas materias primas son inválidas');
+      throw new BadRequestException('Una o más materias primas son inválidas');
     }
   }
 
@@ -406,7 +406,7 @@ export class ProduccionService {
           },
           include: { detalles: true },
         }),
-      'Ya existe una formula con esa version para el producto',
+      'Ya existe una fórmula con esa versión para el producto',
     );
     await this.auditar(
       empresaId,
@@ -552,7 +552,7 @@ export class ProduccionService {
       if (!formula) throw new BadRequestException('Fórmula inválida');
       if (formula.productoId !== dto.productoId) {
         throw new BadRequestException(
-          'La formula no corresponde al producto de la orden',
+          'La fórmula no corresponde al producto de la orden',
         );
       }
       detallesFormula = formula.detalles.map((detalle) => ({
@@ -826,7 +826,7 @@ export class ProduccionService {
         });
         if (transicion.count === 0) {
           throw new BadRequestException(
-            'La orden ya esta completada o cancelada',
+            'La orden ya está completada o cancelada',
           );
         }
         if (actual.estado === 'EN_PROCESO') {
@@ -952,7 +952,7 @@ export class ProduccionService {
           },
         });
         if (transicion.count === 0) {
-          throw new BadRequestException('La merma no esta pendiente');
+          throw new BadRequestException('La merma no está pendiente');
         }
         if (actual.materiaPrimaId) {
           const mp = await tx.materiaPrima.findUnique({
@@ -999,7 +999,7 @@ export class ProduccionService {
       },
     });
     if (transicion.count === 0) {
-      throw new BadRequestException('La merma no esta pendiente');
+      throw new BadRequestException('La merma no está pendiente');
     }
     const merma = await this.prisma.merma.findUniqueOrThrow({ where: { id } });
     await this.auditar(empresaId, actorId, 'merma.rechazada', 'Merma', id, {

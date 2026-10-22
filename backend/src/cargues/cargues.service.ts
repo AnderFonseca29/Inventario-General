@@ -195,7 +195,7 @@ export class CarguesService {
       select: { id: true, nombre: true, costo: true },
     });
     if (productos.length !== productoIds.length) {
-      throw new BadRequestException('Uno o mas productos son inválidos');
+      throw new BadRequestException('Uno o más productos son inválidos');
     }
     const mapaProductos = new Map(productos.map((p) => [p.id, p]));
 
@@ -346,7 +346,7 @@ export class CarguesService {
       });
       if (!cargueActual) throw new NotFoundException('Cargue no encontrado');
       if (cargueActual.estado === 'ANULADO') {
-        throw new BadRequestException('El cargue ya esta anulado');
+        throw new BadRequestException('El cargue ya está anulado');
       }
 
       // Un cargue ya confirmado devolvio el stock a la bodega: al anularlo se
