@@ -1,17 +1,48 @@
-# Normaliza los saltos de línea a LF en el repositorio.
+# .gitattributes - Stockora
+#
+# Reglas de normalizacion de texto en Git. Mantiene los archivos de texto en
+# UTF-8 y LF en el repositorio, sin importar el sistema operativo del
+# desarrollador. Esto evita que Git guarde finales de linea o codificacion local.
+
+# --- Normalizacion por defecto de todo archivo de texto ---
 * text=auto eol=lf
 
-# Archivos que deben conservar CRLF
-*.bat text eol=crlf
-*.cmd text eol=crlf
+# --- Codificacion explicita ---
+*.ts        text eol=lf working-tree-encoding=UTF-8
+*.tsx       text eol=lf working-tree-encoding=UTF-8
+*.js        text eol=lf working-tree-encoding=UTF-8
+*.jsx       text eol=lf working-tree-encoding=UTF-8
+*.mjs       text eol=lf working-tree-encoding=UTF-8
+*.cjs       text eol=lf working-tree-encoding=UTF-8
+*.json      text eol=lf working-tree-encoding=UTF-8
+*.html      text eol=lf working-tree-encoding=UTF-8
+*.css       text eol=lf working-tree-encoding=UTF-8
+*.scss      text eol=lf working-tree-encoding=UTF-8
+*.md        text eol=lf working-tree-encoding=UTF-8
+*.yml       text eol=lf working-tree-encoding=UTF-8
+*.yaml      text eol=lf working-tree-encoding=UTF-8
+*.prisma    text eol=lf working-tree-encoding=UTF-8
+*.sql       text eol=lf working-tree-encoding=UTF-8
+*.svg       text eol=lf working-tree-encoding=UTF-8
+*.txt       text eol=lf working-tree-encoding=UTF-8
+*.env       text eol=lf working-tree-encoding=UTF-8
+*.example   text eol=lf working-tree-encoding=UTF-8
 
-# Binarios
-*.png binary
-*.jpg binary
-*.jpeg binary
-*.gif binary
-*.ico binary
-*.woff binary
-*.woff2 binary
-*.ttf binary
-*.pdf binary
+# --- Binarios: nunca tocar ---
+*.png       binary
+*.jpg       binary
+*.jpeg      binary
+*.gif       binary
+*.webp      binary
+*.ico       binary
+*.woff      binary
+*.woff2     binary
+*.ttf       binary
+*.eot       binary
+*.pdf       binary
+*.zip       binary
+
+# --- Excepciones ---
+*.bat       text eol=crlf
+*.cmd       text eol=crlf
+*.ps1       text eol=crlf

@@ -1,4 +1,4 @@
-﻿# Multi-stage Dockerfile para backend NestJS + Prisma (hallazgo O)
+# Multi-stage Dockerfile para backend NestJS + Prisma (hallazgo O)
 # Objetivo: imagen mas ligera, sin devDependencies, con solo lo necesario para runtime
 
 # --- Etapa 1: Dependencias ---
