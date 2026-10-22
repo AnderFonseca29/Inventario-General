@@ -9,16 +9,20 @@ import { MODULOS_SISTEMA } from '../src/common/constants/modulos';
 const prisma = new PrismaClient();
 
 const FUNCIONALIDADES = [
-  { codigo: 'usuarios', nombre: 'Gestion de usuarios', modulo: 'usuarios' },
+  { codigo: 'usuarios', nombre: 'Gestión de usuarios', modulo: 'usuarios' },
   { codigo: 'roles', nombre: 'Roles y permisos', modulo: 'roles' },
-  { codigo: 'catalogos', nombre: 'Catalogos de productos', modulo: 'catalogos' },
+  { codigo: 'catalogos', nombre: 'Catálogos de productos', modulo: 'catalogos' },
   { codigo: 'inventario', nombre: 'Inventario y movimientos', modulo: 'inventario' },
   { codigo: 'cargues', nombre: 'Cargues a vendedores', modulo: 'cargues' },
   { codigo: 'botellones', nombre: 'Control de botellones', modulo: 'botellones' },
-  { codigo: 'produccion', nombre: 'Materias primas y produccion', modulo: 'produccion' },
+  {
+    codigo: 'produccion',
+    nombre: 'Materias primas y producción',
+    modulo: 'produccion',
+  },
   { codigo: 'documentos', nombre: 'Solicitudes y comprobantes internos', modulo: 'documentos' },
   { codigo: 'reportes', nombre: 'Reportes y alertas', modulo: 'reportes' },
-  { codigo: 'auditoria', nombre: 'Auditoria', modulo: 'auditoria' },
+  { codigo: 'auditoria', nombre: 'Auditoría', modulo: 'auditoria' },
 ];
 
 const PLANES = [
