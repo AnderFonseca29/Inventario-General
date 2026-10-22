@@ -113,6 +113,9 @@ export class EmpresasService {
           email,
           passwordHash,
           esSuperAdmin: false,
+          // El administrador creado con la empresa es su dueno: es la unica
+          // cuenta autorizada para el modulo de membresias (pago).
+          esPropietario: true,
         },
       });
 

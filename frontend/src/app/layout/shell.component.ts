@@ -59,6 +59,10 @@ const PERMISO_POR_CLAVE: Record<string, string | string[]> = {
   auditorias: 'auditoria.ver',
 };
 
+// Modulos reservados al dueno de la empresa: los demas usuarios no los ven en
+// el menu ni pueden abrirlos por URL (el backend tambien los rechaza).
+const MODULOS_SOLO_DUENO = new Set(['membresia']);
+
 const COLLAPSE_KEY = 'inv_sidebar_collapsed';
 
 @Component({
@@ -257,6 +261,9 @@ export class ShellComponent {
       .menu()
       .filter((modulo) => {
         if (modulo.tipo !== 'SISTEMA') return true;
+        if (MODULOS_SOLO_DUENO.has(modulo.clave) && !this.auth.esPropietario()) {
+          return false;
+        }
         const permiso = PERMISO_POR_CLAVE[modulo.clave];
         if (!permiso) return false;
         return Array.isArray(permiso)

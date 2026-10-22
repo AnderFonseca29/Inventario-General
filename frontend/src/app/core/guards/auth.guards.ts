@@ -69,3 +69,15 @@ export function permisoOSuperAdminGuard(codigo: string): CanActivateFn {
     return router.createUrlTree(['/app/dashboard']);
   };
 }
+
+// Rutas exclusivas del dueno de la empresa (modulo de membresias). Los demas
+// usuarios de la empresa no acceden: el backend tambien los rechaza con 403.
+export const propietarioGuard: CanActivateFn = () => {
+  const auth = inject(AuthService);
+  const router = inject(Router);
+
+  if (auth.esPropietario() || auth.isSuperAdmin()) {
+    return true;
+  }
+  return router.createUrlTree(['/app/dashboard']);
+};

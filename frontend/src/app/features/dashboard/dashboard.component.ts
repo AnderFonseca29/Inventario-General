@@ -91,7 +91,7 @@ const ROADMAP = [
       @if (esOperativo()) {
         <p>
           Este es tu resumen personal. Aquí ves únicamente tu actividad: tus
-          cargues, tus movimientos de botellón y las membresías que afiliaste.
+          cargues y tus movimientos de botellón.
         </p>
       } @else {
         <p>
@@ -187,39 +187,41 @@ const ROADMAP = [
             }
           </div>
 
-          <div class="card card-body anim-up">
-            <div class="section-title"><app-icon name="users" /> Mis membresías</div>
-            @if (membresiasRecientes().length === 0) {
-              <div class="empty">
-                <app-icon name="users" />
-                <div class="empty-title">Sin membresías</div>
-                <div>Aún no has afiliado membresías.</div>
-              </div>
-            } @else {
-              <div class="table-wrap">
-                <table class="table">
-                  <thead>
-                    <tr>
-                      <th>Cliente</th>
-                      <th>Plan</th>
-                      <th>Estado</th>
-                      <th>Vence</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    @for (m of membresiasRecientes(); track m.id) {
+          @if (esPropietario()) {
+            <div class="card card-body anim-up">
+              <div class="section-title"><app-icon name="users" /> Mis membresías</div>
+              @if (membresiasRecientes().length === 0) {
+                <div class="empty">
+                  <app-icon name="users" />
+                  <div class="empty-title">Sin membresías</div>
+                  <div>Aún no has afiliado membresías.</div>
+                </div>
+              } @else {
+                <div class="table-wrap">
+                  <table class="table">
+                    <thead>
                       <tr>
-                        <td><span class="cell-strong">{{ m.cliente }}</span></td>
-                        <td><span class="cell-muted">{{ m.plan }}</span></td>
-                        <td><span [class]="badgeEstado(m.estado)">{{ m.estado }}</span></td>
-                        <td><span class="cell-muted">{{ fechaCorta(m.fechaFin) }}</span></td>
+                        <th>Cliente</th>
+                        <th>Plan</th>
+                        <th>Estado</th>
+                        <th>Vence</th>
                       </tr>
-                    }
-                  </tbody>
-                </table>
-              </div>
-            }
-          </div>
+                    </thead>
+                    <tbody>
+                      @for (m of membresiasRecientes(); track m.id) {
+                        <tr>
+                          <td><span class="cell-strong">{{ m.cliente }}</span></td>
+                          <td><span class="cell-muted">{{ m.plan }}</span></td>
+                          <td><span [class]="badgeEstado(m.estado)">{{ m.estado }}</span></td>
+                          <td><span class="cell-muted">{{ fechaCorta(m.fechaFin) }}</span></td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                </div>
+              }
+            </div>
+          }
         </div>
       </div>
     } @else {
@@ -387,6 +389,8 @@ export class DashboardComponent {
   readonly user = this.auth.user;
   readonly esSuperAdmin = this.auth.isSuperAdmin;
   readonly esOperativo = this.auth.esOperativo;
+  // El modulo de membresias es del dueno: los demas usuarios no lo ven.
+  readonly esPropietario = this.auth.esPropietario;
   readonly roadmap = ROADMAP;
 
   readonly empresas = signal<Empresa[]>([]);
@@ -462,7 +466,7 @@ export class DashboardComponent {
   readonly kpis = computed<Kpi[]>(() => {
     if (this.esOperativo()) {
       const r = this.resumen();
-      return [
+      const kpis: Kpi[] = [
         {
           label: 'Mis cargues',
           valor: r?.cargues.total ?? 0,
@@ -484,14 +488,19 @@ export class DashboardComponent {
           tint: 'tint-accent',
           sub: 'Movimientos registrados',
         },
-        {
+      ];
+      // Las membresias son del dueno de la empresa: no se le anuncian a los
+      // demas usuarios.
+      if (this.esPropietario()) {
+        kpis.push({
           label: 'Membresías activas',
           valor: r?.membresias.activas ?? 0,
           icono: 'users',
           tint: 'tint-success',
           sub: 'Afiliadas por ti',
-        },
-      ];
+        });
+      }
+      return kpis;
     }
 
     if (this.esSuperAdmin()) {

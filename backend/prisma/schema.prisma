@@ -292,6 +292,9 @@ model Usuario {
   passwordHash String
   activo       Boolean   @default(true)
   esSuperAdmin Boolean   @default(false)
+  // Dueno de la empresa: unica cuenta autorizada para ver y administer el
+  // modulo de membresias (pago de la suscripcion) y los reportes del modulo.
+  esPropietario Boolean  @default(false)
   ultimoLogin  DateTime? @db.Timestamptz(3)
   createdAt    DateTime  @default(now()) @db.Timestamptz(3)
   updatedAt    DateTime  @updatedAt @db.Timestamptz(3)

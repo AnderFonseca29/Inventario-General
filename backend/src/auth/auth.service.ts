@@ -148,6 +148,7 @@ export class AuthService {
         email: true,
         activo: true,
         esSuperAdmin: true,
+        esPropietario: true,
         empresaId: true,
         empresa: { select: { estado: true } },
       },
@@ -168,6 +169,7 @@ export class AuthService {
       email: usuario.email,
       empresaId: usuario.empresaId,
       esSuperAdmin: usuario.esSuperAdmin,
+      esPropietario: usuario.esPropietario,
       permisos,
     };
   }

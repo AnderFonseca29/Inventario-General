@@ -31,10 +31,15 @@ import {
 } from '../common/decorators/permisos.decorator';
 import { PERMISOS } from '../common/constants/permisos';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
+import { SoloPropietario } from '../common/decorators/propietario.decorator';
 import { exigirEmpresa } from '../common/guards/tenant.guard';
 import type { AuthenticatedUser } from '../common/types/authenticated-user';
 
+// El modulo de membresias maneja el pago de la suscripcion: solo el dueno de
+// la empresa puede verlo y administrarlo. Los demas usuarios de la empresa
+// reciben 403 aunque tengan el permiso asignado.
 @RequiereEmpresa()
+@SoloPropietario()
 @Controller('membresia')
 export class MembresiaController {
   constructor(private readonly membresia: MembresiaService) {}
