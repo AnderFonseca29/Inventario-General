@@ -73,6 +73,22 @@ describe('DialogoService', () => {
     await expect(promesa).resolves.toBeNull();
   });
 
+  it('preguntar puede pedir repetir el valor', () => {
+    void servicio.preguntar({ titulo: 'T', repetir: true, tipo: 'password' });
+    const d = servicio.dialogo();
+    expect(d?.tipo).toBe('preguntar');
+    if (d?.tipo === 'preguntar') {
+      expect(d.repetir).toBe(true);
+      expect(d.tipoEntrada).toBe('password');
+    }
+  });
+
+  it('preguntar no pide repetir por defecto', () => {
+    void servicio.preguntar({ titulo: 'T' });
+    const d = servicio.dialogo();
+    if (d?.tipo === 'preguntar') expect(d.repetir).toBe(false);
+  });
+
   it('avisar abre un dialogo sin decision', () => {
     servicio.avisar({ titulo: 'Formula', mensaje: 'linea 1\nlinea 2' });
     const d = servicio.dialogo();

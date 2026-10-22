@@ -28,6 +28,8 @@ export interface OpcionesPreguntar {
   tipo?: 'text' | 'password';
   /** Longitud minima del valor. */
   minimo?: number;
+  /** Pide escribir el valor dos veces (para contrasenas). */
+  repetir?: boolean;
   textoConfirmar?: string;
   textoCancelar?: string;
 }
@@ -56,6 +58,7 @@ export type Dialogo =
       placeholder: string;
       tipoEntrada: 'text' | 'password';
       minimo: number;
+      repetir: boolean;
       textoConfirmar: string;
       textoCancelar: string;
       peligro: boolean;
@@ -110,6 +113,7 @@ export class DialogoService {
         placeholder: opciones.placeholder ?? '',
         tipoEntrada: opciones.tipo ?? 'text',
         minimo: opciones.minimo ?? 1,
+        repetir: opciones.repetir ?? false,
         textoConfirmar: opciones.textoConfirmar ?? 'Guardar',
         textoCancelar: opciones.textoCancelar ?? 'Cancelar',
         peligro: false,

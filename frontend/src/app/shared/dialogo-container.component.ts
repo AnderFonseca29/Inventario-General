@@ -75,6 +75,23 @@ import { IconComponent } from './icons';
                     <div class="form-error">{{ e }}</div>
                   }
                 </div>
+
+                @if (d.repetir) {
+                  <div class="form-group">
+                    <label for="dialogo-campo-repeticion">
+                      Repita {{ d.etiqueta.toLowerCase() }}
+                    </label>
+                    <input
+                      id="dialogo-campo-repeticion"
+                      class="form-control"
+                      [type]="d.tipoEntrada"
+                      [placeholder]="d.placeholder"
+                      [(ngModel)]="valorRepetido"
+                      (keyup.enter)="aceptar()"
+                      [class.is-invalid]="!!error()"
+                    />
+                  </div>
+                }
               }
             </div>
 
@@ -107,6 +124,8 @@ export class DialogoContainerComponent {
 
   /** Valor escrito en el dialogo de tipo "preguntar". */
   readonly valor = signal('');
+  /** Segunda escritura, cuando el dialogo pide repetir el valor. */
+  readonly valorRepetido = signal('');
   readonly error = signal<string | null>(null);
 
   readonly tituloId = 'dialogo-titulo';
@@ -120,6 +139,7 @@ export class DialogoContainerComponent {
       const d = this.dialogo();
       if (!d) return;
       this.valor.set('');
+      this.valorRepetido.set('');
       this.error.set(null);
       setTimeout(() => this.campo()?.nativeElement.focus(), 0);
     });
@@ -167,6 +187,10 @@ export class DialogoContainerComponent {
             ? `Debe tener al menos ${d.minimo} caracteres.`
             : 'Este campo es obligatorio.',
         );
+        return;
+      }
+      if (d.repetir && valor !== this.valorRepetido().trim()) {
+        this.error.set('Los valores escritos no coinciden.');
         return;
       }
       this.dialogoService.resolver(valor);
