@@ -1,0 +1,75 @@
+#!/bin/sh
+# Stockora - Hook pre-commit
+#
+# Falla el commit si se detectan problemas de codificacion:
+#   - Mojibake (doble codificacion UTF-8 -> Latin-1 -> UTF-8)
+#   - Archivos que no son UTF-8 valido
+#   - Byte Order Mark (BOM) UTF-8 no permitido
+#
+# Se ejecuta sobre los archivos EN STAGING para ser rapido.
+# Se puede desactivar con: SKIP_ENCODING_CHECK=1 git commit ...
+#
+# Ver docs/CALIDAD.md para el detalle.
+
+set -e
+
+if [ "$SKIP_ENCODING_CHECK" = "1" ]; then
+  echo "[hook] SKIP_ENCODING_CHECK=1 -> comprobacion de codificacion omitida."
+  exit 0
+fi
+
+REPO_ROOT=$(git rev-parse --show-toplevel)
+cd "$REPO_ROOT"
+
+# --- Localizar Node.js ---
+# Git Bash en Windows no siempre hereda el PATH con Node, asi que se buscan
+# rutas habituales de instalacion antes de rendirse.
+NODE_BIN=""
+if [ -n "$NODE" ] && command -v "$NODE" >/dev/null 2>&1; then
+  NODE_BIN="$NODE"
+elif command -v node >/dev/null 2>&1; then
+  NODE_BIN="node"
+else
+  for candidato in \
+    "/c/Program Files/nodejs/node.exe" \
+    "/c/Program Files (x86)/nodejs/node.exe" \
+    "$LOCALAPPDATA/Programs/nodejs/node.exe" \
+    "$APPDATA/nvm/current/node.exe"; do
+    if [ -x "$candidato" ]; then
+      NODE_BIN="$candidato"
+      break
+    fi
+  done
+fi
+
+if [ -z "$NODE_BIN" ]; then
+  echo "[hook] Node.js no encontrado: se omite la comprobacion de codificacion."
+  echo "[hook] Instala Node.js o exporta NODE=/ruta/a/node antes de hacer commit."
+  exit 0
+fi
+
+echo "[hook] Comprobando codificacion UTF-8..."
+
+STAGED=$(git diff --cached --name-only --diff-filter=ACMR)
+if [ -z "$STAGED" ]; then
+  echo "[hook] Sin archivos de texto en staging: nada que comprobar."
+  exit 0
+fi
+
+TMP_LIST=$(mktemp)
+# shellcheck disable=SC2068
+printf '%s\n' $STAGED > "$TMP_LIST"
+
+if "$NODE_BIN" scripts/check-encoding.mjs --files "$TMP_LIST"; then
+  rm -f "$TMP_LIST"
+  echo "[hook] Codificacion OK."
+  exit 0
+fi
+
+rm -f "$TMP_LIST"
+echo ""
+echo "[hook] COMMIT BLOQUEADO: hay problemas de codificacion en los archivos modificados."
+echo "[hook] Corrige el texto y vuelve a intentarlo."
+echo "[hook] Para una revision automatica:  node scripts/fix-encoding.mjs --apply"
+echo "[hook] Para saltarlo (no recomendado):  SKIP_ENCODING_CHECK=1 git commit ..."
+exit 1
