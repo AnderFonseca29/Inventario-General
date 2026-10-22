@@ -129,23 +129,6 @@
   background: #fff;
 }
 
-.nav-item.disabled {
-  color: #5b6b85;
-  cursor: default;
-  opacity: 0.75;
-}
-
-.pronto-tag {
-  margin-left: auto;
-  font-size: 9.5px;
-  background: rgba(255, 255, 255, 0.1);
-  color: #cbd5e1;
-  padding: 2px 7px;
-  border-radius: 999px;
-  font-weight: 700;
-  letter-spacing: 0.03em;
-}
-
 .sidebar-footer {
   display: flex;
   align-items: center;
@@ -190,8 +173,7 @@
 @media (min-width: 901px) {
   .layout.collapsed .brand-text,
   .layout.collapsed .nav-seccion,
-  .layout.collapsed .nav-label,
-  .layout.collapsed .pronto-tag {
+  .layout.collapsed .nav-label {
     display: none;
   }
 
