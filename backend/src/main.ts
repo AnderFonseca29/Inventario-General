@@ -4,6 +4,7 @@ import { ConfigService } from '@nestjs/config';
 import helmet from 'helmet';
 import { AppModule } from './app.module';
 import { GlobalExceptionFilter } from './common/filters/global-exception.filter';
+import { resolverOrigenes } from './common/utils/origenes-cors';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { bufferLogs: false });
@@ -31,13 +32,12 @@ async function bootstrap() {
   app.useGlobalFilters(new GlobalExceptionFilter());
 
   const config = app.get(ConfigService);
-  const origins = (config.get<string>('CORS_ORIGINS') ?? '')
-    .split(',')
-    .map((o) => o.trim())
-    .filter(Boolean);
+
+  // Los origenes del propio producto van siempre; `CORS_ORIGINS` solo suma.
+  const origins = resolverOrigenes(config.get<string>('CORS_ORIGINS'));
 
   app.enableCors({
-    origin: origins.length > 0 ? origins : false,
+    origin: origins,
     credentials: true,
   });
 
