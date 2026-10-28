@@ -300,7 +300,6 @@ export class CatalogosComponent {
         },
         { key: 'costo', label: 'Costo', tipo: 'number', defecto: 0 },
         { key: 'precioVenta', label: 'Precio de venta', tipo: 'number', defecto: 0 },
-        { key: 'esBotellon', label: 'Es botellón', tipo: 'checkbox', defecto: false },
         {
           key: 'controlaInventario',
           label: 'Controla inventario',
@@ -314,7 +313,6 @@ export class CatalogosComponent {
         { key: 'nombre', label: 'Producto' },
         { key: 'categoria.nombre', label: 'Categoría' },
         { key: 'unidad.abreviatura', label: 'Unidad' },
-        { key: 'esBotellon', label: 'Botellón', tipo: 'bool' },
         { key: 'costo', label: 'Costo', tipo: 'money' },
         { key: 'precioVenta', label: 'Precio', tipo: 'money' },
         { key: 'activo', label: 'Activo', tipo: 'bool' },
