@@ -18,11 +18,25 @@ body {
 body {
   margin: 0;
   font-family: var(--font);
-  background: var(--color-bg);
+  background-color: var(--color-bg);
   color: var(--color-text);
   font-size: 14px;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
+}
+
+// Fondo "tecnico": retícula muy tenue y dos halos de marca. Solo en pantallas
+// grandes para no gastar pintura en el telefono.
+@media (min-width: 901px) {
+  body {
+    background-image:
+      linear-gradient(to right, rgba(16, 24, 40, 0.028) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(16, 24, 40, 0.028) 1px, transparent 1px),
+      radial-gradient(900px 480px at 12% -8%, rgba(79, 70, 229, 0.07), transparent 62%),
+      radial-gradient(760px 420px at 100% 0%, rgba(14, 165, 233, 0.06), transparent 58%);
+    background-size: 44px 44px, 44px 44px, auto, auto;
+    background-repeat: repeat, repeat, no-repeat, no-repeat;
+  }
 }
 
 img,
@@ -52,6 +66,25 @@ button {
 
 ::selection {
   background: rgba(79, 70, 229, 0.18);
+}
+
+// Foco visible y coherente para navegacion con teclado.
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+a,
+button,
+summary {
+  transition: color 0.16s ease, background-color 0.16s ease, border-color 0.16s ease,
+    box-shadow 0.16s ease, transform 0.16s ease;
+}
+
+// Cantidades en monoespaciada: alineadas y con aire tecnico.
+.qty {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
 }
 
 // Scrollbar

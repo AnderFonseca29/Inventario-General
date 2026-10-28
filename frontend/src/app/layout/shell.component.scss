@@ -112,7 +112,7 @@
   color: #cbd5e1;
   font-size: 13.5px;
   font-weight: 500;
-  transition: background 0.16s, color 0.16s;
+  transition: background 0.16s, color 0.16s, transform 0.16s cubic-bezier(0.22, 1, 0.36, 1);
   position: relative;
   white-space: nowrap;
   cursor: pointer;
@@ -127,6 +127,10 @@
 .nav-item:hover:not(.disabled) {
   background: var(--color-sidebar-hover);
   color: #fff;
+}
+
+.nav-item:hover:not(.active):not(.disabled) {
+  transform: translateX(2px);
 }
 
 .nav-item.active {
@@ -364,6 +368,7 @@
   border-radius: 50%;
   background: var(--color-danger);
   border: 2px solid #fff;
+  animation: pulseDot 2.6s ease-in-out infinite;
 }
 
 .notif {
@@ -471,6 +476,12 @@
   flex: 1;
   min-width: 0;
   animation: fadeIn 0.25s ease both;
+}
+
+// Cada cambio de pagina entra con un fundido corto (sin transform, para no
+// crear un contenedor de posicion que rompa los modales fijos).
+.content > router-outlet + * {
+  animation: fadeIn 0.22s ease both;
 }
 
 @media (max-width: 900px) {

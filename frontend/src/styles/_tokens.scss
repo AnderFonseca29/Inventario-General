@@ -11,12 +11,13 @@
   --color-accent-light: #e0f2fe;
 
   // Superficies
-  --color-bg: #f4f6fb;
+  --color-bg: #f4f6fc;
   --color-surface: #ffffff;
-  --color-border: #e6e9f2;
-  --color-border-strong: #d3d9e6;
+  --color-surface-2: #fafbff;
+  --color-border: #e3e7f1;
+  --color-border-strong: #cfd6e6;
   --color-text: #101828;
-  --color-text-muted: #667085;
+  --color-text-muted: #5f6b80;
 
   // Sidebar
   --color-sidebar: #0b1220;
@@ -39,17 +40,22 @@
   --gradient-hero: linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #0ea5e9 100%);
 
   // Radios
-  --radius-lg: 16px;
-  --radius: 12px;
-  --radius-sm: 9px;
+  --radius-lg: 14px;
+  --radius: 11px;
+  --radius-sm: 8px;
 
   // Sombras
-  --shadow-xs: 0 1px 2px rgba(16, 24, 40, 0.05);
-  --shadow-sm: 0 1px 3px rgba(16, 24, 40, 0.08), 0 1px 2px rgba(16, 24, 40, 0.04);
-  --shadow-md: 0 4px 16px -2px rgba(16, 24, 40, 0.1), 0 2px 6px -2px rgba(16, 24, 40, 0.06);
-  --shadow-lg: 0 24px 48px -12px rgba(16, 24, 40, 0.22);
+  --shadow-xs: 0 1px 2px rgba(16, 24, 40, 0.06);
+  --shadow-sm: 0 1px 2px rgba(16, 24, 40, 0.06), 0 1px 3px rgba(16, 24, 40, 0.05);
+  --shadow-md: 0 8px 24px -8px rgba(16, 24, 40, 0.18), 0 2px 6px -2px rgba(16, 24, 40, 0.06);
+  --shadow-lg: 0 28px 60px -16px rgba(16, 24, 40, 0.28);
   --shadow-primary: 0 8px 20px -6px rgba(79, 70, 229, 0.5);
+
+  // Foco accesible
+  --ring: 0 0 0 4px rgba(79, 70, 229, 0.16);
 
   // Tipografía
   --font: 'Segoe UI', system-ui, -apple-system, Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: ui-monospace, 'Cascadia Code', 'JetBrains Mono', 'SFMono-Regular', Menlo,
+    Consolas, 'Liberation Mono', monospace;
 }

@@ -32,17 +32,15 @@
   .segmented {
     display: flex;
     width: 100%;
-    overflow-x: auto;
+    flex-wrap: wrap;
     border-radius: var(--radius);
-    scrollbar-width: none;
-  }
-
-  .segmented::-webkit-scrollbar {
-    display: none;
+    overflow-x: visible;
   }
 
   .segmented button {
+    flex: 1 1 auto;
     white-space: nowrap;
-    flex-shrink: 0;
+    padding: 7px 10px;
+    font-size: 12.5px;
   }
 }

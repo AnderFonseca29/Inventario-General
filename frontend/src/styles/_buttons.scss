@@ -22,6 +22,12 @@
 .btn app-icon {
   width: 17px;
   height: 17px;
+  transition: transform 0.18s ease;
+}
+
+.btn:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
 }
 
 .btn:active:not(:disabled) {

@@ -34,6 +34,11 @@
   height: 46px;
   border-radius: 13px;
   flex-shrink: 0;
+  transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.stat-card:hover .stat-icon {
+  transform: translateY(-2px) scale(1.06);
 }
 
 .stat-icon app-icon {
