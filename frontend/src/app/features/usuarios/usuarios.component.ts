@@ -4,6 +4,7 @@ import { UsuariosService } from '../../core/services/usuarios.service';
 import { RolesService } from '../../core/services/roles.service';
 import { AuthService } from '../../core/services/auth.service';
 import { ToastService } from '../../core/services/toast.service';
+import { DialogoService } from '../../core/services/dialogo.service';
 import { Rol } from '../../core/models/rol.model';
 import { Usuario } from '../../core/models/usuario.model';
 import { IconComponent } from '../../shared/icons';
@@ -222,6 +223,7 @@ export class UsuariosComponent {
   private readonly rolesService = inject(RolesService);
   private readonly auth = inject(AuthService);
   private readonly toast = inject(ToastService);
+  private readonly dialogo = inject(DialogoService);
   private readonly fb = inject(FormBuilder);
 
   readonly usuarios = signal<Usuario[]>([]);
@@ -392,7 +394,17 @@ export class UsuariosComponent {
   }
 
   desactivar(u: Usuario): void {
-    if (!confirm(`¿Desactivar a ${u.nombre}? No podrá iniciar sesión.`)) return;
+    void this.confirmarDesactivar(u);
+  }
+
+  private async confirmarDesactivar(u: Usuario): Promise<void> {
+    const ok = await this.dialogo.confirmar({
+      titulo: 'Desactivar usuario',
+      mensaje: `¿Desactivar a ${u.nombre}? No podrá iniciar sesión.`,
+      textoConfirmar: 'Desactivar',
+      peligro: true,
+    });
+    if (!ok) return;
     this.usuariosService.desactivar(u.id).subscribe({
       next: () => {
         this.toast.exito('Usuario desactivado');
@@ -403,12 +415,21 @@ export class UsuariosComponent {
   }
 
   resetPass(u: Usuario): void {
-    const nueva = prompt(`Nueva contraseña para ${u.nombre} (mínimo 8 caracteres):`);
+    void this.pedirNuevaContrasena(u);
+  }
+
+  private async pedirNuevaContrasena(u: Usuario): Promise<void> {
+    const nueva = await this.dialogo.preguntar({
+      titulo: `Nueva contraseña para ${u.nombre}`,
+      mensaje: 'Se cerrarán las sesiones activas de este usuario.',
+      etiqueta: 'Contraseña',
+      placeholder: 'Mínimo 8 caracteres',
+      tipo: 'password',
+      minimo: 8,
+      repetir: true,
+      textoConfirmar: 'Cambiar contraseña',
+    });
     if (!nueva) return;
-    if (nueva.length < 8) {
-      this.toast.error('La contraseña debe tener al menos 8 caracteres');
-      return;
-    }
     this.usuariosService.resetPassword(u.id, nueva).subscribe({
       next: () => this.toast.exito('Contraseña actualizada'),
       error: (err) => this.toast.error(this.mensaje(err)),

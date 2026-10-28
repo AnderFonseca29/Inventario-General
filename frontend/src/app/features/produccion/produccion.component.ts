@@ -4,6 +4,7 @@ import { ProduccionService } from '../../core/services/produccion.service';
 import { CatalogosService } from '../../core/services/catalogos.service';
 import { AuthService } from '../../core/services/auth.service';
 import { ToastService } from '../../core/services/toast.service';
+import { DialogoService } from '../../core/services/dialogo.service';
 import { Bodega, Producto, Proveedor, Unidad } from '../../core/models/catalogo.model';
 import {
   ETIQUETA_ESTADO_MERMA,
@@ -640,6 +641,7 @@ export class ProduccionComponent {
   private readonly catalogos = inject(CatalogosService);
   private readonly auth = inject(AuthService);
   private readonly toast = inject(ToastService);
+  private readonly dialogo = inject(DialogoService);
   private readonly fb = inject(FormBuilder);
 
   readonly unidades = signal<Unidad[]>([]);
@@ -879,7 +881,17 @@ export class ProduccionComponent {
   }
 
   eliminarMateria(m: MateriaPrima): void {
-    if (!confirm(`¿Eliminar la materia prima ${m.nombre}?`)) return;
+    void this.confirmarEliminarMateria(m);
+  }
+
+  private async confirmarEliminarMateria(m: MateriaPrima): Promise<void> {
+    const ok = await this.dialogo.confirmar({
+      titulo: 'Eliminar materia prima',
+      mensaje: `¿Eliminar la materia prima ${m.nombre}?`,
+      textoConfirmar: 'Eliminar',
+      peligro: true,
+    });
+    if (!ok) return;
     this.produccion.eliminarMateriaPrima(m.id).subscribe({
       next: () => {
         this.toast.exito('Materia prima eliminada');
@@ -970,7 +982,10 @@ export class ProduccionComponent {
     const lineas = f.detalles
       .map((d) => `• ${d.materiaPrima?.nombre ?? d.materiaPrimaId}: ${this.numero(d.cantidad)}`)
       .join('\n');
-    alert(`${f.nombre} (v${f.version})\nProducto: ${f.producto.nombre}\n\n${lineas}`);
+    this.dialogo.avisar({
+      titulo: `${f.nombre} (v${f.version})`,
+      mensaje: `Producto: ${f.producto.nombre}\n\n${lineas}`,
+    });
   }
 
   guardarFormula(): void {
@@ -1011,7 +1026,17 @@ export class ProduccionComponent {
   }
 
   eliminarFormula(f: Formula): void {
-    if (!confirm(`¿Eliminar la fórmula ${f.nombre} v${f.version}?`)) return;
+    void this.confirmarEliminarFormula(f);
+  }
+
+  private async confirmarEliminarFormula(f: Formula): Promise<void> {
+    const ok = await this.dialogo.confirmar({
+      titulo: 'Eliminar fórmula',
+      mensaje: `¿Eliminar la fórmula ${f.nombre} v${f.version}?`,
+      textoConfirmar: 'Eliminar',
+      peligro: true,
+    });
+    if (!ok) return;
     this.produccion.eliminarFormula(f.id).subscribe({
       next: () => {
         this.toast.exito('Fórmula eliminada');
@@ -1073,11 +1098,12 @@ export class ProduccionComponent {
               )} / cons. ${this.numero(d.cantidadConsumida)}`,
           )
           .join('\n');
-        alert(
-          `${orden.consecutivo} — ${this.etiquetaOrden(orden.estado)}\nProducto: ${orden.producto.nombre}\nPlanificado: ${this.numero(
+        this.dialogo.avisar({
+          titulo: `${orden.consecutivo} — ${this.etiquetaOrden(orden.estado)}`,
+          mensaje: `Producto: ${orden.producto.nombre}\nPlanificado: ${this.numero(
             orden.cantidadPlanificada,
           )} / Producido: ${this.numero(orden.cantidadProducida)}\n\n${lineas}`,
-        );
+        });
       },
       error: (err) => this.toast.error(this.mensaje(err)),
     });
@@ -1161,7 +1187,20 @@ export class ProduccionComponent {
   }
 
   cancelarOrden(o: OrdenProduccion): void {
-    if (!confirm(`¿Cancelar la orden ${o.consecutivo}?`)) return;
+    void this.confirmarCancelarOrden(o);
+  }
+
+  private async confirmarCancelarOrden(o: OrdenProduccion): Promise<void> {
+    const ok = await this.dialogo.confirmar({
+      titulo: 'Cancelar orden',
+      mensaje:
+        o.estado === 'EN_PROCESO'
+          ? `¿Cancelar la orden ${o.consecutivo}? Se liberará la materia prima reservada.`
+          : `¿Cancelar la orden ${o.consecutivo}?`,
+      textoConfirmar: 'Cancelar orden',
+      peligro: true,
+    });
+    if (!ok) return;
     this.produccion.cancelarOrden(o.id).subscribe({
       next: () => {
         this.toast.exito('Orden cancelada');

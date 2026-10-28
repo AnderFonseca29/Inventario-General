@@ -2,6 +2,7 @@ import { Component, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { EmpresasService } from '../../core/services/empresas.service';
 import { ToastService } from '../../core/services/toast.service';
+import { DialogoService } from '../../core/services/dialogo.service';
 import { Empresa, EstadoEmpresa } from '../../core/models/empresa.model';
 import { IconComponent } from '../../shared/icons';
 import { FechaColPipe } from '../../shared/fecha-col.pipe';
@@ -233,6 +234,7 @@ import { FechaColPipe } from '../../shared/fecha-col.pipe';
 export class EmpresasComponent {
   private readonly empresasService = inject(EmpresasService);
   private readonly toast = inject(ToastService);
+  private readonly dialogo = inject(DialogoService);
   private readonly fb = inject(FormBuilder);
 
   readonly empresas = signal<Empresa[]>([]);
@@ -347,9 +349,27 @@ export class EmpresasComponent {
   }
 
   cambiarEstado(e: Empresa, estado: EstadoEmpresa): void {
+    void this.confirmarCambioEstado(e, estado);
+  }
+
+  private async confirmarCambioEstado(
+    e: Empresa,
+    estado: EstadoEmpresa,
+  ): Promise<void> {
     const etiqueta =
-      estado === 'ACTIVA' ? 'activar' : estado === 'SUSPENDIDA' ? 'suspender' : 'cancelar';
-    if (!confirm(`¿${etiqueta.charAt(0).toUpperCase() + etiqueta.slice(1)} la empresa ${e.nombre}?`)) return;
+      estado === 'ACTIVA'
+        ? 'activar'
+        : estado === 'SUSPENDIDA'
+          ? 'suspender'
+          : 'cancelar';
+    const accion = etiqueta.charAt(0).toUpperCase() + etiqueta.slice(1);
+    const ok = await this.dialogo.confirmar({
+      titulo: `${accion} empresa`,
+      mensaje: `¿${accion} la empresa ${e.nombre}?`,
+      textoConfirmar: accion,
+      peligro: estado !== 'ACTIVA',
+    });
+    if (!ok) return;
     this.empresasService.cambiarEstado(e.id, estado).subscribe({
       next: () => {
         this.toast.exito('Estado actualizado');
