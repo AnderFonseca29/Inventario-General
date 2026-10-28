@@ -422,7 +422,11 @@ export class ShellComponent implements OnDestroy, AfterViewInit {
     const el = this.contenido()?.nativeElement;
     if (!el) return;
     this.actualizarModal();
-    this.observador = new MutationObserver(() => this.actualizarModal());
+    this.etiquetarTablas();
+    this.observador = new MutationObserver(() => {
+      this.actualizarModal();
+      this.etiquetarTablas();
+    });
     this.observador.observe(el, { childList: true, subtree: true });
   }
 
@@ -437,6 +441,30 @@ export class ShellComponent implements OnDestroy, AfterViewInit {
       return;
     }
     this.modalAbierto.set(el.querySelector('.modal-backdrop') !== null);
+  }
+
+  // Las tablas se apilan como tarjetas en pantallas pequenas (ver _tables.scss).
+  // Para no repetir la etiqueta en cada plantilla, se copia el titulo de la
+  // columna a data-label de cada celda de la fila.
+  private etiquetarTablas(): void {
+    const el = this.contenido()?.nativeElement;
+    if (!el) return;
+    el.querySelectorAll('table').forEach((tabla) => {
+      const encabezados = Array.from(tabla.querySelectorAll('thead th')).map((th) =>
+        (th.textContent ?? '').trim(),
+      );
+      if (encabezados.length === 0) return;
+      tabla.querySelectorAll('tbody tr').forEach((fila) => {
+        Array.from(fila.children).forEach((celda, indice) => {
+          const td = celda as HTMLElement;
+          if (td.tagName !== 'TD' || td.hasAttribute('colspan')) return;
+          const etiqueta = encabezados[indice] ?? '';
+          if (etiqueta && td.getAttribute('data-label') !== etiqueta) {
+            td.setAttribute('data-label', etiqueta);
+          }
+        });
+      });
+    });
   }
 
   toggleSidebar(): void {

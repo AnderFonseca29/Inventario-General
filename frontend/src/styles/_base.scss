@@ -9,6 +9,10 @@
 html,
 body {
   height: 100%;
+  max-width: 100%;
+  // Red de seguridad: nada debe obligar a deslizar la pagina a los lados.
+  // "clip" no crea contenedor de scroll, asi que no rompe el topbar sticky.
+  overflow-x: clip;
 }
 
 body {
@@ -19,6 +23,13 @@ body {
   font-size: 14px;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
+}
+
+img,
+svg,
+video,
+canvas {
+  max-width: 100%;
 }
 
 h1,
