@@ -1,4 +1,4 @@
-﻿import { Component, HostListener, signal } from '@angular/core';
+import { Component, HostListener, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { IconComponent } from '../../shared/icons';
 

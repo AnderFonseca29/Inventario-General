@@ -1,4 +1,4 @@
-﻿import { Component, HostListener, computed, inject, signal } from '@angular/core';
+import { Component, HostListener, computed, inject, signal } from '@angular/core';
 import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { filter } from 'rxjs';
 import { AuthService } from '../core/services/auth.service';
@@ -83,25 +83,17 @@ const COLLAPSE_KEY = 'inv_sidebar_collapsed';
             @if (seccion.items.length) {
               <div class="nav-seccion">{{ seccion.titulo }}</div>
               @for (item of seccion.items; track item.label) {
-                @if (item.pronto) {
-                  <div class="nav-item disabled" [title]="item.label + ' (próximamente)'" role="menuitem" aria-disabled="true">
-                    <app-icon [name]="item.icono" />
-                    <span class="nav-label">{{ item.label }}</span>
-                    <span class="pronto-tag">Pronto</span>
-                  </div>
-                } @else {
-                  <a
-                    class="nav-item"
-                    [routerLink]="item.ruta"
-                    routerLinkActive="active"
-                    [title]="item.label"
-                    (click)="cerrarDrawer()"
-                    [attr.aria-current]="isActive(item) ? 'page' : null"
-                  >
-                    <app-icon [name]="item.icono" />
-                    <span class="nav-label">{{ item.label }}</span>
-                  </a>
-                }
+                <a
+                  class="nav-item"
+                  [routerLink]="item.ruta"
+                  routerLinkActive="active"
+                  [title]="item.label"
+                  (click)="cerrarDrawer()"
+                  [attr.aria-current]="isActive(item) ? 'page' : null"
+                >
+                  <app-icon [name]="item.icono" />
+                  <span class="nav-label">{{ item.label }}</span>
+                </a>
               }
             }
           }
@@ -109,7 +101,7 @@ const COLLAPSE_KEY = 'inv_sidebar_collapsed';
 
         <div class="sidebar-footer">
           <app-icon name="bolt" />
-          <span class="nav-label">v1.0 · Fase 3</span>
+          <span class="nav-label">Versión 1.0</span>
         </div>
       </aside>
 
@@ -144,17 +136,11 @@ const COLLAPSE_KEY = 'inv_sidebar_collapsed';
                 } @else {
                   @for (r of resultadosBusqueda(); track r.seccion + r.label) {
                     @if (r.ruta) {
-                  <a class="dropdown-item" [routerLink]="r.ruta" (click)="busqueda.set('')">
-                    <app-icon [name]="r.icono" />
-                    <span class="search-label">{{ r.label }}</span>
-                    <span class="search-sec">{{ r.seccion }}</span>
-                  </a>
-                    } @else {
-                      <div class="dropdown-item disabled">
+                      <a class="dropdown-item" [routerLink]="r.ruta" (click)="busqueda.set('')">
                         <app-icon [name]="r.icono" />
                         <span class="search-label">{{ r.label }}</span>
-                        <span class="search-sec">Pronto</span>
-                      </div>
+                        <span class="search-sec">{{ r.seccion }}</span>
+                      </a>
                     }
                   }
                 }
@@ -250,7 +236,10 @@ export class ShellComponent {
   readonly busqueda = signal('');
 
   // El usuario operativo (vendedor) solo ve Inicio: se oculta toda la seccion
-  // de operación. Para el resto se filtra cada modulo por su permiso.
+  // de operación. Para el resto se filtra cada módulo por su permiso.
+  // Los módulos sin destino (no implementados o sin ruta) NO se muestran: en
+  // producción el menú no debe tener entradas que no llevan a ninguna parte.
+  // El administrador los sigue viendo en la pantalla de Módulos.
   readonly modulosOperacion = computed<NavItem[]>(() => {
     if (this.esOperativo()) return [];
     return this.modulosState
@@ -263,7 +252,8 @@ export class ShellComponent {
           ? this.auth.hasAlgunPermiso(permiso)
           : this.auth.hasPermiso(permiso);
       })
-      .map(toNavItem);
+      .map(toNavItem)
+      .filter((item) => !item.pronto);
   });
 
   readonly colapsado = signal(localStorage.getItem(COLLAPSE_KEY) === '1');

@@ -34,37 +34,11 @@
   font-weight: 600;
 }
 
-// ---- Roadmap / estado del sistema ----
-.road-item {
-  display: flex;
-  align-items: center;
-  gap: 11px;
-  padding: 9px 0;
-  border-bottom: 1px solid #f0f2f7;
-  font-size: 13.5px;
-}
-
-.road-item:last-child {
-  border-bottom: none;
-}
-
-.road-dot {
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  background: #cbd5e1;
-  flex-shrink: 0;
-}
-
-.road-dot.listo {
-  background: var(--color-success);
-  box-shadow: 0 0 0 4px rgba(5, 150, 105, 0.15);
-}
-
-.road-nombre {
-  flex: 1;
-  font-weight: 500;
-  color: #344054;
+// ---- Grilla principal + lateral ----
+// Cuando la columna lateral no tiene contenido (p. ej. un administrador sin
+// permiso de configurar la empresa), la tarjeta principal ocupa todo el ancho.
+.grid-main-side.sin-lateral {
+  grid-template-columns: 1fr;
 }
 
 // ---- Accesos rápidos ----

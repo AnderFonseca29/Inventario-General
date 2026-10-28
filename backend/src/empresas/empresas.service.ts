@@ -73,7 +73,7 @@ export class EmpresasService {
     const existe = await this.prisma.usuario.findUnique({ where: { email } });
     if (existe) {
       throw new ConflictException(
-        'El correo del administrador ya esta registrado',
+        'El correo del administrador ya está registrado',
       );
     }
     if (dto.nit) {
@@ -81,7 +81,7 @@ export class EmpresasService {
         where: { nit: dto.nit },
       });
       if (existeNit) {
-        throw new ConflictException('El NIT ya esta registrado');
+        throw new ConflictException('El NIT ya está registrado');
       }
     }
 

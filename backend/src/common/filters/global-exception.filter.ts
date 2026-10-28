@@ -142,13 +142,13 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     if (exception instanceof Prisma.PrismaClientInitializationError) {
       return {
         status: HttpStatus.SERVICE_UNAVAILABLE,
-        mensaje: 'El servicio no esta disponible en este momento',
+        mensaje: 'El servicio no está disponible en este momento',
       };
     }
 
     return {
       status: HttpStatus.INTERNAL_SERVER_ERROR,
-      mensaje: 'Ocurrio un error inesperado. Intenta de nuevo mas tarde.',
+      mensaje: 'Ocurrió un error inesperado. Intenta de nuevo más tarde.',
     };
   }
 

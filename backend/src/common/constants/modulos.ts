@@ -8,12 +8,12 @@ export interface ModuloSistemaDefinicion {
   implementado: boolean;
 }
 
-// Modulos fijos del sistema: se siembran por cada empresa y no se pueden eliminar.
+// Módulos fijos del sistema: se siembran por cada empresa y no se pueden eliminar.
 export const MODULOS_SISTEMA: ModuloSistemaDefinicion[] = [
   {
     clave: 'catalogo',
-    nombre: 'Catalogo',
-    descripcion: 'Productos, categorias, unidades y presentaciones',
+    nombre: 'Catálogo',
+    descripcion: 'Productos, categorías, unidades y presentaciones',
     icono: 'box',
     orden: 1,
     ruta: '/catalogos',
@@ -39,8 +39,8 @@ export const MODULOS_SISTEMA: ModuloSistemaDefinicion[] = [
   },
   {
     clave: 'produccion',
-    nombre: 'Produccion',
-    descripcion: 'Materias primas, formulas y ordenes de produccion',
+    nombre: 'Producción',
+    descripcion: 'Materias primas, fórmulas y órdenes de producción',
     icono: 'factory',
     orden: 4,
     ruta: '/produccion',
@@ -48,8 +48,8 @@ export const MODULOS_SISTEMA: ModuloSistemaDefinicion[] = [
   },
   {
     clave: 'membresia',
-    nombre: 'Membresia',
-    descripcion: 'Clientes y planes de membresia',
+    nombre: 'Membresía',
+    descripcion: 'Clientes y planes de membresía',
     icono: 'users',
     orden: 5,
     ruta: '/membresia',
@@ -66,7 +66,7 @@ export const MODULOS_SISTEMA: ModuloSistemaDefinicion[] = [
   },
   {
     clave: 'auditorias',
-    nombre: 'Auditorias',
+    nombre: 'Auditorías',
     descripcion: 'Trazabilidad de acciones y cambios',
     icono: 'audit',
     orden: 7,
@@ -75,7 +75,7 @@ export const MODULOS_SISTEMA: ModuloSistemaDefinicion[] = [
   },
 ];
 
-// Iconos disponibles para los modulos configurables por el administrador.
+// Iconos disponibles para los módulos configurables por el administrador.
 export const ICONOS_MODULO = [
   'box',
   'truck',
