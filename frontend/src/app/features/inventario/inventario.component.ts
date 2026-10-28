@@ -119,7 +119,7 @@ import { formatearFechaHora } from '../../core/utils/fechas';
             @case ('existencias') {
               <table class="table">
                 <thead>
-                  <tr><th>Producto</th><th>SKU</th><th>Bodega</th><th class="ta-right">Cantidad</th></tr>
+                  <tr><th>Producto</th><th>SKU</th><th>Bodega</th><th class="ta-right">Cantidad en bodega</th><th></th></tr>
                 </thead>
                 <tbody>
                   @for (e of existencias(); track e.id) {
@@ -128,6 +128,13 @@ import { formatearFechaHora } from '../../core/utils/fechas';
                       <td><span class="code-pill">{{ e.producto.sku }}</span></td>
                       <td class="cell-muted">{{ e.bodega.nombre }}</td>
                       <td class="ta-right"><span class="qty">{{ numero(e.cantidad) }}</span></td>
+                      <td class="actions">
+                        @if (puedeAjustar()) {
+                          <button class="btn btn-ghost btn-sm" (click)="abrirAjuste(e)" title="Fijar cantidad en bodega">
+                            <app-icon name="edit" />
+                          </button>
+                        }
+                      </td>
                     </tr>
                   }
                 </tbody>
@@ -315,6 +322,54 @@ import { formatearFechaHora } from '../../core/utils/fechas';
         </div>
       </div>
     }
+
+    @if (ajuste(); as ex) {
+      <div class="modal-backdrop" (click)="cerrarAjuste()">
+        <div class="modal" (click)="$event.stopPropagation()">
+          <div class="modal-header">
+            <h3>Fijar cantidad en bodega</h3>
+            <button class="icon-btn" (click)="cerrarAjuste()"><app-icon name="close" /></button>
+          </div>
+          <form [formGroup]="formAjuste" (ngSubmit)="guardarAjuste()">
+            <div class="modal-body">
+              @if (errorAjuste()) {
+                <div class="alert alert-error"><app-icon name="warning" /><span>{{ errorAjuste() }}</span></div>
+              }
+              <p class="ajuste-resumen">
+                <strong>{{ ex.producto.nombre }}</strong>
+                <span class="cell-muted"> · {{ ex.producto.sku }} · {{ ex.bodega.nombre }}</span>
+              </p>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="aj-cant">Cantidad real en bodega</label>
+                  <input id="aj-cant" class="form-control" type="number" step="any" min="0" formControlName="cantidad" />
+                </div>
+                <div class="form-group">
+                  <label>Diferencia</label>
+                  <div class="ajuste-diferencia" [class.neg]="diferenciaAjuste() < 0">
+                    {{ diferenciaAjuste() > 0 ? '+' : '' }}{{ numero(diferenciaAjuste()) }}
+                  </div>
+                </div>
+              </div>
+              <p class="ajuste-ayuda">
+                Hoy hay {{ numero(ex.cantidad) }}. Escribe la cantidad que debe quedar y el sistema
+                registra el ajuste de la diferencia.
+              </p>
+              <div class="form-group">
+                <label for="aj-obs">Motivo (opcional)</label>
+                <input id="aj-obs" class="form-control" formControlName="observaciones" />
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-ghost" (click)="cerrarAjuste()">Cancelar</button>
+              <button type="submit" class="btn btn-primary" [disabled]="guardandoAjuste()">
+                {{ guardandoAjuste() ? 'Guardando…' : 'Guardar cantidad' }}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    }
   `,
   styleUrl: './inventario.component.scss',
 })
@@ -351,6 +406,15 @@ export class InventarioComponent {
   readonly detalle = signal<Documento | null>(null);
   readonly errorModal = signal<string | null>(null);
 
+  readonly ajuste = signal<Existencia | null>(null);
+  readonly errorAjuste = signal<string | null>(null);
+  readonly guardandoAjuste = signal(false);
+
+  readonly formAjuste = this.fb.nonNullable.group({
+    cantidad: [0 as number, [Validators.required, Validators.min(0)]],
+    observaciones: [''],
+  });
+
   readonly form = this.fb.nonNullable.group({
     tipo: ['ENTRADA' as TipoMovimientoManual, [Validators.required]],
     bodegaId: ['', [Validators.required]],
@@ -362,6 +426,8 @@ export class InventarioComponent {
   readonly puedeOperar = () => this.auth.hasPermiso('inventario.operar');
   readonly puedeConfirmar = () => this.auth.hasPermiso('inventario.confirmar');
   readonly puedeAnular = () => this.auth.hasPermiso('inventario.anular');
+  // Fijar la cantidad exige crear el ajuste (operar) y aplicarlo (confirmar).
+  readonly puedeAjustar = () => this.puedeOperar() && this.puedeConfirmar();
 
   esTransferencia(): boolean {
     return this.form.controls.tipo.value === 'TRANSFERENCIA';
@@ -472,6 +538,74 @@ export class InventarioComponent {
   cerrarDoc(): void {
     this.modalDoc.set(false);
     this.detalle.set(null);
+  }
+
+  // ------------------------- Ajuste de cantidad ----------------------------
+
+  abrirAjuste(ex: Existencia): void {
+    this.errorAjuste.set(null);
+    this.formAjuste.reset({ cantidad: Number(ex.cantidad), observaciones: '' });
+    this.ajuste.set(ex);
+  }
+
+  cerrarAjuste(): void {
+    this.ajuste.set(null);
+    this.errorAjuste.set(null);
+  }
+
+  diferenciaAjuste(): number {
+    const ex = this.ajuste();
+    if (!ex) return 0;
+    const real = aNumero(this.formAjuste.controls.cantidad.value) ?? 0;
+    return Number((real - Number(ex.cantidad)).toFixed(4));
+  }
+
+  guardarAjuste(): void {
+    const ex = this.ajuste();
+    if (!ex) return;
+    if (this.formAjuste.invalid) {
+      this.formAjuste.markAllAsTouched();
+      this.errorAjuste.set('Escribe una cantidad válida (0 o más)');
+      return;
+    }
+    const diferencia = this.diferenciaAjuste();
+    if (diferencia === 0) {
+      this.cerrarAjuste();
+      this.toast.info('La cantidad no cambió');
+      return;
+    }
+    const observaciones = this.formAjuste.controls.observaciones.value.trim();
+    this.guardandoAjuste.set(true);
+    this.errorAjuste.set(null);
+    this.inventario
+      .crearDocumento({
+        tipo: 'AJUSTE',
+        bodegaId: ex.bodegaId,
+        observaciones: observaciones || 'Ajuste manual de cantidad en bodega',
+        detalles: [{ productoId: ex.productoId, cantidad: diferencia }],
+      })
+      .subscribe({
+        next: (doc) => this.confirmarAjuste(doc.id),
+        error: (err) => {
+          this.guardandoAjuste.set(false);
+          this.errorAjuste.set(this.mensaje(err));
+        },
+      });
+  }
+
+  private confirmarAjuste(id: string): void {
+    this.inventario.confirmarDocumento(id).subscribe({
+      next: () => {
+        this.guardandoAjuste.set(false);
+        this.cerrarAjuste();
+        this.toast.exito('Cantidad actualizada en bodega');
+        this.cargar();
+      },
+      error: (err) => {
+        this.guardandoAjuste.set(false);
+        this.errorAjuste.set(this.mensaje(err));
+      },
+    });
   }
 
   onTipoChange(): void {
