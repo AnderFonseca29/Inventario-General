@@ -84,7 +84,7 @@ table.table td.actions {
   gap: 11px;
 }
 
-@media (max-width: 640px) {
+@media (max-width: 820px) {
   .table-toolbar {
     padding: 12px;
     gap: 10px;
@@ -94,8 +94,98 @@ table.table td.actions {
     min-width: 100%;
   }
 
-  table.table th,
+  // Sin scroll horizontal: cada fila se convierte en una tarjeta y cada celda
+  // muestra su titulo de columna (el shell copia el <th> a data-label).
+  .table-wrap {
+    overflow-x: visible;
+  }
+
+  table.table,
+  table.table tbody,
+  table.table tr,
   table.table td {
-    padding: 11px 12px;
+    display: block;
+    width: 100%;
+  }
+
+  table.table {
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 13px;
+  }
+
+  table.table thead {
+    display: none;
+  }
+
+  table.table tbody tr {
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    background: var(--color-surface);
+    padding: 4px 12px;
+    margin-bottom: 10px;
+    box-shadow: var(--shadow-xs);
+  }
+
+  table.table tbody tr:last-child {
+    margin-bottom: 0;
+  }
+
+  table.table tbody tr:hover {
+    background: var(--color-surface);
+  }
+
+  table.table td {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 9px 0;
+    border-bottom: 1px dashed #eef0f6;
+    text-align: right;
+    min-height: 40px;
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  // Contenido largo (correos, rutas) se parte en vez de empujar la tarjeta.
+  table.table td > * {
+    min-width: 0;
+  }
+
+  table.table td .cell-main {
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+
+  table.table td:last-child {
+    border-bottom: none;
+  }
+
+  table.table td[data-label]::before {
+    content: attr(data-label);
+    flex: 0 1 auto;
+    max-width: 52%;
+    text-align: left;
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+  }
+
+  table.table td.actions {
+    justify-content: flex-end;
+    min-height: 0;
+    padding-top: 4px;
+  }
+
+  table.table td.actions:empty {
+    display: none;
+  }
+
+  // Celdas vacias (sin dato) no aportan en la tarjeta.
+  table.table td:empty:not([data-label]) {
+    display: none;
   }
 }

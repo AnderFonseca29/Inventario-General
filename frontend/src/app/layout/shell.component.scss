@@ -526,13 +526,29 @@
     gap: 8px;
   }
 
-  .crumb-root,
-  .crumb-sep {
+  // El titulo del modulo ya aparece dentro de cada pagina; en el telefono se
+  // oculta para dejar sitio a la busqueda y a la cuenta sin desbordar.
+  .breadcrumb {
     display: none;
   }
 
+  .topbar-left {
+    min-width: 0;
+    flex: 1 1 auto;
+  }
+
+  .topbar-right {
+    flex: 0 0 auto;
+    gap: 8px;
+  }
+
   .topsearch {
+    min-width: 0;
     margin: 0 4px;
+  }
+
+  .topsearch .form-control {
+    min-width: 0;
   }
 
   .content {
@@ -541,5 +557,12 @@
 
   .sidebar-footer {
     justify-content: center;
+  }
+}
+
+@media (max-width: 380px) {
+  .topbar-right .icon-btn {
+    width: 34px;
+    height: 34px;
   }
 }
