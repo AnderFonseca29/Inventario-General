@@ -13,12 +13,14 @@ import {
 } from '../common/constants/permisos';
 import { MODULOS_SISTEMA } from '../common/constants/modulos';
 import { CreateEmpresaDto, UpdateEmpresaDto } from './dto/empresa.dto';
+import { SuscripcionesService } from '../suscripciones/suscripciones.service';
 
 @Injectable()
 export class EmpresasService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly auditoria: AuditoriaService,
+    private readonly suscripciones: SuscripcionesService,
   ) {}
 
   private async crearRolesSistema(
@@ -124,6 +126,10 @@ export class EmpresasService {
           data: { usuarioId: admin.id, rolId: rolAdmin.id },
         });
       }
+
+      // Toda empresa nueva nace con el periodo de prueba de 3 dias + 1 de
+      // gracia; sin el, la empresa quedaria sin plan y sin reloj de vencimiento.
+      await this.suscripciones.crearPrueba(tx, nueva.id);
 
       return nueva;
     });

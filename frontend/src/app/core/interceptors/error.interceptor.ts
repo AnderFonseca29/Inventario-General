@@ -5,6 +5,7 @@ import {
 import { inject } from '@angular/core';
 import { catchError, throwError } from 'rxjs';
 import { ToastService } from '../services/toast.service';
+import { SuscripcionService } from '../services/suscripcion.service';
 
 /**
  * Interceptor global de errores (hallazgo U).
@@ -12,6 +13,8 @@ import { ToastService } from '../services/toast.service';
  * Normaliza los fallos de red mas comunes para que el usuario vea un mensaje
  * util en lugar de un error tecnico:
  *  - status 0   -> sin conexion / servidor inalcanzable / CORS
+ *  - status 402 -> periodo de prueba vencido (se recarga el estado del plan
+ *                  para que el shell muestre la pantalla de bloqueo)
  *  - status 429 -> demasiadas peticiones (throttling)
  *  - status >=500 -> error del servidor
  *
@@ -20,6 +23,7 @@ import { ToastService } from '../services/toast.service';
  */
 export const errorInterceptor: HttpInterceptorFn = (req, next) => {
   const toast = inject(ToastService);
+  const suscripcion = inject(SuscripcionService);
 
   return next(req).pipe(
     catchError((error: HttpErrorResponse) => {
@@ -27,6 +31,10 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
         toast.error(
           'No hay conexión con el servidor. Verifica tu red e inténtalo de nuevo.',
         );
+      } else if (error.status === 402) {
+        // El shell pinta la pantalla de bloqueo con el estado del plan; aqui
+        // solo se refresca para que aparezca sin recargar la pagina.
+        suscripcion.cargar();
       } else if (error.status === 429) {
         toast.error(
           'Demasiadas peticiones. Espera unos segundos antes de volver a intentarlo.',

@@ -30,6 +30,7 @@ import { PermisosGuard } from './common/guards/permisos.guard';
 import { SuperAdminGuard } from './common/guards/superadmin.guard';
 import { PropietarioGuard } from './common/guards/propietario.guard';
 import { TenantGuard } from './common/guards/tenant.guard';
+import { SuscripcionGuard } from './common/guards/suscripcion.guard';
 
 @Module({
   imports: [
@@ -63,6 +64,7 @@ import { TenantGuard } from './common/guards/tenant.guard';
     { provide: APP_GUARD, useClass: EmpresaContextoGuard },
     { provide: APP_GUARD, useClass: PermisosGuard },
     { provide: APP_GUARD, useClass: TenantGuard },
+    { provide: APP_GUARD, useClass: SuscripcionGuard },
     { provide: APP_GUARD, useClass: SuperAdminGuard },
     { provide: APP_GUARD, useClass: PropietarioGuard },
   ],

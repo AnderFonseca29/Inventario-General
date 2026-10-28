@@ -10,6 +10,7 @@ import {
 } from '@angular/common/http/testing';
 import { errorInterceptor } from './error.interceptor';
 import { ToastService } from '../services/toast.service';
+import { SuscripcionService } from '../services/suscripcion.service';
 
 describe('errorInterceptor (hallazgo U)', () => {
   let http: HttpClient;
@@ -80,6 +81,21 @@ describe('errorInterceptor (hallazgo U)', () => {
       statusText: 'Bad Request',
     });
     expect(mostrar).not.toHaveBeenCalled();
+  });
+
+  it('en 402 refresca el plan y no duplica el aviso con un toast', () => {
+    const cargar = vi
+      .spyOn(TestBed.inject(SuscripcionService), 'cargar')
+      .mockImplementation(() => undefined);
+
+    pedirYDetener().flush('periodo vencido', {
+      status: 402,
+      statusText: 'Payment Required',
+    });
+
+    expect(mostrar).not.toHaveBeenCalled();
+    expect(cargar).toHaveBeenCalledTimes(1);
+    cargar.mockRestore();
   });
 
   it('no muestra toast para 401 (lo gestiona el authInterceptor)', () => {

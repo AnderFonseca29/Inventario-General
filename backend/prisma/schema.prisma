@@ -232,6 +232,10 @@ model Suscripcion {
   fechaInicio DateTime          @default(now()) @db.Timestamptz(3)
   fechaFin    DateTime?         @db.Timestamptz(3)
   diasGracia  Int               @default(15)
+  // Las empresas nuevas entran con un periodo de prueba; al activar un plan de
+  // pago la marca se apaga. Sirve para mostrar el aviso de "dias restantes"
+  // sin adivinar por la duracion del periodo.
+  esPrueba    Boolean           @default(false)
   createdAt   DateTime          @default(now()) @db.Timestamptz(3)
   updatedAt   DateTime          @updatedAt @db.Timestamptz(3)
 

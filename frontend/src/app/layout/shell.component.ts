@@ -20,6 +20,8 @@ import {
 import { filter } from 'rxjs';
 import { AuthService } from '../core/services/auth.service';
 import { ModulosStateService } from '../core/services/modulos-state.service';
+import { SuscripcionService } from '../core/services/suscripcion.service';
+import { formatearFecha } from '../core/utils/fechas';
 import { Modulo } from '../core/models/modulo.model';
 import { IconComponent } from '../shared/icons';
 import { CambiarContrasenaComponent } from '../features/auth/cambiar-contrasena.component';
@@ -37,6 +39,13 @@ interface NavItem {
 interface NavSeccion {
   titulo: string;
   items: NavItem[];
+}
+
+// Aviso del periodo de prueba que se muestra sobre el contenido.
+interface AvisoPlan {
+  tono: 'prueba' | 'gracia';
+  titulo: string;
+  detalle: string;
 }
 
 const NAV: NavSeccion[] = [
@@ -263,7 +272,49 @@ function leerPreferencia(): PreferenciaMenu {
         </header>
 
         <main class="content" #contenido>
-          <router-outlet />
+          @if (suscripcion.bloqueado()) {
+            <section class="plan-bloqueo" aria-labelledby="plan-bloqueo-titulo">
+              <span class="plan-bloqueo-icono"><app-icon name="lock" /></span>
+              <p class="plan-eyebrow">Suscripción</p>
+              <h1 id="plan-bloqueo-titulo">El periodo de prueba terminó</h1>
+              <p class="plan-texto">
+                Los módulos de tu empresa están en pausa hasta que se active un
+                plan. Contacta al administrador para reanudar el trabajo.
+              </p>
+              @if (suscripcion.plan()?.plan; as plan) {
+                <dl class="plan-datos">
+                  <div>
+                    <dt>Plan</dt>
+                    <dd>{{ plan.nombre }}</dd>
+                  </div>
+                  @if (detalleFin(); as fin) {
+                    <div>
+                      <dt>Terminó el</dt>
+                      <dd>{{ fin }}</dd>
+                    </div>
+                  }
+                </dl>
+              }
+              <button class="btn btn-primary" (click)="salir()">
+                <app-icon name="logout" /> Cerrar sesión
+              </button>
+            </section>
+          } @else {
+            @if (avisoPlan(); as aviso) {
+              <aside
+                class="aviso-plan"
+                [class.aviso-gracia]="aviso.tono === 'gracia'"
+                role="status"
+              >
+                <app-icon name="clock" />
+                <div class="aviso-plan-texto">
+                  <strong>{{ aviso.titulo }}</strong>
+                  <span>{{ aviso.detalle }}</span>
+                </div>
+              </aside>
+            }
+            <router-outlet />
+          }
         </main>
       </div>
 
@@ -282,6 +333,7 @@ export class ShellComponent implements OnDestroy, AfterViewInit {
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
   private readonly modulosState = inject(ModulosStateService);
+  readonly suscripcion = inject(SuscripcionService);
 
   readonly user = this.auth.user;
   readonly esSuperAdmin = this.auth.isSuperAdmin;
@@ -364,6 +416,43 @@ export class ShellComponent implements OnDestroy, AfterViewInit {
     return email.slice(0, 2).toUpperCase();
   });
 
+  /**
+   * Aviso sobre el contenido: solo para empresas con suscripcion vigente que
+   * estan en prueba o en el dia de gracia. Las empresas sin suscripcion
+   * (anteriores al periodo de prueba) no ven nada.
+   */
+  readonly avisoPlan = computed<AvisoPlan | null>(() => {
+    const plan = this.suscripcion.plan();
+    if (!plan || plan.bloqueado) return null;
+
+    if (plan.estado === 'EN_GRACIA') {
+      return {
+        tono: 'gracia',
+        titulo: 'Último día de gracia',
+        detalle: `El acceso se pausa el ${formatearFecha(plan.finGracia)}. Contacta al administrador para activar el plan.`,
+      };
+    }
+
+    if (plan.esPrueba && plan.diasRestantes !== null) {
+      const dias = plan.diasRestantes;
+      return {
+        tono: 'prueba',
+        titulo:
+          dias === 0
+            ? 'La prueba termina hoy'
+            : `Prueba gratis: ${dias} ${dias === 1 ? 'día' : 'días'}`,
+        detalle: 'Después hay 1 día de gracia antes de pausar el acceso.',
+      };
+    }
+
+    return null;
+  });
+
+  readonly detalleFin = computed(() => {
+    const fin = this.suscripcion.plan()?.fechaFin;
+    return fin ? formatearFecha(fin) : null;
+  });
+
   readonly secciones = computed<NavSeccion[]>(() => {
     const visibles = NAV.map((seccion) => {
       const items = seccion.items.filter((item) => {
@@ -416,6 +505,11 @@ export class ShellComponent implements OnDestroy, AfterViewInit {
     setInterval(() => this.ahora.set(new Date()), 1000);
 
     this.modulosState.cargar();
+
+    // El superadministrador no tiene empresa propia: no se consulta el plan.
+    if (this.user()?.empresaId && !this.esSuperAdmin()) {
+      this.suscripcion.cargar();
+    }
   }
 
   ngAfterViewInit(): void {
@@ -537,6 +631,7 @@ export class ShellComponent implements OnDestroy, AfterViewInit {
 
   salir(): void {
     this.cerrarMenus();
+    this.suscripcion.limpiar();
     this.auth.cerrarSesion();
   }
 
