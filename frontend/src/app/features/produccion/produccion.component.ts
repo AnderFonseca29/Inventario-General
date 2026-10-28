@@ -247,7 +247,7 @@ type Modo =
             @case ('ordenes') {
               <table class="table">
                 <thead>
-                  <tr><th>Consecutivo</th><th>Producto</th><th>Estado</th><th class="ta-right">Plan.</th><th class="ta-right">Prod.</th><th>Insumos</th><th>Fecha</th><th></th></tr>
+                  <tr><th>Consecutivo</th><th>Producto</th><th>Estado</th><th class="ta-right">A producir</th><th class="ta-right">Producida</th><th>Insumos</th><th>Fecha</th><th></th></tr>
                 </thead>
                 <tbody>
                   @for (o of ordenes(); track o.id) {
@@ -269,8 +269,8 @@ type Modo =
                           </button>
                         }
                         @if (o.estado === 'EN_PROCESO' && puedeConfirmar()) {
-                          <button class="btn btn-primary btn-sm" (click)="abrirCompletar(o)" title="Completar">
-                            <app-icon name="check" />
+                          <button class="btn btn-primary btn-sm btn-completar" (click)="abrirCompletar(o)" title="Cantidad que entra a bodega">
+                            <app-icon name="check" /> Completar
                           </button>
                         }
                         @if ((o.estado === 'BORRADOR' || o.estado === 'EN_PROCESO') && puedeConfirmar()) {
@@ -505,8 +505,9 @@ type Modo =
                     </select>
                   </div>
                   <div class="form-group">
-                    <label for="or-cant">Cantidad planificada</label>
-                    <input id="or-cant" class="form-control" type="number" step="any" formControlName="cantidadPlanificada" />
+                    <label for="or-cant">Cantidad a producir</label>
+                    <input id="or-cant" class="form-control" type="number" step="any" min="0" formControlName="cantidadPlanificada" placeholder="Ej. 100" />
+                    <span class="campo-ayuda">Lo que planeas fabricar. Al completar la orden confirmas cuánto entra a la bodega.</span>
                   </div>
                   <div class="form-group full">
                     <label for="or-obs">Observaciones</label>
@@ -540,8 +541,9 @@ type Modo =
                     </select>
                   </div>
                   <div class="form-group">
-                    <label for="cp-cant">Cantidad producida</label>
-                    <input id="cp-cant" class="form-control" type="number" step="any" formControlName="cantidadProducida" />
+                    <label for="cp-cant">Cantidad que entra a bodega</label>
+                    <input id="cp-cant" class="form-control" type="number" step="any" min="0" formControlName="cantidadProducida" />
+                    <span class="campo-ayuda">Se suma al stock de la bodega elegida.</span>
                   </div>
                 </div>
 
@@ -1069,7 +1071,7 @@ export class ProduccionComponent {
   guardarOrden(): void {
     if (this.formOrden.invalid) {
       this.formOrden.markAllAsTouched();
-      this.errorModal.set('Selecciona el producto y la cantidad planificada');
+      this.errorModal.set('Selecciona el producto y la cantidad a producir');
       return;
     }
     const v = this.formOrden.getRawValue();

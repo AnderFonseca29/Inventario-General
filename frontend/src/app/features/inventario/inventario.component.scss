@@ -92,6 +92,34 @@
   font-size: 13px;
 }
 
+.ajuste-resumen {
+  margin: 0 0 14px;
+  font-size: 14px;
+}
+
+.ajuste-diferencia {
+  display: flex;
+  align-items: center;
+  min-height: 38px;
+  padding: 0 12px;
+  border-radius: 8px;
+  background: #ecfdf3;
+  color: #067647;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+}
+
+.ajuste-diferencia.neg {
+  background: #fef3f2;
+  color: #b42318;
+}
+
+.ajuste-ayuda {
+  margin: -4px 0 14px;
+  font-size: 12.5px;
+  color: #667085;
+}
+
 .lineas {
   display: flex;
   flex-direction: column;

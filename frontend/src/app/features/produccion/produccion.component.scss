@@ -29,6 +29,19 @@
   grid-column: 1 / -1;
 }
 
+.campo-ayuda {
+  display: block;
+  margin-top: 4px;
+  font-size: 12px;
+  line-height: 1.4;
+  color: #667085;
+}
+
+.btn-completar {
+  gap: 6px;
+  white-space: nowrap;
+}
+
 .lineas-head {
   display: flex;
   align-items: center;
