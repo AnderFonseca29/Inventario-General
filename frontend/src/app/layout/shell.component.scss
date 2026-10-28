@@ -1,5 +1,27 @@
 // Shell: barra lateral + topbar + contenido
 
+// Aspecto del menu lateral compacto: 78px y solo iconos. Se aplica cuando el
+// usuario lo contrae a mano y tambien de forma automatica al abrir un
+// formulario, para que el formulario disponga de todo el ancho.
+@mixin sidebar-compacto {
+  width: 78px;
+
+  .brand-text,
+  .nav-seccion,
+  .nav-label,
+  .pronto-tag {
+    display: none;
+  }
+
+  .brand,
+  .nav-item,
+  .sidebar-footer {
+    justify-content: center;
+    padding-left: 0;
+    padding-right: 0;
+  }
+}
+
 .layout {
   display: flex;
   min-height: 100vh;
@@ -17,10 +39,6 @@
   height: 100vh;
   transition: width 0.22s cubic-bezier(0.22, 1, 0.36, 1);
   z-index: 30;
-}
-
-.layout.collapsed .sidebar {
-  width: 78px;
 }
 
 // ---- Marca ----
@@ -188,19 +206,16 @@
 
 // ---- Estado colapsado (solo escritorio) ----
 @media (min-width: 901px) {
-  .layout.collapsed .brand-text,
-  .layout.collapsed .nav-seccion,
-  .layout.collapsed .nav-label,
-  .layout.collapsed .pronto-tag {
-    display: none;
+  .layout.collapsed .sidebar {
+    @include sidebar-compacto;
   }
 
-  .layout.collapsed .brand,
-  .layout.collapsed .nav-item,
-  .layout.collapsed .sidebar-footer {
-    justify-content: center;
-    padding-left: 0;
-    padding-right: 0;
+  // Mientras hay un formulario abierto en pantalla (una ruta de formulario o
+  // cualquier modal con backdrop), el menu lateral se contrae solo: el
+  // formulario necesita todo el espacio y el menu sigue accesible con sus
+  // iconos. Si el usuario eligio dejar el menu expandido, su decision manda.
+  .layout.formulario-abierto:not(.expandido) .sidebar {
+    @include sidebar-compacto;
   }
 }
 

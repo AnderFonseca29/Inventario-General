@@ -130,6 +130,8 @@ export const routes: Routes = [
             (m) => m.MiEmpresaComponent,
           ),
         canActivate: [permisoGuard('empresa.configurar')],
+        // Pagina de formulario: el menu lateral se contrae solo al entrar.
+        data: { layout: 'form' },
       },
       {
         path: 'empresas',
