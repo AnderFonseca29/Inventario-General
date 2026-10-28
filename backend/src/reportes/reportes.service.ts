@@ -34,7 +34,9 @@ export class ReportesService {
     return filtro;
   }
 
-  async resumen(empresaId: string) {
+  // El resumen incluye cifras del modulo de membresias: solo el dueno de la
+  // empresa las ve. Para los demas usuarios esos contadores llegan en cero.
+  async resumen(empresaId: string, esPropietario = false) {
     const existen = await this.prisma.existencia.findMany({
       where: { empresaId },
       include: { producto: { select: { costo: true } } },
@@ -87,9 +89,9 @@ export class ReportesService {
 
     return {
       productosActivos,
-      clientesActivos,
-      membresiasActivas,
-      planesActivos,
+      clientesActivos: esPropietario ? clientesActivos : 0,
+      membresiasActivas: esPropietario ? membresiasActivas : 0,
+      planesActivos: esPropietario ? planesActivos : 0,
       ordenesEnProceso,
       mermasPendientes,
       documentosBorrador,

@@ -1,5 +1,22 @@
-import { Component, HostListener, computed, inject, signal } from '@angular/core';
-import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import {
+  AfterViewInit,
+  Component,
+  ElementRef,
+  HostListener,
+  OnDestroy,
+  computed,
+  inject,
+  signal,
+  viewChild,
+} from '@angular/core';
+import {
+  Data,
+  NavigationEnd,
+  Router,
+  RouterLink,
+  RouterLinkActive,
+  RouterOutlet,
+} from '@angular/router';
 import { filter } from 'rxjs';
 import { AuthService } from '../core/services/auth.service';
 import { ModulosStateService } from '../core/services/modulos-state.service';
@@ -60,7 +77,23 @@ const PERMISO_POR_CLAVE: Record<string, string | string[]> = {
   auditorias: 'auditoria.ver',
 };
 
+// Modulos reservados al dueno de la empresa: los demas usuarios no los ven en
+// el menu ni pueden abrirlos por URL (el backend tambien los rechaza).
+const MODULOS_SOLO_DUENO = new Set(['membresia']);
+
+// Preferencia del menu lateral:
+//  - 'auto': el menu se contrae solo al entrar a un formulario
+//  - 'contraido' / 'expandido': el usuario decide y no se toca solo
+type PreferenciaMenu = 'auto' | 'contraido' | 'expandido';
+
 const COLLAPSE_KEY = 'inv_sidebar_collapsed';
+
+function leerPreferencia(): PreferenciaMenu {
+  const guardado = localStorage.getItem(COLLAPSE_KEY);
+  if (guardado === '1') return 'contraido';
+  if (guardado === '0') return 'expandido';
+  return 'auto';
+}
 
 @Component({
   selector: 'app-shell',
@@ -72,7 +105,13 @@ const COLLAPSE_KEY = 'inv_sidebar_collapsed';
     CambiarContrasenaComponent,
   ],
   template: `
-    <div class="layout" [class.collapsed]="colapsado()" [class.movil-abierto]="movilAbierto()">
+    <div
+      class="layout"
+      [class.collapsed]="colapsado()"
+      [class.expandido]="preferenciaMenu() === 'expandido'"
+      [class.movil-abierto]="movilAbierto()"
+      [class.formulario-abierto]="formularioAbierto()"
+    >
       <aside class="sidebar" [attr.aria-hidden]="esMovil() ? !movilAbierto() : null">
         <button class="drawer-close" (click)="cerrarDrawer()" title="Cerrar menú" aria-label="Cerrar menú">
           <app-icon name="close" />
@@ -116,8 +155,15 @@ const COLLAPSE_KEY = 'inv_sidebar_collapsed';
       <div class="main">
         <header class="topbar">
           <div class="topbar-left">
-          <button class="icon-btn" (click)="toggleSidebar()" title="Menú" aria-label="Abrir o cerrar menú" [attr.aria-expanded]="!esMovil() ? !colapsado() : movilAbierto()">
-            </button>
+          <button
+            class="icon-btn sidebar-toggle"
+            (click)="toggleSidebar()"
+            [title]="colapsado() ? 'Expandir el menú' : 'Contraer el menú'"
+            [attr.aria-label]="colapsado() ? 'Expandir el menú' : 'Contraer el menú'"
+            [attr.aria-expanded]="!esMovil() ? !colapsado() : movilAbierto()"
+          >
+            <app-icon [name]="colapsado() ? 'chevron' : 'menu'" />
+          </button>
             <div class="breadcrumb">
               <span class="crumb-root">Panel</span>
               <app-icon name="chevron" class="crumb-sep" />
@@ -216,7 +262,7 @@ const COLLAPSE_KEY = 'inv_sidebar_collapsed';
           </div>
         </header>
 
-        <main class="content">
+        <main class="content" #contenido>
           <router-outlet />
         </main>
       </div>
@@ -232,7 +278,7 @@ const COLLAPSE_KEY = 'inv_sidebar_collapsed';
   `,
   styleUrl: './shell.component.scss',
 })
-export class ShellComponent {
+export class ShellComponent implements OnDestroy, AfterViewInit {
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
   private readonly modulosState = inject(ModulosStateService);
@@ -259,6 +305,9 @@ export class ShellComponent {
       .menu()
       .filter((modulo) => {
         if (modulo.tipo !== 'SISTEMA') return true;
+        if (MODULOS_SOLO_DUENO.has(modulo.clave) && !this.auth.esPropietario()) {
+          return false;
+        }
         const permiso = PERMISO_POR_CLAVE[modulo.clave];
         if (!permiso) return false;
         return Array.isArray(permiso)
@@ -268,8 +317,6 @@ export class ShellComponent {
       .map(toNavItem)
       .filter((item) => !item.pronto);
   });
-
-  readonly colapsado = signal(localStorage.getItem(COLLAPSE_KEY) === '1');
 
   private readonly url = signal(this.router.url);
   private readonly ahora = signal(new Date());
@@ -281,6 +328,36 @@ export class ShellComponent {
       second: '2-digit',
     }),
   );
+
+  // Preferencia guardada del usuario sobre el menu lateral.
+  readonly preferenciaMenu = signal<PreferenciaMenu>(leerPreferencia());
+
+  // Datos de la ruta activa: las rutas marcadas con data layout 'form' son
+  // paginas de formulario y contraen el menu lateral por si solas.
+  private readonly datosRuta = signal<Data | undefined>(undefined);
+
+  readonly esRutaFormulario = computed(
+    () => this.datosRuta()?.['layout'] === 'form',
+  );
+
+  // Un modal con formulario esta abierto: lo detecta un MutationObserver sobre
+  // el area de contenido, porque los modales usan .modal-backdrop.
+  private readonly modalAbierto = signal(false);
+  private observador?: MutationObserver;
+  private readonly contenido = viewChild<ElementRef<HTMLElement>>('contenido');
+
+  readonly formularioAbierto = computed(
+    () => this.esRutaFormulario() || this.modalAbierto(),
+  );
+
+  // Estado efectivo del menu lateral. El usuario puede fijar la preferencia
+  // con el boton: en modo 'auto' se contrae solo al abrir un formulario.
+  readonly colapsado = computed(() => {
+    const preferencia = this.preferenciaMenu();
+    if (preferencia === 'contraido') return true;
+    if (preferencia === 'expandido') return false;
+    return this.formularioAbierto();
+  });
 
   readonly iniciales = computed(() => {
     const email = this.user()?.email ?? '';
@@ -331,6 +408,7 @@ export class ShellComponent {
       .pipe(filter((e): e is NavigationEnd => e instanceof NavigationEnd))
       .subscribe(() => {
         this.url.set(this.router.url);
+        this.datosRuta.set(this.datosRutaActiva());
         this.cerrarMenus();
         this.cerrarDrawer();
       });
@@ -340,14 +418,47 @@ export class ShellComponent {
     this.modulosState.cargar();
   }
 
+  ngAfterViewInit(): void {
+    const el = this.contenido()?.nativeElement;
+    if (!el) return;
+    this.actualizarModal();
+    this.observador = new MutationObserver(() => this.actualizarModal());
+    this.observador.observe(el, { childList: true, subtree: true });
+  }
+
+  ngOnDestroy(): void {
+    this.observador?.disconnect();
+  }
+
+  private actualizarModal(): void {
+    const el = this.contenido()?.nativeElement;
+    if (!el) {
+      this.modalAbierto.set(false);
+      return;
+    }
+    this.modalAbierto.set(el.querySelector('.modal-backdrop') !== null);
+  }
+
   toggleSidebar(): void {
     if (this.esMovil()) {
       this.movilAbierto.update((v) => !v);
       return;
     }
-    const nuevo = !this.colapsado();
-    this.colapsado.set(nuevo);
-    localStorage.setItem(COLLAPSE_KEY, nuevo ? '1' : '0');
+    // El boton invierte el estado visible del menu y deja fijada la
+    // preferencia del usuario (deja de moverse solo).
+    const nuevo: PreferenciaMenu = this.colapsado() ? 'expandido' : 'contraido';
+    this.preferenciaMenu.set(nuevo);
+    localStorage.setItem(COLLAPSE_KEY, nuevo === 'contraido' ? '1' : '0');
+  }
+
+  // Datos de la hoja de ruta mas profunda activa (las rutas hijas heredan los
+  // datos de su padre).
+  private datosRutaActiva(): Data | undefined {
+    let activa = this.router.routerState.snapshot.root;
+    while (activa.firstChild) {
+      activa = activa.firstChild;
+    }
+    return activa.data;
   }
 
   cerrarDrawer(): void {

@@ -11,6 +11,6 @@ export class ResumenController {
 
   @Get('mi-resumen')
   miResumen(@CurrentUser() user: AuthenticatedUser) {
-    return this.resumen.miResumen(user.id, user.empresaId);
+    return this.resumen.miResumen(user);
   }
 }

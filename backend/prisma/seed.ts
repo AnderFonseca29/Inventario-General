@@ -20,37 +20,55 @@ const FUNCIONALIDADES = [
     nombre: 'Materias primas y producción',
     modulo: 'produccion',
   },
+  { codigo: 'membresia', nombre: 'Membresías de clientes', modulo: 'membresia' },
   { codigo: 'documentos', nombre: 'Solicitudes y comprobantes internos', modulo: 'documentos' },
   { codigo: 'reportes', nombre: 'Reportes y alertas', modulo: 'reportes' },
   { codigo: 'auditoria', nombre: 'Auditoría', modulo: 'auditoria' },
 ];
 
+// Los precios son los de la decisión P1, en pesos colombianos (COP):
+// Básico 60.000, Medio 90.000 y Premium 120.000.
+//
+// El campo `codigo` no se cambia: es la clave con la que el seed hace el
+// upsert y la referencia que usa `Suscripcion.planId`. Cambiarlo crearía
+// planes nuevos y dejaría huérfanas las suscripciones ya creadas.
+// El `nombre` sí es el texto visible y sí se actualiza.
 const PLANES = [
   {
     codigo: 'basico',
-    nombre: 'Basico',
-    descripcion: 'Para empresas pequenas',
-    precioMensual: 99000,
-    maxUsuarios: 3,
+    nombre: 'Básico',
+    descripcion: 'Para empresas pequeñas',
+    precioMensual: 60000,
+    maxUsuarios: 5,
     maxBodegas: 1,
     maxReportes: 5,
     funcionalidades: ['usuarios', 'roles', 'catalogos', 'inventario', 'reportes'],
   },
   {
     codigo: 'pro',
-    nombre: 'Pro',
+    nombre: 'Medio',
     descripcion: 'Para empresas en crecimiento',
-    precioMensual: 249000,
+    precioMensual: 90000,
     maxUsuarios: 10,
     maxBodegas: 3,
     maxReportes: null,
-    funcionalidades: ['usuarios', 'roles', 'catalogos', 'inventario', 'cargues', 'botellones', 'reportes'],
+    funcionalidades: [
+      'usuarios',
+      'roles',
+      'catalogos',
+      'inventario',
+      'cargues',
+      'botellones',
+      'produccion',
+      'membresia',
+      'reportes',
+    ],
   },
   {
     codigo: 'empresa',
-    nombre: 'Empresa',
-    descripcion: 'Sin limites operativos ni de usuarios',
-    precioMensual: 499000,
+    nombre: 'Premium',
+    descripcion: 'Sin límites operativos ni de usuarios',
+    precioMensual: 120000,
     maxUsuarios: null,
     maxBodegas: null,
     maxReportes: null,

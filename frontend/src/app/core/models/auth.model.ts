@@ -3,6 +3,8 @@ export interface AuthenticatedUser {
   email: string;
   empresaId: string | null;
   esSuperAdmin: boolean;
+  // Dueno de la empresa: unica cuenta que ve el modulo de membresias.
+  esPropietario: boolean;
   permisos: string[];
 }
 

@@ -45,7 +45,7 @@ describe('errorInterceptor (hallazgo U)', () => {
     pedirYDetener().error(new ErrorEvent('network error'));
     expect(mostrar).toHaveBeenCalledWith(
       'error',
-      expect.stringContaining('conexion'),
+      expect.stringContaining('conexión'),
       expect.any(Number),
     );
   });

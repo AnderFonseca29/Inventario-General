@@ -28,6 +28,7 @@ import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { EmpresaContextoGuard } from './common/guards/empresa-contexto.guard';
 import { PermisosGuard } from './common/guards/permisos.guard';
 import { SuperAdminGuard } from './common/guards/superadmin.guard';
+import { PropietarioGuard } from './common/guards/propietario.guard';
 import { TenantGuard } from './common/guards/tenant.guard';
 
 @Module({
@@ -63,6 +64,7 @@ import { TenantGuard } from './common/guards/tenant.guard';
     { provide: APP_GUARD, useClass: PermisosGuard },
     { provide: APP_GUARD, useClass: TenantGuard },
     { provide: APP_GUARD, useClass: SuperAdminGuard },
+    { provide: APP_GUARD, useClass: PropietarioGuard },
   ],
 })
 export class AppModule {}

@@ -46,6 +46,10 @@ export class AuthService {
   readonly isAuthenticated = computed(() => this._user() !== null);
   readonly isSuperAdmin = computed(() => this._user()?.esSuperAdmin ?? false);
 
+  // Dueno de la empresa: unica cuenta autorizada para el modulo de membresias
+  // (pago de la suscripcion) y para los reportes de ese modulo.
+  readonly esPropietario = computed(() => this._user()?.esPropietario ?? false);
+
   // Usuario operativo (vendedor): registra actividad propia pero no administra
   // la empresa. Solo debe ver su resumen personal.
   readonly esOperativo = computed(() => {
