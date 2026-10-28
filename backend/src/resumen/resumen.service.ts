@@ -1,6 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { EstadoMembresia, Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
+import type { AuthenticatedUser } from '../common/types/authenticated-user';
+
+// UUID valido que no corresponde a ninguna fila: se usa para que la consulta de
+// membresias no devuelva nada cuando quien pregunta no es el dueno.
+const SIN_DUENO = '00000000-0000-0000-0000-000000000000';
 
 @Injectable()
 export class ResumenService {
@@ -8,7 +13,9 @@ export class ResumenService {
 
   // Resumen personal del usuario autenticado (pensado para el rol Vendedor):
   // solo expone la información propia del usuario, nunca la de toda la empresa.
-  async miResumen(usuarioId: string, empresaId: string | null) {
+  async miResumen(user: AuthenticatedUser) {
+    const usuarioId = user.id;
+    const empresaId = user.empresaId;
     if (!empresaId) {
       return this.vacio();
     }
@@ -40,7 +47,12 @@ export class ResumenService {
           orderBy: { creadoEn: 'desc' },
         }),
         this.prisma.membresiaCliente.findMany({
-          where: { empresaId, creadoPorId: usuarioId },
+          where: {
+            empresaId,
+            creadoPorId: usuarioId,
+            // Las membresias son del dueno: los demas usuarios no las reciben.
+            ...(user.esPropietario ? {} : { id: SIN_DUENO }),
+          },
           select: {
             id: true,
             estado: true,

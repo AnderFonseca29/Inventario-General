@@ -110,7 +110,7 @@ export class CatalogosService {
         this.prisma.categoria.create({
           data: { empresaId, nombre: dto.nombre, activo: dto.activo ?? true },
         }),
-      'Ya existe una categoria con ese nombre',
+      'Ya existe una categoría con ese nombre',
     );
     await this.auditar(
       empresaId,
@@ -137,7 +137,7 @@ export class CatalogosService {
     if (!actual) throw new NotFoundException('Categoría no encontrada');
     const creado = await this.ejecutar(
       () => this.prisma.categoria.update({ where: { id }, data: dto }),
-      'Ya existe una categoria con ese nombre',
+      'Ya existe una categoría con ese nombre',
     );
     await this.auditar(
       empresaId,
@@ -244,7 +244,7 @@ export class CatalogosService {
       (await this.prisma.producto.count({ where: { unidadId: id } })) +
       (await this.prisma.materiaPrima.count({ where: { unidadId: id } }));
     if (usados > 0) {
-      throw new ConflictException('La unidad esta en uso');
+      throw new ConflictException('La unidad está en uso');
     }
     await this.prisma.unidad.delete({ where: { id } });
     return { ok: true };
@@ -562,7 +562,7 @@ export class CatalogosService {
             activo: dto.activo ?? true,
           },
         }),
-      'Ya existe una bodega con ese codigo',
+      'Ya existe una bodega con ese código',
     );
     await this.auditar(
       empresaId,
@@ -589,7 +589,7 @@ export class CatalogosService {
     if (!actual) throw new NotFoundException('Bodega no encontrada');
     const creado = await this.ejecutar(
       () => this.prisma.bodega.update({ where: { id }, data: dto }),
-      'Ya existe una bodega con ese codigo',
+      'Ya existe una bodega con ese código',
     );
     await this.auditar(
       empresaId,

@@ -148,6 +148,7 @@ export class AuthService {
         email: true,
         activo: true,
         esSuperAdmin: true,
+        esPropietario: true,
         empresaId: true,
         empresa: { select: { estado: true } },
       },
@@ -158,7 +159,7 @@ export class AuthService {
     }
 
     if (usuario.empresa && usuario.empresa.estado === 'CANCELADA') {
-      throw new UnauthorizedException('La empresa esta cancelada');
+      throw new UnauthorizedException('La empresa está cancelada');
     }
 
     const permisos = await this.permisosDeUsuario(usuario.id);
@@ -168,6 +169,7 @@ export class AuthService {
       email: usuario.email,
       empresaId: usuario.empresaId,
       esSuperAdmin: usuario.esSuperAdmin,
+      esPropietario: usuario.esPropietario,
       permisos,
     };
   }

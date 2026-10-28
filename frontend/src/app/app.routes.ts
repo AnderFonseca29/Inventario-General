@@ -4,6 +4,7 @@ import {
   permisoAlgunoGuard,
   permisoGuard,
   permisoOSuperAdminGuard,
+  propietarioGuard,
   superAdminGuard,
 } from './core/guards/auth.guards';
 
@@ -104,7 +105,7 @@ export const routes: Routes = [
           import('./features/membresia/membresia.component').then(
             (m) => m.MembresiaComponent,
           ),
-        canActivate: [permisoGuard('membresia.ver')],
+        canActivate: [permisoGuard('membresia.ver'), propietarioGuard],
       },
       {
         path: 'reportes',
@@ -129,6 +130,8 @@ export const routes: Routes = [
             (m) => m.MiEmpresaComponent,
           ),
         canActivate: [permisoGuard('empresa.configurar')],
+        // Pagina de formulario: el menu lateral se contrae solo al entrar.
+        data: { layout: 'form' },
       },
       {
         path: 'empresas',

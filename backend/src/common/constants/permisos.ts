@@ -83,10 +83,10 @@ export const CATALOGO_PERMISOS: PermisoDefinicion[] = [
     modulo: 'roles',
   },
 
-  { codigo: PERMISOS.MODULOS_VER, nombre: 'Ver modulos', modulo: 'modulos' },
+  { codigo: PERMISOS.MODULOS_VER, nombre: 'Ver módulos', modulo: 'modulos' },
   {
     codigo: PERMISOS.MODULOS_ADMINISTRAR,
-    nombre: 'Administrar modulos de la empresa',
+    nombre: 'Administrar módulos de la empresa',
     modulo: 'modulos',
   },
 
@@ -98,12 +98,12 @@ export const CATALOGO_PERMISOS: PermisoDefinicion[] = [
 
   {
     codigo: PERMISOS.CATALOGOS_VER,
-    nombre: 'Ver catalogos',
+    nombre: 'Ver catálogos',
     modulo: 'catalogos',
   },
   {
     codigo: PERMISOS.CATALOGOS_ADMINISTRAR,
-    nombre: 'Administrar catalogos',
+    nombre: 'Administrar catálogos',
     modulo: 'catalogos',
   },
 
@@ -161,7 +161,7 @@ export const CATALOGO_PERMISOS: PermisoDefinicion[] = [
 
   {
     codigo: PERMISOS.BOTELLONES_REGISTRAR,
-    nombre: 'Registrar movimientos de botellon',
+    nombre: 'Registrar movimientos de botellón',
     modulo: 'botellones',
   },
   {
@@ -187,17 +187,17 @@ export const CATALOGO_PERMISOS: PermisoDefinicion[] = [
 
   {
     codigo: PERMISOS.PRODUCCION_VER,
-    nombre: 'Ver produccion',
+    nombre: 'Ver producción',
     modulo: 'produccion',
   },
   {
     codigo: PERMISOS.PRODUCCION_OPERAR,
-    nombre: 'Operar produccion',
+    nombre: 'Operar producción',
     modulo: 'produccion',
   },
   {
     codigo: PERMISOS.PRODUCCION_CONFIRMAR,
-    nombre: 'Confirmar produccion',
+    nombre: 'Confirmar producción',
     modulo: 'produccion',
   },
 
@@ -214,17 +214,17 @@ export const CATALOGO_PERMISOS: PermisoDefinicion[] = [
 
   {
     codigo: PERMISOS.MEMBRESIA_VER,
-    nombre: 'Ver clientes y membresias',
+    nombre: 'Ver clientes y membresías',
     modulo: 'membresia',
   },
   {
     codigo: PERMISOS.MEMBRESIA_ADMINISTRAR,
-    nombre: 'Administrar clientes y planes de membresia',
+    nombre: 'Administrar clientes y planes de membresía',
     modulo: 'membresia',
   },
   {
     codigo: PERMISOS.MEMBRESIA_AFILIAR,
-    nombre: 'Afiliar y renovar membresias',
+    nombre: 'Afiliar y renovar membresías',
     modulo: 'membresia',
   },
 
@@ -237,7 +237,7 @@ export const CATALOGO_PERMISOS: PermisoDefinicion[] = [
 
   {
     codigo: PERMISOS.AUDITORIA_VER,
-    nombre: 'Ver auditoria',
+    nombre: 'Ver auditoría',
     modulo: 'auditoria',
   },
 ];
@@ -246,7 +246,7 @@ export const ROLES_SISTEMA = {
   ADMINISTRADOR: 'Administrador',
   VENDEDOR: 'Vendedor',
   BODEGA: 'Bodega',
-  PRODUCCION: 'Produccion',
+  PRODUCCION: 'Producción',
 } as const;
 
 export const PERMISOS_POR_ROL_SISTEMA: Record<string, string[]> = {
@@ -255,8 +255,6 @@ export const PERMISOS_POR_ROL_SISTEMA: Record<string, string[]> = {
     PERMISOS.CARGUES_VER_PROPIOS,
     PERMISOS.BOTELLONES_REGISTRAR,
     PERMISOS.BOTELLONES_VER_PROPIOS,
-    PERMISOS.MEMBRESIA_VER,
-    PERMISOS.MEMBRESIA_AFILIAR,
   ],
   [ROLES_SISTEMA.BODEGA]: [
     PERMISOS.CATALOGOS_VER,

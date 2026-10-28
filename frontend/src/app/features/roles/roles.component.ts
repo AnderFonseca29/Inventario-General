@@ -4,6 +4,7 @@ import { RolesService } from '../../core/services/roles.service';
 import { PermisosService } from '../../core/services/permisos.service';
 import { AuthService } from '../../core/services/auth.service';
 import { ToastService } from '../../core/services/toast.service';
+import { DialogoService } from '../../core/services/dialogo.service';
 import { Permiso, Rol } from '../../core/models/rol.model';
 import { IconComponent } from '../../shared/icons';
 
@@ -195,6 +196,7 @@ export class RolesComponent {
   private readonly permisosService = inject(PermisosService);
   private readonly auth = inject(AuthService);
   private readonly toast = inject(ToastService);
+  private readonly dialogo = inject(DialogoService);
   private readonly fb = inject(FormBuilder);
 
   readonly roles = signal<Rol[]>([]);
@@ -376,7 +378,17 @@ export class RolesComponent {
   }
 
   eliminar(r: Rol): void {
-    if (!confirm(`¿Eliminar el rol ${r.nombre}?`)) return;
+    void this.confirmarEliminar(r);
+  }
+
+  private async confirmarEliminar(r: Rol): Promise<void> {
+    const ok = await this.dialogo.confirmar({
+      titulo: 'Eliminar rol',
+      mensaje: `¿Eliminar el rol ${r.nombre}?`,
+      textoConfirmar: 'Eliminar',
+      peligro: true,
+    });
+    if (!ok) return;
     this.rolesService.eliminar(r.id).subscribe({
       next: () => {
         this.toast.exito('Rol eliminado');

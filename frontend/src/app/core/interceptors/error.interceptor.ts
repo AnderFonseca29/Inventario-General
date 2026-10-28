@@ -25,7 +25,7 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
     catchError((error: HttpErrorResponse) => {
       if (error.status === 0) {
         toast.error(
-          'No hay conexion con el servidor. Verifica tu red e intentalo de nuevo.',
+          'No hay conexión con el servidor. Verifica tu red e inténtalo de nuevo.',
         );
       } else if (error.status === 429) {
         toast.error(

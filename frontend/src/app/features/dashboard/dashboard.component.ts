@@ -73,15 +73,6 @@ const ACCESOS: Acceso[] = [
   },
 ];
 
-const ROADMAP = [
-  { nombre: 'Seguridad y acceso', estado: 'listo' },
-  { nombre: 'Catálogos', estado: 'listo' },
-  { nombre: 'Inventario', estado: 'listo' },
-  { nombre: 'Cargues', estado: 'listo' },
-  { nombre: 'Botellones', estado: 'pronto' },
-  { nombre: 'Producción', estado: 'listo' },
-];
-
 @Component({
   selector: 'app-dashboard',
   imports: [RouterLink, IconComponent],
@@ -91,7 +82,7 @@ const ROADMAP = [
       @if (esOperativo()) {
         <p>
           Este es tu resumen personal. Aquí ves únicamente tu actividad: tus
-          cargues, tus movimientos de botellón y las membresías que afiliaste.
+          cargues y tus movimientos de botellón.
         </p>
       } @else {
         <p>
@@ -101,8 +92,9 @@ const ROADMAP = [
       }
       <div class="hero-tags">
         <span class="badge">{{ rolLabel() }}</span>
-        <span class="badge">{{ user()?.permisos.length ?? 0 }} permisos activos</span>
-        <span class="badge">Biblioteca de acceso · Fase 3</span>
+        @if (empresa()?.nombre) {
+          <span class="badge">{{ empresa()!.nombre }}</span>
+        }
       </div>
     </section>
 
@@ -187,39 +179,41 @@ const ROADMAP = [
             }
           </div>
 
-          <div class="card card-body anim-up">
-            <div class="section-title"><app-icon name="users" /> Mis membresías</div>
-            @if (membresiasRecientes().length === 0) {
-              <div class="empty">
-                <app-icon name="users" />
-                <div class="empty-title">Sin membresías</div>
-                <div>Aún no has afiliado membresías.</div>
-              </div>
-            } @else {
-              <div class="table-wrap">
-                <table class="table">
-                  <thead>
-                    <tr>
-                      <th>Cliente</th>
-                      <th>Plan</th>
-                      <th>Estado</th>
-                      <th>Vence</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    @for (m of membresiasRecientes(); track m.id) {
+          @if (esPropietario()) {
+            <div class="card card-body anim-up">
+              <div class="section-title"><app-icon name="users" /> Mis membresías</div>
+              @if (membresiasRecientes().length === 0) {
+                <div class="empty">
+                  <app-icon name="users" />
+                  <div class="empty-title">Sin membresías</div>
+                  <div>Aún no has afiliado membresías.</div>
+                </div>
+              } @else {
+                <div class="table-wrap">
+                  <table class="table">
+                    <thead>
                       <tr>
-                        <td><span class="cell-strong">{{ m.cliente }}</span></td>
-                        <td><span class="cell-muted">{{ m.plan }}</span></td>
-                        <td><span [class]="badgeEstado(m.estado)">{{ m.estado }}</span></td>
-                        <td><span class="cell-muted">{{ fechaCorta(m.fechaFin) }}</span></td>
+                        <th>Cliente</th>
+                        <th>Plan</th>
+                        <th>Estado</th>
+                        <th>Vence</th>
                       </tr>
-                    }
-                  </tbody>
-                </table>
-              </div>
-            }
-          </div>
+                    </thead>
+                    <tbody>
+                      @for (m of membresiasRecientes(); track m.id) {
+                        <tr>
+                          <td><span class="cell-strong">{{ m.cliente }}</span></td>
+                          <td><span class="cell-muted">{{ m.plan }}</span></td>
+                          <td><span [class]="badgeEstado(m.estado)">{{ m.estado }}</span></td>
+                          <td><span class="cell-muted">{{ fechaCorta(m.fechaFin) }}</span></td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                </div>
+              }
+            </div>
+          }
         </div>
       </div>
     } @else {
@@ -238,7 +232,7 @@ const ROADMAP = [
         }
       </div>
 
-      <div class="grid-main-side">
+      <div class="grid-main-side" [class.sin-lateral]="!hayContenidoLateral()">
         <div class="card card-body anim-up">
           @if (esSuperAdmin()) {
             <div class="section-title"><app-icon name="building" /> Empresas recientes</div>
@@ -345,20 +339,20 @@ const ROADMAP = [
             </div>
           }
 
-          <div class="card card-body anim-up">
-            <div class="section-title"><app-icon name="bolt" /> Estado del sistema</div>
-            @for (r of roadmap; track r.nombre) {
-              <div class="road-item">
-                <span class="road-dot" [class.listo]="r.estado === 'listo'"></span>
-                <span class="road-nombre">{{ r.nombre }}</span>
-                @if (r.estado === 'listo') {
-                  <span class="badge badge-success">Listo</span>
-                } @else {
-                  <span class="badge badge-muted">Próximamente</span>
-                }
-              </div>
-            }
-          </div>
+          @if (esSuperAdmin()) {
+            <div class="card card-body anim-up">
+              <div class="section-title"><app-icon name="building" /> Resumen de la plataforma</div>
+              @for (e of empresasPorEstado(); track e.etiqueta) {
+                <div class="bar-row">
+                  <span class="bar-label">{{ e.etiqueta }}</span>
+                  <div class="progress">
+                    <div class="progress-bar" [style.width.%]="e.porcentaje"></div>
+                  </div>
+                  <span class="bar-count">{{ e.total }}</span>
+                </div>
+              }
+            </div>
+          }
         </div>
       </div>
 
@@ -387,7 +381,8 @@ export class DashboardComponent {
   readonly user = this.auth.user;
   readonly esSuperAdmin = this.auth.isSuperAdmin;
   readonly esOperativo = this.auth.esOperativo;
-  readonly roadmap = ROADMAP;
+  // El modulo de membresias es del dueno: los demas usuarios no lo ven.
+  readonly esPropietario = this.auth.esPropietario;
 
   readonly empresas = signal<Empresa[]>([]);
   readonly empresa = signal<Empresa | null>(null);
@@ -432,6 +427,22 @@ export class DashboardComponent {
       }));
   });
 
+  /** Distribución real de empresas por estado (solo superadministrador). */
+  readonly empresasPorEstado = computed(() => {
+    const lista = this.empresas();
+    const total = lista.length || 1;
+    const cuenta = (estado: string) =>
+      lista.filter((e) => e.estado === estado).length;
+    return [
+      { etiqueta: 'Activas', total: cuenta('ACTIVA') },
+      { etiqueta: 'Suspendidas', total: cuenta('SUSPENDIDA') },
+      { etiqueta: 'Canceladas', total: cuenta('CANCELADA') },
+    ].map((r) => ({ ...r, porcentaje: Math.round((r.total / total) * 100) }));
+  });
+
+  /** Indica si la columna lateral tiene contenido: si no, la grilla va a una columna. */
+  readonly hayContenidoLateral = computed(() => this.esSuperAdmin() || !!this.empresa());
+
   // ------------------------- Resumen personal (vendedor) -------------------
 
   readonly carguesRecientes = computed(
@@ -462,7 +473,7 @@ export class DashboardComponent {
   readonly kpis = computed<Kpi[]>(() => {
     if (this.esOperativo()) {
       const r = this.resumen();
-      return [
+      const kpis: Kpi[] = [
         {
           label: 'Mis cargues',
           valor: r?.cargues.total ?? 0,
@@ -484,14 +495,19 @@ export class DashboardComponent {
           tint: 'tint-accent',
           sub: 'Movimientos registrados',
         },
-        {
+      ];
+      // Las membresias son del dueno de la empresa: no se le anuncian a los
+      // demas usuarios.
+      if (this.esPropietario()) {
+        kpis.push({
           label: 'Membresías activas',
           valor: r?.membresias.activas ?? 0,
           icono: 'users',
           tint: 'tint-success',
           sub: 'Afiliadas por ti',
-        },
-      ];
+        });
+      }
+      return kpis;
     }
 
     if (this.esSuperAdmin()) {

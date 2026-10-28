@@ -2,6 +2,7 @@ import { Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ReportesService } from '../../core/services/reportes.service';
 import { ToastService } from '../../core/services/toast.service';
+import { AuthService } from '../../core/services/auth.service';
 import {
   ReporteInventario,
   ReporteMembresias,
@@ -29,7 +30,7 @@ import { IconComponent } from '../../shared/icons';
       <div>
         <div class="page-title">Reportes</div>
         <div class="page-subtitle">
-          Indicadores de inventario, producción, membresías y operación.
+          Indicadores de inventario, producción{{ esPropietario() ? ', membresías' : '' }} y operación.
         </div>
       </div>
       <div class="toolbar-actions">
@@ -153,6 +154,7 @@ import { IconComponent } from '../../shared/icons';
         }
       </div>
 
+      @if (esPropietario()) {
       <div class="card">
         <div class="card-title">
           <app-icon name="users" /> Membresías
@@ -196,6 +198,7 @@ import { IconComponent } from '../../shared/icons';
           </div>
         }
       </div>
+      }
 
       <div class="card">
         <div class="card-title">
@@ -230,6 +233,10 @@ import { IconComponent } from '../../shared/icons';
 export class ReportesComponent {
   private readonly service = inject(ReportesService);
   private readonly toast = inject(ToastService);
+  private readonly auth = inject(AuthService);
+
+  // Las cifras de membresias son del dueno de la empresa.
+  readonly esPropietario = this.auth.esPropietario;
 
   readonly resumen = signal<ReporteResumen>({
     productosActivos: 0,
@@ -262,16 +269,24 @@ export class ReportesComponent {
 
   readonly kpis = computed(() => {
     const r = this.resumen();
-    return [
+    const kpis = [
       { label: 'Valor inventario', valor: this.dinero(r.valorInventario), icono: 'trend-up' },
       { label: 'Productos activos', valor: r.productosActivos, icono: 'box' },
-      { label: 'Clientes activos', valor: r.clientesActivos, icono: 'users' },
-      { label: 'Membresías activas', valor: r.membresiasActivas, icono: 'spark' },
+    ];
+    // Clientes, membresias y planes solo los ve el dueno de la empresa.
+    if (this.esPropietario()) {
+      kpis.push(
+        { label: 'Clientes activos', valor: r.clientesActivos, icono: 'users' },
+        { label: 'Membresías activas', valor: r.membresiasActivas, icono: 'spark' },
+      );
+    }
+    kpis.push(
       { label: 'Órdenes en proceso', valor: r.ordenesEnProceso, icono: 'factory' },
       { label: 'Mermas pendientes', valor: r.mermasPendientes, icono: 'warning' },
       { label: 'Docs. en borrador', valor: r.documentosBorrador, icono: 'box' },
       { label: 'Botellones pendientes', valor: r.movimientosBotellonPendientes, icono: 'bottle' },
-    ];
+    );
+    return kpis;
   });
 
   readonly topProductos = computed(() => this.inventario().porProducto.slice(0, 8));
@@ -290,7 +305,11 @@ export class ReportesComponent {
       error: (err: unknown) => this.toast.error(this.mensaje(err)),
     });
     this.service.inventario().subscribe({ next: (r) => this.inventario.set(r) });
-    this.service.membresias().subscribe({ next: (r) => this.membresias.set(r) });
+    // El detalle de membresias es exclusivo del dueno: los demas usuarios no
+    // lo piden porque el backend responde 403.
+    if (this.esPropietario()) {
+      this.service.membresias().subscribe({ next: (r) => this.membresias.set(r) });
+    }
     this.cargarRango();
   }
 

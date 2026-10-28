@@ -174,7 +174,7 @@ export class MembresiaService {
     });
     if (referencias > 0) {
       throw new ConflictException(
-        'El cliente tiene membresias asociadas; desactivalo en su lugar',
+        'El cliente tiene membresías asociadas; desactívalo en su lugar',
       );
     }
     await this.prisma.cliente.delete({ where: { id } });
@@ -239,7 +239,7 @@ export class MembresiaService {
             activo: dto.activo ?? true,
           },
         }),
-      'Ya existe un plan de membresia con ese nombre',
+      'Ya existe un plan de membresía con ese nombre',
     );
     await this.auditar(
       empresaId,
@@ -263,7 +263,7 @@ export class MembresiaService {
     await this.obtenerPlanMembresia(empresaId, id);
     const actualizado = await this.ejecutar(
       () => this.prisma.planMembresia.update({ where: { id }, data: dto }),
-      'Ya existe un plan de membresia con ese nombre',
+      'Ya existe un plan de membresía con ese nombre',
     );
     await this.auditar(
       empresaId,
@@ -284,7 +284,7 @@ export class MembresiaService {
     });
     if (referencias > 0) {
       throw new ConflictException(
-        'El plan tiene membresias asociadas; desactivalo en su lugar',
+        'El plan tiene membresías asociadas; desactívalo en su lugar',
       );
     }
     await this.prisma.planMembresia.delete({ where: { id } });
@@ -448,7 +448,7 @@ export class MembresiaService {
       });
       if (afectadas.count === 0) {
         throw new ConflictException(
-          'La membresia ya fue renovada o no esta activa',
+          'La membresía ya fue renovada o no está activa',
         );
       }
       return tx.membresiaCliente.create({
@@ -498,7 +498,7 @@ export class MembresiaService {
       data: { estado: EstadoMembresia.CANCELADA },
     });
     if (afectadas.count === 0) {
-      throw new BadRequestException('La membresía ya esta cancelada');
+      throw new BadRequestException('La membresía ya está cancelada');
     }
     const actualizada = await this.prisma.membresiaCliente.findUniqueOrThrow({
       where: { id: membresia.id },

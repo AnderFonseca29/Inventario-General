@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { CatalogosService } from '../../core/services/catalogos.service';
 import { AuthService } from '../../core/services/auth.service';
 import { ToastService } from '../../core/services/toast.service';
+import { DialogoService } from '../../core/services/dialogo.service';
 import {
   Bodega,
   Categoria,
@@ -242,6 +243,7 @@ export class CatalogosComponent {
   private readonly catalogos = inject(CatalogosService);
   private readonly auth = inject(AuthService);
   private readonly toast = inject(ToastService);
+  private readonly dialogo = inject(DialogoService);
   private readonly fb = inject(FormBuilder);
 
   readonly categorias = signal<Categoria[]>([]);
@@ -682,7 +684,19 @@ export class CatalogosComponent {
   eliminar(fila: Fila): void {
     const nombre =
       this.valor(fila, 'nombre') ?? this.valor(fila, 'sku') ?? 'el elemento';
-    if (!confirm(`¿Eliminar ${nombre}?`)) return;
+    void this.confirmarEliminar(nombre, fila);
+  }
+
+  private async confirmarEliminar(nombre: string, fila: Fila): Promise<void> {
+    const entidad = this.entidades.find((e) => e.key === this.activa());
+    const singular = entidad?.singular ?? 'elemento';
+    const ok = await this.dialogo.confirmar({
+      titulo: `Eliminar ${singular}`,
+      mensaje: `¿Eliminar ${nombre}? Esta acción no se puede deshacer.`,
+      textoConfirmar: 'Eliminar',
+      peligro: true,
+    });
+    if (!ok) return;
     this.eliminar$(this.activa(), String(fila['id'])).subscribe({
       next: () => {
         this.toast.exito('Elemento eliminado');

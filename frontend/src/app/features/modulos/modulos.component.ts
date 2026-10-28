@@ -5,6 +5,7 @@ import { ModulosStateService } from '../../core/services/modulos-state.service';
 import { EmpresasService } from '../../core/services/empresas.service';
 import { AuthService } from '../../core/services/auth.service';
 import { ToastService } from '../../core/services/toast.service';
+import { DialogoService } from '../../core/services/dialogo.service';
 import { Empresa } from '../../core/models/empresa.model';
 import { Modulo } from '../../core/models/modulo.model';
 import { IconComponent } from '../../shared/icons';
@@ -272,6 +273,7 @@ export class ModulosComponent {
   private readonly empresasService = inject(EmpresasService);
   private readonly auth = inject(AuthService);
   private readonly toast = inject(ToastService);
+  private readonly dialogo = inject(DialogoService);
   private readonly fb = inject(FormBuilder);
 
   readonly iconos = ICONOS_DISPONIBLES;
@@ -460,7 +462,17 @@ export class ModulosComponent {
   }
 
   eliminar(m: Modulo): void {
-    if (!confirm(`¿Eliminar el módulo ${m.nombre}?`)) return;
+    void this.confirmarEliminar(m);
+  }
+
+  private async confirmarEliminar(m: Modulo): Promise<void> {
+    const ok = await this.dialogo.confirmar({
+      titulo: 'Eliminar módulo',
+      mensaje: `¿Eliminar el módulo ${m.nombre}?`,
+      textoConfirmar: 'Eliminar',
+      peligro: true,
+    });
+    if (!ok) return;
     this.modulosService.eliminar(m.id, this.empresaId()).subscribe({
       next: () => {
         this.toast.exito('Módulo eliminado');

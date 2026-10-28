@@ -398,7 +398,7 @@ export class InventarioService {
       select: { id: true, nombre: true, costo: true },
     });
     if (productos.length !== new Set(productoIds).size) {
-      throw new BadRequestException('Uno o mas productos son inválidos');
+      throw new BadRequestException('Uno o más productos son inválidos');
     }
     const mapaProductos = new Map(productos.map((p) => [p.id, p]));
 

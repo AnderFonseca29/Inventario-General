@@ -62,7 +62,7 @@ export class TenantGuard implements CanActivate {
     // /modulos), que resuelven la empresa de forma explicita y auditable.
     throw new ForbiddenException(
       user.esSuperAdmin
-        ? 'La cuenta de plataforma no opera datos de empresa. Usa los modulos de administracion.'
+        ? 'La cuenta de plataforma no opera datos de empresa. Usa los módulos de administración.'
         : 'El usuario no tiene una empresa asignada',
     );
   }
@@ -76,7 +76,7 @@ export function exigirEmpresa(user: AuthenticatedUser): string {
   if (user.empresaId) return user.empresaId;
   throw new ForbiddenException(
     user.esSuperAdmin
-      ? 'La cuenta de plataforma no opera datos de empresa. Usa los modulos de administracion.'
+      ? 'La cuenta de plataforma no opera datos de empresa. Usa los módulos de administración.'
       : 'El usuario no tiene una empresa asignada',
   );
 }

@@ -46,6 +46,10 @@ export class AuthService {
   readonly isAuthenticated = computed(() => this._user() !== null);
   readonly isSuperAdmin = computed(() => this._user()?.esSuperAdmin ?? false);
 
+  // Dueno de la empresa: unica cuenta autorizada para el modulo de membresias
+  // (pago de la suscripcion) y para los reportes de ese modulo.
+  readonly esPropietario = computed(() => this._user()?.esPropietario ?? false);
+
   // Usuario operativo (vendedor): registra actividad propia pero no administra
   // la empresa. Solo debe ver su resumen personal.
   readonly esOperativo = computed(() => {
@@ -119,6 +123,22 @@ export class AuthService {
     return this.http
       .post<LoginResponse>(`${this.base}/refresh`, { refreshToken })
       .pipe(tap((resp) => this.guardarSesion(resp)));
+  }
+
+  /**
+   * Cambia la contrasena del usuario que ha iniciado sesion.
+   *
+   * El backend exige la contrasena actual y una nueva de al menos 10
+   * caracteres con mayuscula, minuscula y numero.
+   */
+  cambiarContrasena(
+    contrasenaActual: string,
+    contrasenaNueva: string,
+  ): Observable<{ ok: true }> {
+    return this.http.post<{ ok: true }>(`${this.base}/change-password`, {
+      currentPassword: contrasenaActual,
+      newPassword: contrasenaNueva,
+    });
   }
 
   cerrarSesion(): void {

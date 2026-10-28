@@ -9,6 +9,7 @@ import { Observable } from 'rxjs';
 import { MembresiaService } from '../../core/services/membresia.service';
 import { AuthService } from '../../core/services/auth.service';
 import { ToastService } from '../../core/services/toast.service';
+import { DialogoService } from '../../core/services/dialogo.service';
 import {
   Cliente,
   EstadoMembresia,
@@ -423,6 +424,7 @@ export class MembresiaComponent {
   private readonly service = inject(MembresiaService);
   private readonly auth = inject(AuthService);
   private readonly toast = inject(ToastService);
+  private readonly dialogo = inject(DialogoService);
   private readonly fb = inject(FormBuilder);
 
   readonly clientes = signal<Cliente[]>([]);
@@ -709,7 +711,17 @@ export class MembresiaComponent {
   }
 
   eliminarCliente(c: Cliente): void {
-    if (!confirm(`¿Eliminar el cliente ${c.nombre}?`)) return;
+    void this.confirmarEliminarCliente(c);
+  }
+
+  private async confirmarEliminarCliente(c: Cliente): Promise<void> {
+    const ok = await this.dialogo.confirmar({
+      titulo: 'Eliminar cliente',
+      mensaje: `¿Eliminar el cliente ${c.nombre}?`,
+      textoConfirmar: 'Eliminar',
+      peligro: true,
+    });
+    if (!ok) return;
     this.service.eliminarCliente(c.id).subscribe({
       next: () => {
         this.toast.exito('Cliente eliminado');
@@ -720,7 +732,17 @@ export class MembresiaComponent {
   }
 
   eliminarPlan(p: PlanMembresia): void {
-    if (!confirm(`¿Eliminar el plan ${p.nombre}?`)) return;
+    void this.confirmarEliminarPlan(p);
+  }
+
+  private async confirmarEliminarPlan(p: PlanMembresia): Promise<void> {
+    const ok = await this.dialogo.confirmar({
+      titulo: 'Eliminar plan',
+      mensaje: `¿Eliminar el plan ${p.nombre}?`,
+      textoConfirmar: 'Eliminar',
+      peligro: true,
+    });
+    if (!ok) return;
     this.service.eliminarPlan(p.id).subscribe({
       next: () => {
         this.toast.exito('Plan eliminado');
@@ -731,8 +753,17 @@ export class MembresiaComponent {
   }
 
   cancelar(m: MembresiaCliente): void {
-    if (!confirm(`¿Cancelar la membresía de ${m.cliente?.nombre ?? 'el cliente'}?`))
-      return;
+    void this.confirmarCancelar(m);
+  }
+
+  private async confirmarCancelar(m: MembresiaCliente): Promise<void> {
+    const ok = await this.dialogo.confirmar({
+      titulo: 'Cancelar membresía',
+      mensaje: `¿Cancelar la membresía de ${m.cliente?.nombre ?? 'el cliente'}?`,
+      textoConfirmar: 'Cancelar membresía',
+      peligro: true,
+    });
+    if (!ok) return;
     this.service.cancelarMembresia(m.id).subscribe({
       next: () => {
         this.toast.exito('Membresía cancelada');
