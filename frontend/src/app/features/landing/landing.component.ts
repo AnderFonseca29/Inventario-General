@@ -320,13 +320,13 @@ const PASOS: Paso[] = [
           <p>Plataforma de inventario multiempresa con trazabilidad completa.</p>
         </div>
         <div class="lp-footer-col">
-          <h4>Producto</h4>
+          <h3>Producto</h3>
           <a href="#caracteristicas">Características</a>
           <a href="#modulos">Módulos</a>
           <a href="#planes">Planes</a>
         </div>
         <div class="lp-footer-col">
-          <h4>Cuenta</h4>
+          <h3>Cuenta</h3>
           <a routerLink="/login">Iniciar sesión</a>
           <a routerLink="/registro">Crear cuenta</a>
         </div>
