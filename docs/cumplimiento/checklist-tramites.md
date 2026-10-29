@@ -120,7 +120,7 @@ No crear cuentas desde este repositorio. Cada paso lo ejecuta la empresa y luego
 - [ ] Implementar aceptación de Términos en el checkout.
 - [ ] Aplicar límites de plan (`maxBodegas`, `maxReportes`) y corregir política de contraseñas.
 - [ ] Quitar el seed automático del `Dockerfile` de producción.
-- [ ] Enlazar el Aviso de Privacidad en todos los formularios de recolección.
+- [x] Enlazar el Aviso de Privacidad en registro y derechos; repetir en formularios futuros.
 - [ ] Probar el modal de aceptación a 320/360 px y con teclado.
 - [ ] Probar los endpoints de superadmin con una sesión real.
 - [ ] Ejecutar prueba de restauración de backup y documentarla.

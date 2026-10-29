@@ -219,7 +219,9 @@ import { IconComponent } from '../../shared/icons';
                     He leído y acepto los
                     <a href="/legal/terminos-y-condiciones.md" target="_blank" rel="noopener noreferrer">Términos y Condiciones</a>,
                     la
-                    <a href="/legal/politica-de-privacidad.md" target="_blank" rel="noopener noreferrer">Política de Privacidad</a>
+                    <a href="/legal/politica-de-privacidad.md" target="_blank" rel="noopener noreferrer">Política de Privacidad</a>,
+                    el
+                    <a href="/legal/aviso-de-privacidad.md" target="_blank" rel="noopener noreferrer">Aviso de Privacidad</a>
                     y el
                     <a href="/legal/uso-aceptable.md" target="_blank" rel="noopener noreferrer">Uso Aceptable</a>.
                   </span>

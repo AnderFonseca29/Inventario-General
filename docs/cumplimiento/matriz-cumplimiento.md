@@ -51,7 +51,7 @@ Consulta: 28 de octubre de 2026. Las fuentes se usan para identificar obligacion
 | D-01 | Política de Tratamiento publicada y descargable | Ley 1581/2012; Decreto 1074/2015 | ✅ Aprobado (técnico) | `frontend/public/legal/politica-de-tratamiento-de-datos.md`; hash en `MANIFEST.md`; enlace en landing | Revisión por abogado; datos de la sociedad |
 | D-02 | Política de Privacidad publicada | Ley 1581/2012 | ✅ Aprobado (técnico) | `politica-de-privacidad.md`; hash `3c9026d9…` | Revisión legal |
 | D-03 | Términos y Condiciones publicados | Ley 1480/2011; Ley 527/1999 | ✅ Aprobado (técnico) | `terminos-y-condiciones.md`; hash `903582a2…` | Revisión legal; IVA y régimen |
-| D-04 | Aviso de Privacidad disponible | Decreto 1074/2015 | ⚠️ Parcial | `aviso-de-privacidad.md`; hash `52736494…` | **No está enlazado en los formularios de recolección** (grep sin coincidencias) |
+| D-04 | Aviso de Privacidad disponible | Decreto 1074/2015 | ✅ Aprobado (técnico) | `aviso-de-privacidad.md`; hash `52736494…`; enlazado en registro y derechos; 0 desbordes a 360 px | Formularios internos de usuarios/clientes corresponden a la empresa-cliente como responsable |
 | D-05 | Uso Aceptable publicado | Ley 1581/2012; Ley 1273/2009 | ✅ Aprobado (técnico) | `uso-aceptable.md`; hash `9715c4a3…` | Revisión legal |
 | D-06 | Política de Cookies publicada | Ley 1581/2012; guías SIC | ✅ Aprobado (técnico) | `politica-de-cookies.md`; hash `92c47513…` | Revisión legal |
 | D-07 | Política de Derechos de los Titulares | Ley 1581/2012 | ✅ Aprobado (técnico) | `derechos-de-los-titulares.md`; hash `54fed2e1…` | Revisión legal |
@@ -150,6 +150,7 @@ Consulta: 28 de octubre de 2026. Las fuentes se usan para identificar obligacion
 | Consulta de derechos | 200 correcto / 404 correo erróneo | 2026-10-28 | API |
 | Aceptación legal | 3 filas `PRIMER_LOGIN`; modal desaparece al recargar | 2026-10-28 | PostgreSQL + navegador |
 | Cookie banner en `/app` | Ausente | 2026-10-28 | Navegador |
+| Aviso de privacidad en registro y derechos | 1 enlace visible; 0 desbordes a 360 px | 2026-10-28 | Navegador (iframe 360 px) |
 
 ## 6. Brechas priorizadas
 
@@ -157,7 +158,7 @@ Consulta: 28 de octubre de 2026. Las fuentes se usan para identificar obligacion
 
 1. Revisión y firma de todos los documentos por abogado colombiano.
 2. Completar identidad de la S.A.S. y designar responsable de datos/PQR.
-3. Enlazar el Aviso de Privacidad en cada formulario de recolección.
+3. Enlazar el Aviso de Privacidad en cada formulario de recolección. **Hecho en registro y derechos**; repetir en formularios futuros.
 4. Resolver transferencia internacional y RNBD con concepto legal.
 5. Implementar correo transaccional y recuperación de contraseña.
 6. Probar login y aceptaciones con una cuenta real en producción.
