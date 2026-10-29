@@ -17,6 +17,7 @@ Estos documentos se publican como archivos Markdown descargables e imprimibles. 
 | Política de Cookies | [`politica-de-cookies.md`](./politica-de-cookies.md) | Categorías, consentimiento y control de cookies |
 | Derechos de los Titulares | [`derechos-de-los-titulares.md`](./derechos-de-los-titulares.md) | Cómo ejercer acceso, rectificación, supresión y reclamos |
 | Política de Retención | [`politica-de-retencion.md`](./politica-de-retencion.md) | Plazos, purga, anonimización y evidencia |
+| Contrato de Encargo (DPA) | [`contrato-de-encargo.md`](./contrato-de-encargo.md) | Obligaciones de Stockora como encargada de los datos del cliente |
 
 ## Cómo usarlos
 
@@ -45,4 +46,13 @@ Los documentos usan `[DATO PENDIENTE: ...]` para la información que solo puede 
 
 ## Estado
 
-Este paquete corresponde a la rama `feat/legal-documentos`. Los documentos de cookies, derechos de los titulares, retención y encargo se trabajan en ramas separadas.
+Documentos en ramas separadas, sin fusionar a `main`:
+
+- `feat/legal-documentos`: términos, privacidad, tratamiento, aviso y uso aceptable.
+- `feat/legal-cookies`: política de cookies y consentimiento.
+- `feat/legal-derechos-titulares`: derechos y solicitudes.
+- `feat/legal-retencion`: plazos, caducidad y reporte.
+- `feat/legal-encargado`: contrato de encargo (DPA).
+- `feat/legal-aceptaciones`: registro de aceptaciones.
+
+Todos requieren revisión por abogado con licencia en Colombia antes de publicarse como definitivos.
