@@ -143,7 +143,7 @@ Consulta: 28 de octubre de 2026. Las fuentes se usan para identificar obligacion
 | Backend unitario | 97/97 | 2026-10-28 | `jest --runInBand` |
 | Frontend unitario | 44/44 | 2026-10-28 | `ng test --no-watch` |
 | Build backend | Verde | 2026-10-28 | `nest build` |
-| Build frontend | Verde (warning SCSS 12.14 kB vs 12 kB) | 2026-10-28 | `ng build` |
+| Build frontend | Verde; presupuesto de estilos ajustado a 13 kB | 2026-10-28 | `ng build` |
 | Responsive 14 rutas × 8 anchos | 0 desbordes | 2026-10-27/28 | Navegador automatizado |
 | Banner de cookies | Aceptar/Rechazar/Consent Mode | 2026-10-28 | Navegador |
 | Radicación de derechos | Radicado `DER-20261028-C048CA87` | 2026-10-28 | API + navegador |

@@ -127,7 +127,7 @@ No crear cuentas desde este repositorio. Cada paso lo ejecuta la empresa y luego
 - [ ] Crear runbook de incidentes y hacer un simulacro.
 - [ ] Programar revisión de accesos y capacitación anual.
 - [ ] Revisar accesibilidad y LCP/CLS del panel en móvil.
-- [ ] Resolver el warning de presupuesto SCSS (12.14 kB vs 12 kB) o subir el budget a 13 kB.
+- [x] Presupuesto SCSS ajustado a 13 kB (el landing usa 12.14 kB; sin warning de build).
 - [ ] Corregir el toast “Bodega creado” y el rol `Produccion` sin acento.
 - [ ] Recuperar `stash@{0}` (“registro-profesional-pendiente”) en una rama nueva.
 
