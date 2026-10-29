@@ -244,18 +244,18 @@ import { formatearFechaHora } from '../../core/utils/fechas';
                 <div formArrayName="detalles" class="lineas">
                   @for (linea of detalles.controls; track $index; let i = $index) {
                     <div [formGroupName]="i" class="linea">
-                      <select class="form-control" formControlName="productoId">
+                      <select class="form-control" formControlName="productoId" aria-label="Producto">
                         <option value="">Producto…</option>
                         @for (p of productos(); track p.id) {
                           <option [value]="p.id">{{ p.sku }} · {{ p.nombre }}</option>
                         }
                       </select>
                       <input class="form-control" type="number" step="any" min="0"
-                        formControlName="cantidad" placeholder="Cantidad" />
+                        formControlName="cantidad" placeholder="Cantidad" aria-label="Cantidad" />
                       <input class="form-control" type="number" step="any" min="0"
-                        formControlName="costoUnitario" placeholder="Costo (opcional)" />
+                        formControlName="costoUnitario" placeholder="Costo (opcional)" aria-label="Costo unitario (opcional)" />
                       <button type="button" class="btn btn-danger btn-sm" (click)="quitarLinea(i)"
-                        [disabled]="detalles.length === 1">
+                        [disabled]="detalles.length === 1" aria-label="Quitar producto de la línea">
                         <app-icon name="trash" />
                       </button>
                     </div>

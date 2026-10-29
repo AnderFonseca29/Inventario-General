@@ -22,7 +22,22 @@
   box-shadow: var(--shadow-lg);
   width: 100%;
   max-width: 560px;
+  max-height: calc(100vh - 88px);
+  max-height: calc(100dvh - 88px);
+  display: flex;
+  flex-direction: column;
   animation: pop 0.22s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/*
+ * Los formularios van dentro de un <form> intermedio. Hacerlo columna
+ * permite que solo el cuerpo haga scroll y el encabezado/pie sigan visibles.
+ */
+.modal > form {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
 }
 
 .modal-lg {
@@ -31,6 +46,7 @@
 
 .modal-header {
   display: flex;
+  flex: 0 0 auto;
   align-items: center;
   justify-content: space-between;
   padding: 20px 22px;
@@ -42,11 +58,16 @@
 }
 
 .modal-body {
+  flex: 1 1 auto;
+  min-height: 0;
   padding: 22px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .modal-footer {
   display: flex;
+  flex: 0 0 auto;
   justify-content: flex-end;
   gap: 10px;
   padding: 16px 22px;
@@ -85,16 +106,16 @@
 
   .modal,
   .modal-lg {
+    width: 100%;
     max-width: none;
-    min-height: 100vh;
+    height: 100vh;
+    height: 100dvh;
+    max-height: 100vh;
+    max-height: 100dvh;
     border-radius: 0;
-    display: flex;
-    flex-direction: column;
   }
 
   .modal-body {
-    flex: 1;
-    overflow-y: auto;
     padding: 18px;
   }
 

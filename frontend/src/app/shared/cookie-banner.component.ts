@@ -94,6 +94,10 @@ import { ConsentimientoService } from '../core/services/consentimiento.service';
         pointer-events: auto;
         width: 100%;
         max-width: 1100px;
+        max-height: calc(100vh - 2rem);
+        max-height: calc(100dvh - 2rem);
+        overflow-y: auto;
+        overscroll-behavior: contain;
         display: flex;
         flex-wrap: wrap;
         align-items: center;
@@ -187,9 +191,12 @@ import { ConsentimientoService } from '../core/services/consentimiento.service';
           bottom: 0.6rem;
         }
         .cookie-caja {
+          max-height: calc(100vh - 1.2rem);
+          max-height: calc(100dvh - 1.2rem);
           padding: 0.9rem;
         }
         .cookie-acciones {
+          width: 100%;
           flex-direction: column;
         }
         .cookie-acciones button {

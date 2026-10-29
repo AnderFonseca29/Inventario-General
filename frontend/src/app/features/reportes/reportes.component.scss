@@ -52,6 +52,10 @@
   margin: 0;
 }
 
+.range-controls .btn {
+  min-height: 44px;
+}
+
 .report-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));

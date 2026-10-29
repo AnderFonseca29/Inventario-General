@@ -81,10 +81,6 @@
   color: #344054;
 }
 
-.form-row .full {
-  grid-column: 1 / -1;
-}
-
 .table-sm td,
 .table-sm th {
   padding-top: 8px;
@@ -131,6 +127,14 @@
   grid-template-columns: 2fr 1fr 1fr auto;
   gap: 8px;
   align-items: center;
+}
+
+.linea > .btn-danger {
+  width: auto;
+  min-width: 44px;
+  min-height: 44px;
+  align-self: center;
+  justify-self: end;
 }
 
 @media (max-width: 720px) {

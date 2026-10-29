@@ -115,6 +115,12 @@ const REGLAS = {
     .modal {
       max-width: 460px;
     }
+
+    @media (max-width: 640px) {
+      .modal {
+        max-width: none;
+      }
+    }
   `,
 })
 export class CambiarContrasenaComponent {

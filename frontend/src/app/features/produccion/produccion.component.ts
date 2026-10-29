@@ -456,14 +456,16 @@ type Modo =
                 <div formArrayName="detalles" class="lineas">
                   @for (linea of insumos.controls; track $index; let i = $index) {
                     <div [formGroupName]="i" class="linea linea-formula">
-                      <select class="form-control" formControlName="materiaPrimaId">
+                      <select class="form-control" formControlName="materiaPrimaId" aria-label="Materia prima">
                         <option value="">Materia prima…</option>
                         @for (m of materias(); track m.id) {
                           <option [value]="m.id">{{ m.nombre }}</option>
                         }
                       </select>
-                      <input class="form-control" type="number" step="any" formControlName="cantidad" placeholder="Cantidad" />
-                      <button type="button" class="btn btn-danger btn-sm" (click)="quitarInsumo(i)" [disabled]="insumos.length === 1">
+                      <input class="form-control" type="number" step="any" formControlName="cantidad"
+                        placeholder="Cantidad" aria-label="Cantidad de materia prima" />
+                      <button type="button" class="btn btn-danger btn-sm" (click)="quitarInsumo(i)"
+                        [disabled]="insumos.length === 1" aria-label="Quitar insumo de la fórmula">
                         <app-icon name="trash" />
                       </button>
                     </div>
@@ -554,8 +556,10 @@ type Modo =
                   @for (linea of consumos.controls; track $index; let i = $index) {
                     <div [formGroupName]="i" class="linea linea-consumo">
                       <span class="cell-strong">{{ nombreInsumo(linea) }}</span>
-                      <input class="form-control" type="number" step="any" formControlName="cantidadConsumida" placeholder="Consumido" />
-                      <input class="form-control" type="number" step="any" formControlName="merma" placeholder="Merma" />
+                      <input class="form-control" type="number" step="any" formControlName="cantidadConsumida"
+                        placeholder="Consumido" [attr.aria-label]="'Cantidad consumida de ' + nombreInsumo(linea)" />
+                      <input class="form-control" type="number" step="any" formControlName="merma"
+                        placeholder="Merma" [attr.aria-label]="'Merma de ' + nombreInsumo(linea)" />
                     </div>
                   }
                 </div>

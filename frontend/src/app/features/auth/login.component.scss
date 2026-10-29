@@ -121,6 +121,11 @@
   max-width: 390px;
 }
 
+/* El alta necesita más ancho: son seis campos y dos columnas legibles. */
+.login-card.registro-card {
+  max-width: 520px;
+}
+
 .login-logo {
   margin-bottom: 20px;
 }

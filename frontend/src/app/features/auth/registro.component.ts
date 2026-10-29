@@ -50,7 +50,7 @@ import { IconComponent } from '../../shared/icons';
       </div>
 
       <div class="login-main">
-        <div class="login-card">
+        <div class="login-card registro-card">
           <div class="login-logo">
             <span class="brand-logo">ST</span>
           </div>
