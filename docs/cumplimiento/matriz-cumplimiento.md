@@ -133,7 +133,7 @@ Consulta: 28 de octubre de 2026. Las fuentes se usan para identificar obligacion
 | P-04 | Retracto y reversión | Ley 1480/2011 | ✅ Aprobado (texto) | Términos | Revisión legal; flujo operativo |
 | P-05 | Cancelación y suspensión | Ley 1480/2011 | ✅ Aprobado (texto) | Términos; decisión L9 | Probar en producto |
 | P-06 | PQR y canales de atención | Ley 2300/2023 | ⚠️ Parcial | Canales definidos; formulario de derechos | Dominio/correo y aplicabilidad B2B `[VERIFICAR]` |
-| P-07 | Accesibilidad | Ley 1618/2013 | ⚠️ Parcial | Lighthouse landing: accesibilidad 100 | Modal y panel sin auditoría formal |
+| P-07 | Accesibilidad | Ley 1618/2013 | ⚠️ Parcial | Lighthouse landing: accesibilidad 100; auditoría geométrica de formularios y modales 320–1440 | Modal y panel sin auditoría formal de teclado/lector |
 | P-08 | Rendimiento móvil | Regla interna | ⚠️ No probado | Lighthouse landing: SEO 80; sin LCP/CLS con throttling | Medir y corregir |
 
 ## 5. Evidencia de pruebas
@@ -144,7 +144,12 @@ Consulta: 28 de octubre de 2026. Las fuentes se usan para identificar obligacion
 | Frontend unitario | 44/44 | 2026-10-28 | `ng test --no-watch` |
 | Build backend | Verde | 2026-10-28 | `nest build` |
 | Build frontend | Verde; presupuesto de estilos ajustado a 13 kB | 2026-10-28 | `ng build` |
-| Responsive 14 rutas × 8 anchos | 0 desbordes | 2026-10-27/28 | Navegador automatizado |
+| Responsive 14 rutas × 8 anchos | 0 desbordes de página | 2026-10-27/28 | Navegador automatizado (CDP) |
+| Formularios y modales responsive | 0 desbordes; controles de 44 px; body con scroll y footer visible | 2026-10-28 | 1440/1024/820/768/640/480/390/360/320; roles a 320×568 y 360×640 |
+| Líneas dinámicas (inventario, cargues, fórmula) | Eliminar 44×44 alineado a la derecha; una columna ≤480 | 2026-10-28 | 3 formularios × 5 anchos (1440/640/480/360/320) |
+| Modal de aceptación legal | 320×568: 296×544; 360×640: 336×572; scroll interno | 2026-10-28 | Simulación en navegador; sin escrituras en BD |
+| Banner/panel de cookies | 320×568: panel de 412 px y botones full-width; 320×480 y 640×320 sin desborde | 2026-10-28 | Navegador (CDP) |
+| Cambio de contraseña | Full-screen en 320/360/480/640; 3 controles de 44 px; footer visible | 2026-10-28 | Navegador (CDP) |
 | Banner de cookies | Aceptar/Rechazar/Consent Mode | 2026-10-28 | Navegador |
 | Radicación de derechos | Radicado `DER-20261028-C048CA87` | 2026-10-28 | API + navegador |
 | Consulta de derechos | 200 correcto / 404 correo erróneo | 2026-10-28 | API |

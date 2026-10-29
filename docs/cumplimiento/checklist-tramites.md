@@ -121,13 +121,14 @@ No crear cuentas desde este repositorio. Cada paso lo ejecuta la empresa y luego
 - [ ] Aplicar límites de plan (`maxBodegas`, `maxReportes`) y corregir política de contraseñas.
 - [ ] Quitar el seed automático del `Dockerfile` de producción.
 - [x] Enlazar el Aviso de Privacidad en registro y derechos; repetir en formularios futuros.
-- [ ] Probar el modal de aceptación a 320/360 px y con teclado.
+- [ ] Probar el modal de aceptación a 320/360 px y con teclado. Geometría y scroll verificados; falta navegación por teclado.
 - [ ] Probar los endpoints de superadmin con una sesión real.
 - [ ] Ejecutar prueba de restauración de backup y documentarla.
 - [ ] Crear runbook de incidentes y hacer un simulacro.
 - [ ] Programar revisión de accesos y capacitación anual.
 - [ ] Revisar accesibilidad y LCP/CLS del panel en móvil.
 - [x] Presupuesto SCSS ajustado a 13 kB (el landing usa 12.14 kB; sin warning de build).
+- [x] Auditar formularios y modales de 320 a 1440 px; líneas dinámicas, cookies y aceptación sin desbordes (2026-10-28).
 - [ ] Corregir el toast “Bodega creado” y el rol `Produccion` sin acento.
 - [ ] Recuperar `stash@{0}` (“registro-profesional-pendiente”) en una rama nueva.
 
@@ -141,7 +142,7 @@ No crear cuentas desde este repositorio. Cada paso lo ejecuta la empresa y luego
 | Backup/restore | Restauración completa en entorno aislado | ❌ No probado |
 | Incidente simulado | Detección, contención, notificación y cierre en plazo | ❌ No probado |
 | Superadmin derechos | Listar, responder y cerrar con sesión real | ⚠️ No probado |
-| Modal 320/360 px | Sin desbordes; foco y teclado correctos | ⚠️ Parcial |
+| Modal 320/360 px | Sin desbordes; foco y teclado correctos | ⚠️ Parcial (geometría y scroll OK; teclado pendiente) |
 | Cookies en todas las rutas `/app` | Banner ausente y sin scripts de analítica | ⚠️ Parcial |
 | RNBD | Cálculo de activos y decisión documentada | ⛔ Pendiente |
 
