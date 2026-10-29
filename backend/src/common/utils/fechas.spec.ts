@@ -1,6 +1,7 @@
 import {
   aInstanteUtc,
   finDelDiaUtc,
+  sumarDiasHabiles,
   ZONA_HORARIA,
 } from './fechas';
 
@@ -50,5 +51,11 @@ describe('fechas (hallazgo T)', () => {
 
   it('expone la zona horaria de operacion', () => {
     expect(ZONA_HORARIA).toBe('America/Bogota');
+  });
+
+  it('suma dias habiles sin contar sabados ni domingos', () => {
+    const desde = aInstanteUtc('2026-01-15')!;
+    const limite = sumarDiasHabiles(desde, 10);
+    expect(limite.toISOString()).toBe('2026-01-30T04:59:59.999Z');
   });
 });

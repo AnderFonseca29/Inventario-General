@@ -118,6 +118,23 @@ enum EstadoSolicitud {
   ANULADA
 }
 
+enum TipoSolicitudDerechos {
+  ACCESO
+  CONSULTA
+  RECTIFICACION
+  SUPRESION
+  REVOCATORIA
+  RECLAMO
+}
+
+enum EstadoSolicitudDerechos {
+  RECIBIDA
+  EN_TRAMITE
+  RESPONDIDA
+  CERRADA
+  RECHAZADA
+}
+
 enum EstadoMembresia {
   ACTIVA
   VENCIDA
@@ -319,6 +336,7 @@ model Usuario {
   auditoriasSoporte       AuditoriaSoporte[]      @relation("AuditoriaSoporteUsuario")
   recepcionesMp           RecepcionMateriaPrima[] @relation("RecepcionResponsable")
   membresiasCreadas       MembresiaCliente[]      @relation("MembresiaCreador")
+  solicitudesDerechos     SolicitudDerechos[]     @relation("SolicitudDerechosRespondedor")
 
   @@index([empresaId])
   @@map("usuarios")
@@ -1051,4 +1069,36 @@ model AuditoriaSoporte {
 
   @@index([empresaId, creadoEn])
   @@map("auditoria_soporte")
+}
+
+// ===================== DERECHOS DE LOS TITULARES ===========================
+
+model SolicitudDerechos {
+  id              String                  @id @default(uuid()) @db.Uuid
+  radicado        String                  @unique
+  tipo            TipoSolicitudDerechos
+  nombre          String
+  documento       String
+  correo          String
+  telefono        String?
+  empresa         String?
+  mensaje         String
+  autorizacion    Boolean                 @default(false)
+  estado          EstadoSolicitudDerechos @default(RECIBIDA)
+  fechaRecepcion  DateTime                @default(now()) @db.Timestamptz(3)
+  fechaLimite     DateTime                @db.Timestamptz(3)
+  fechaRespuesta  DateTime?               @db.Timestamptz(3)
+  respuesta       String?
+  respondidoPorId String?                 @db.Uuid
+  ip              String?
+  userAgent       String?
+  createdAt       DateTime                @default(now()) @db.Timestamptz(3)
+  updatedAt       DateTime                @updatedAt @db.Timestamptz(3)
+
+  respondidoPor Usuario? @relation("SolicitudDerechosRespondedor", fields: [respondidoPorId], references: [id], onDelete: SetNull)
+
+  @@index([estado, fechaLimite])
+  @@index([correo])
+  @@index([fechaRecepcion])
+  @@map("solicitudes_derechos")
 }

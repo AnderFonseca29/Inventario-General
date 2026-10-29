@@ -15,6 +15,7 @@ Estos documentos se publican como archivos Markdown descargables e imprimibles. 
 | Aviso de Privacidad | [`aviso-de-privacidad.md`](./aviso-de-privacidad.md) | Aviso breve para formularios y recolección |
 | Uso Aceptable | [`uso-aceptable.md`](./uso-aceptable.md) | Conductas prohibidas, seguridad y comunicaciones |
 | Política de Cookies | [`politica-de-cookies.md`](./politica-de-cookies.md) | Categorías, consentimiento y control de cookies |
+| Derechos de los Titulares | [`derechos-de-los-titulares.md`](./derechos-de-los-titulares.md) | Cómo ejercer acceso, rectificación, supresión y reclamos |
 
 ## Cómo usarlos
 

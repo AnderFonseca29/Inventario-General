@@ -1,0 +1,239 @@
+<div class="der-page">
+  <header class="der-top">
+    <a class="der-brand" routerLink="/">
+      <span class="brand-logo">ST</span>
+      <span>Stockora</span>
+    </a>
+    <a class="der-back" routerLink="/">Volver al inicio</a>
+  </header>
+
+  <main class="der-main">
+    <section class="der-info" aria-labelledby="titulo-derechos">
+      <p class="der-kicker">Protección de datos</p>
+      <h1 id="titulo-derechos">Ejerce tus derechos</h1>
+      <p class="der-lead">
+        Radica una consulta, reclamo, rectificación, supresión, acceso o
+        revocatoria. Te entregamos un radicado y respondemos dentro de los
+        plazos legales.
+      </p>
+
+      <ul class="der-plazos">
+        <li>
+          <b>Consultas</b>
+          <span>10 días hábiles</span>
+        </li>
+        <li>
+          <b>Reclamos</b>
+          <span>15 días hábiles</span>
+        </li>
+        <li>
+          <b>Radicado</b>
+          <span>Inmediato</span>
+        </li>
+      </ul>
+
+      <p class="der-note">
+        Si el dato lo cargó una empresa que usa Stockora, remitiremos la
+        solicitud a esa empresa, que actúa como responsable.
+      </p>
+
+      <a class="der-doc" href="/legal/derechos-de-los-titulares.md">
+        Leer el procedimiento completo
+      </a>
+    </section>
+
+    <section class="der-card" aria-labelledby="titulo-formulario">
+      @if (radicado(); as r) {
+        <div class="der-ok" role="status">
+          <app-icon name="check" />
+          <h2 id="titulo-formulario">Solicitud radicada</h2>
+          <p>Guarda este número para consultar el estado:</p>
+          <strong class="der-radicado">{{ r.radicado }}</strong>
+          <p class="der-fechas">
+            Recibida: {{ r.fechaRecepcion | date: 'dd/MM/yyyy' }} · Límite:
+            {{ r.fechaLimite | date: 'dd/MM/yyyy' }}
+          </p>
+          <div class="der-acciones">
+            <button type="button" class="der-btn sec" (click)="nueva()">
+              Radicar otra
+            </button>
+            <button type="button" class="der-btn" (click)="prepararConsulta()">
+              Consultar estado
+            </button>
+          </div>
+        </div>
+      } @else {
+        <h2 id="titulo-formulario">Nueva solicitud</h2>
+        <p class="der-ayuda">
+          Los campos marcados con <span aria-hidden="true">*</span> son
+          obligatorios.
+        </p>
+
+        <form [formGroup]="form" (ngSubmit)="enviar()" novalidate>
+          <div class="der-grid">
+            <label class="campo ancho">
+              <span>Tipo de solicitud *</span>
+              <select formControlName="tipo" aria-label="Tipo de solicitud">
+                <option value="CONSULTA">Consulta</option>
+                <option value="ACCESO">Acceso a mis datos</option>
+                <option value="RECTIFICACION">Rectificación</option>
+                <option value="SUPRESION">Supresión</option>
+                <option value="REVOCATORIA">Revocatoria de autorización</option>
+                <option value="RECLAMO">Reclamo</option>
+              </select>
+            </label>
+
+            <label class="campo">
+              <span>Nombre completo *</span>
+              <input
+                type="text"
+                formControlName="nombre"
+                autocomplete="name"
+                [attr.aria-invalid]="invalido('nombre')"
+              />
+              @if (invalido('nombre')) {
+                <small class="der-error-campo">{{ mensaje('nombre') }}</small>
+              }
+            </label>
+
+            <label class="campo">
+              <span>Documento de identidad *</span>
+              <input
+                type="text"
+                formControlName="documento"
+                inputmode="numeric"
+                autocomplete="off"
+                [attr.aria-invalid]="invalido('documento')"
+              />
+              @if (invalido('documento')) {
+                <small class="der-error-campo">{{ mensaje('documento') }}</small>
+              }
+            </label>
+
+            <label class="campo">
+              <span>Correo electrónico *</span>
+              <input
+                type="email"
+                formControlName="correo"
+                autocomplete="email"
+                [attr.aria-invalid]="invalido('correo')"
+              />
+              @if (invalido('correo')) {
+                <small class="der-error-campo">{{ mensaje('correo') }}</small>
+              }
+            </label>
+
+            <label class="campo">
+              <span>Teléfono (opcional)</span>
+              <input
+                type="tel"
+                formControlName="telefono"
+                autocomplete="tel"
+              />
+            </label>
+
+            <label class="campo ancho">
+              <span>Empresa (opcional)</span>
+              <input
+                type="text"
+                formControlName="empresa"
+                autocomplete="organization"
+              />
+            </label>
+
+            <label class="campo ancho">
+              <span>Descripción de la solicitud *</span>
+              <textarea
+                rows="5"
+                formControlName="mensaje"
+                placeholder="Indica qué dato quieres conocer, corregir, suprimir o qué autorización deseas revocar."
+                [attr.aria-invalid]="invalido('mensaje')"
+              ></textarea>
+              @if (invalido('mensaje')) {
+                <small class="der-error-campo">{{ mensaje('mensaje') }}</small>
+              }
+            </label>
+
+            <div class="campo ancho">
+              <label class="der-check">
+                <input type="checkbox" formControlName="autorizacion" />
+                <span>
+                  Autorizo el tratamiento de mis datos para atender esta
+                  solicitud, conforme a la
+                  <a href="/legal/politica-de-privacidad.md" target="_blank" rel="noopener">
+                    política de privacidad</a
+                  >
+                  y al
+                  <a href="/legal/derechos-de-los-titulares.md" target="_blank" rel="noopener">
+                    procedimiento de derechos</a
+                  >. *
+                </span>
+              </label>
+              @if (invalido('autorizacion')) {
+                <small class="der-error-campo">{{ mensaje('autorizacion') }}</small>
+              }
+            </div>
+          </div>
+
+          @if (error(); as e) {
+            <p class="der-error" role="alert">{{ e }}</p>
+          }
+
+          <button type="submit" class="der-btn" [disabled]="enviando()">
+            {{ enviando() ? 'Radicando…' : 'Radicar solicitud' }}
+          </button>
+        </form>
+      }
+    </section>
+  </main>
+
+  <section id="consulta" class="der-consulta" aria-labelledby="titulo-consulta">
+    <div>
+      <h2 id="titulo-consulta">Consultar una solicitud</h2>
+      <p>Ingresa el radicado y el correo con el que la registraste.</p>
+    </div>
+
+    <form [formGroup]="consultaForm" (ngSubmit)="consultar()" novalidate>
+      <label class="campo">
+        <span>Radicado *</span>
+        <input
+          type="text"
+          formControlName="radicado"
+          placeholder="DER-AAAAMMDD-XXXXXXXX"
+        />
+      </label>
+      <label class="campo">
+        <span>Correo *</span>
+        <input type="email" formControlName="correo" autocomplete="email" />
+      </label>
+      <button type="submit" class="der-btn" [disabled]="consultando()">
+        {{ consultando() ? 'Consultando…' : 'Consultar' }}
+      </button>
+    </form>
+
+    @if (errorConsulta(); as e) {
+      <p class="der-error" role="alert">{{ e }}</p>
+    }
+    @if (consulta(); as c) {
+      <div class="der-resultado" role="status">
+        <p><b>Radicado:</b> {{ c.radicado }}</p>
+        <p><b>Estado:</b> {{ c.estado }}</p>
+        <p><b>Recibida:</b> {{ c.fechaRecepcion | date: 'dd/MM/yyyy' }}</p>
+        <p><b>Límite:</b> {{ c.fechaLimite | date: 'dd/MM/yyyy' }}</p>
+        @if (c.fechaRespuesta) {
+          <p><b>Respondida:</b> {{ c.fechaRespuesta | date: 'dd/MM/yyyy' }}</p>
+        }
+      </div>
+    }
+  </section>
+
+  <footer class="der-footer">
+    <span>© {{ anio }} Stockora</span>
+    <nav aria-label="Enlaces legales">
+      <a href="/legal/terminos-y-condiciones.md">Términos</a>
+      <a href="/legal/politica-de-privacidad.md">Privacidad</a>
+      <a href="/legal/derechos-de-los-titulares.md">Derechos</a>
+      <a href="/legal/politica-de-cookies.md">Cookies</a>
+    </nav>
+  </footer>
+</div>

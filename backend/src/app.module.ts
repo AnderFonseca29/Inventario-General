@@ -24,6 +24,7 @@ import { ReportesModule } from './reportes/reportes.module';
 import { ResumenModule } from './resumen/resumen.module';
 import { PermisosModule } from './permisos/permisos.module';
 import { SuscripcionesModule } from './suscripciones/suscripciones.module';
+import { DerechosModule } from './derechos/derechos.module';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { EmpresaContextoGuard } from './common/guards/empresa-contexto.guard';
 import { PermisosGuard } from './common/guards/permisos.guard';
@@ -54,6 +55,7 @@ import { TenantGuard } from './common/guards/tenant.guard';
     ResumenModule,
     PermisosModule,
     SuscripcionesModule,
+    DerechosModule,
   ],
   controllers: [AppController],
   providers: [

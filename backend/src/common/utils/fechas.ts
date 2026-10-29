@@ -139,3 +139,40 @@ export function finDelDiaUtc(entrada: unknown): Date | undefined {
   const [anio, mes, dia] = texto.split('-').map(Number);
   return utcDesdeHoraLocal(anio, mes, dia, 23, 59, 59, 999);
 }
+
+/**
+ * Suma dias habiles (lunes a viernes) a una fecha y devuelve el final de ese
+ * dia en hora Colombia. No descuenta festivos: el llamador debe ajustar si el
+ * vencimiento coincide con uno. [VERIFICAR: calendario de festivos.]
+ */
+export function sumarDiasHabiles(desde: Date, dias: number): Date {
+  const partes = new Intl.DateTimeFormat('en-CA', {
+    timeZone: ZONA_HORARIA,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).formatToParts(desde);
+  const valor = (tipo: string): number =>
+    Number(partes.find((parte) => parte.type === tipo)?.value ?? 0);
+
+  let cursor = new Date(
+    Date.UTC(valor('year'), valor('month') - 1, valor('day'), 12),
+  );
+  let sumados = 0;
+  const total = Math.max(0, Math.trunc(dias));
+  while (sumados < total) {
+    cursor = new Date(cursor.getTime() + 24 * 60 * 60 * 1000);
+    const diaSemana = cursor.getUTCDay();
+    if (diaSemana !== 0 && diaSemana !== 6) sumados += 1;
+  }
+
+  return utcDesdeHoraLocal(
+    cursor.getUTCFullYear(),
+    cursor.getUTCMonth() + 1,
+    cursor.getUTCDate(),
+    23,
+    59,
+    59,
+    999,
+  );
+}

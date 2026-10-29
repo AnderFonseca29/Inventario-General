@@ -143,5 +143,12 @@ export const routes: Routes = [
       },
     ],
   },
+  {
+    path: 'derechos',
+    loadComponent: () =>
+      import('./features/legal/derechos.component').then(
+        (m) => m.DerechosComponent,
+      ),
+  },
   { path: '**', redirectTo: '' },
 ];
