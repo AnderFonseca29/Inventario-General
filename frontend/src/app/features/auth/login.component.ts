@@ -51,6 +51,13 @@ import { IconComponent } from '../../shared/icons';
       </div>
 
       <div class="login-main">
+        <div class="login-top">
+          <a class="back-link" routerLink="/">
+            <app-icon name="arrow-left" />
+            Volver al inicio
+          </a>
+        </div>
+
         <div class="login-card">
           <div class="login-logo">
             <span class="brand-logo">ST</span>
@@ -86,7 +93,7 @@ import { IconComponent } from '../../shared/icons';
 
             <div class="form-group">
               <label for="password">Contraseña</label>
-              <div class="control-icon">
+              <div class="control-icon con-accion">
                 <app-icon name="lock" />
                 <input
                   id="password"
@@ -95,15 +102,18 @@ import { IconComponent } from '../../shared/icons';
                   formControlName="password"
                   placeholder="••••••••"
                   autocomplete="current-password"
-                  style="padding-right: 44px"
                 />
                 <button
                   type="button"
                   class="ver-btn"
                   (click)="verClave.set(!verClave())"
+                  [attr.aria-label]="
+                    verClave() ? 'Ocultar contraseña' : 'Mostrar contraseña'
+                  "
+                  [attr.aria-pressed]="verClave()"
                   [title]="verClave() ? 'Ocultar' : 'Mostrar'"
                 >
-                  <app-icon name="eye" />
+                  <app-icon [name]="verClave() ? 'eye-off' : 'eye'" />
                 </button>
               </div>
               @if (

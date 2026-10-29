@@ -48,7 +48,9 @@
   position: relative;
 }
 
-.control-icon app-icon {
+// Icono decorativo del campo. Con el selector hijo directo, los iconos que van
+// dentro de un boton (mostrar/ocultar contrasena) conservan su sitio.
+.control-icon > app-icon {
   position: absolute;
   left: 12px;
   top: 50%;
@@ -61,6 +63,50 @@
 
 .control-icon .form-control {
   padding-left: 40px;
+}
+
+// Campo con boton a la derecha (ver/ocultar contrasena).
+.control-icon.con-accion .form-control {
+  padding-right: 46px;
+}
+
+.control-icon .ver-btn {
+  position: absolute;
+  right: 5px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition:
+    color 0.15s ease,
+    background-color 0.15s ease;
+}
+
+.control-icon .ver-btn app-icon {
+  position: static;
+  transform: none;
+  width: 18px;
+  height: 18px;
+  color: inherit;
+}
+
+.control-icon .ver-btn:hover {
+  color: var(--color-text);
+  background: rgba(15, 23, 42, 0.06);
+}
+
+.control-icon .ver-btn:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 1px;
 }
 
 .form-error {

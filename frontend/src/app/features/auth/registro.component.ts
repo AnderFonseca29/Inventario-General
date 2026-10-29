@@ -50,6 +50,13 @@ import { IconComponent } from '../../shared/icons';
       </div>
 
       <div class="login-main">
+        <div class="login-top">
+          <a class="back-link" routerLink="/login">
+            <app-icon name="arrow-left" />
+            Volver a iniciar sesión
+          </a>
+        </div>
+
         <div class="login-card">
           <div class="login-logo">
             <span class="brand-logo">ST</span>
@@ -161,7 +168,7 @@ import { IconComponent } from '../../shared/icons';
 
                 <div class="form-group">
                   <label for="password">Contraseña <span aria-hidden="true">*</span></label>
-                  <div class="control-icon">
+                  <div class="control-icon con-accion">
                     <app-icon name="lock" />
                     <input
                       id="password"
@@ -170,7 +177,6 @@ import { IconComponent } from '../../shared/icons';
                       formControlName="password"
                       placeholder="Mínimo 8 caracteres"
                       autocomplete="new-password"
-                      style="padding-right: 44px"
                       [class.is-invalid]="form.controls.password.touched && form.controls.password.invalid"
                       aria-required="true"
                       aria-describedby="passHelp"
@@ -180,9 +186,10 @@ import { IconComponent } from '../../shared/icons';
                       class="ver-btn"
                       (click)="verClave.set(!verClave())"
                       [attr.aria-label]="verClave() ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+                      [attr.aria-pressed]="verClave()"
                       [title]="verClave() ? 'Ocultar' : 'Mostrar'"
                     >
-                      <app-icon name="eye" />
+                      <app-icon [name]="verClave() ? 'eye-off' : 'eye'" />
                     </button>
                   </div>
                   <small id="passHelp" class="form-hint">Mínimo 8 caracteres</small>

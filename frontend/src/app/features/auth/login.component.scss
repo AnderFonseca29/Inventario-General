@@ -110,15 +110,54 @@
 
 .login-main {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 30px;
+  flex-direction: column;
+  padding: 22px 30px 30px;
   background: var(--color-bg);
+}
+
+// Fila superior con el atajo para volver (tambien visible en movil, donde la
+// columna informativa se oculta).
+.login-top {
+  display: flex;
+  justify-content: flex-start;
+  min-height: 32px;
+}
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  // El icono (no la caja del boton) queda alineado con el borde del contenido.
+  margin-left: -8px;
+  padding: 6px 12px 6px 8px;
+  border-radius: 8px;
+  color: var(--color-text-muted);
+  font-size: 13.5px;
+  font-weight: 600;
+  text-decoration: none;
+  transition:
+    color 0.15s ease,
+    background-color 0.15s ease;
+}
+
+.back-link app-icon {
+  font-size: 0.95rem;
+}
+
+.back-link:hover {
+  color: var(--color-text);
+  background: rgba(15, 23, 42, 0.06);
+}
+
+.back-link:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
 }
 
 .login-card {
   width: 100%;
   max-width: 390px;
+  margin: auto;
 }
 
 .login-logo {
@@ -177,37 +216,8 @@
   font-weight: 600;
 }
 
-.ver-btn {
-  position: absolute;
-  right: 8px;
-  top: 50%;
-  transform: translateY(-50%);
-  border: none;
-  background: transparent;
-  cursor: pointer;
-  color: #98a2b3;
-  padding: 6px;
-  border-radius: 7px;
-  display: inline-flex;
-}
-
-.ver-btn:hover {
-  color: var(--color-text);
-}
-
-.ver-btn app-icon {
-  width: 18px;
-  height: 18px;
-}
-
-.ver-btn:hover {
-  color: var(--color-text);
-}
-
-.ver-btn app-icon {
-  width: 18px;
-  height: 18px;
-}
+// El boton de mostrar/ocultar y su icono viven en styles/_forms.scss
+// (.control-icon .ver-btn): asi todas las pantallas quedan alineadas igual.
 
 @media (max-width: 900px) {
   .login-page {
@@ -215,5 +225,8 @@
   }
   .login-aside {
     display: none;
+  }
+  .login-main {
+    padding: 16px 18px 24px;
   }
 }

@@ -256,6 +256,19 @@
   outline-offset: 2px;
 }
 
+// Atajo para volver a la pantalla anterior: se muestra solo cuando el menu
+// lateral es un cajon (<=900px), que es donde no hay menu a la vista.
+.volver-btn {
+  display: none;
+  color: var(--color-text);
+}
+
+@media (max-width: 900px) {
+  .volver-btn {
+    display: inline-flex;
+  }
+}
+
 // ---- Migas de pan ----
 .breadcrumb {
   display: flex;

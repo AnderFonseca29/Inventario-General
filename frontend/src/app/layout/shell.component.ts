@@ -164,6 +164,17 @@ function leerPreferencia(): PreferenciaMenu {
           >
             <app-icon [name]="colapsado() ? 'chevron' : 'menu'" />
           </button>
+            @if (!enInicio()) {
+              <button
+                class="icon-btn volver-btn"
+                type="button"
+                (click)="volver()"
+                title="Volver a la página anterior"
+                aria-label="Volver a la página anterior"
+              >
+                <app-icon name="arrow-left" />
+              </button>
+            }
             <div class="breadcrumb">
               <span class="crumb-root">Panel</span>
               <app-icon name="chevron" class="crumb-sep" />
@@ -403,6 +414,9 @@ export class ShellComponent implements OnDestroy, AfterViewInit {
     return 'Inicio';
   });
 
+  /** En el panel de inicio no se muestra el atajo de volver. */
+  readonly enInicio = computed(() => this.url().startsWith('/app/dashboard'));
+
   constructor() {
     this.router.events
       .pipe(filter((e): e is NavigationEnd => e instanceof NavigationEnd))
@@ -533,6 +547,21 @@ export class ShellComponent implements OnDestroy, AfterViewInit {
   isActive(item: NavItem): boolean {
     if (!item.ruta) return false;
     return this.url().startsWith(item.ruta);
+  }
+
+  /**
+   * Vuelve a la pantalla anterior del propio panel. Si la sesion arranco
+   * directamente en esta ruta (sin historial interno), va al inicio para no
+   * sacar al usuario de la aplicacion.
+   */
+  volver(): void {
+    const navegacionId = (history.state as { navigationId?: number } | null)
+      ?.navigationId;
+    if ((navegacionId ?? 0) > 1) {
+      history.back();
+      return;
+    }
+    void this.router.navigateByUrl('/app/dashboard');
   }
 
   salir(): void {
