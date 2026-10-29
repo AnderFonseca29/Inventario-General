@@ -1,0 +1,69 @@
+@if (visible()) {
+  <div class="al-backdrop">
+    <section
+      class="al-modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="al-titulo"
+      aria-describedby="al-descripcion"
+    >
+      <p class="al-kicker">Actualización legal</p>
+      <h2 id="al-titulo">Antes de continuar</h2>
+      <p id="al-descripcion" class="al-texto">
+        Para usar Stockora necesitamos que aceptes la versión vigente de estos
+        documentos. Puedes abrirlos y descargarlos antes de decidir.
+      </p>
+
+      <ul class="al-documentos">
+        @for (documento of pendientes(); track documento.documento) {
+          <li>
+            <a
+              [href]="documento.ruta"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {{ documento.titulo }}
+            </a>
+            <span class="al-version">v{{ version() }}</span>
+          </li>
+        }
+      </ul>
+
+      <label class="al-check">
+        <input
+          #checkAceptacion
+          type="checkbox"
+          [checked]="acepto()"
+          (change)="acepto.set($any($event.target).checked); error.set('')"
+        />
+        <span>
+          He leído y acepto los Términos y Condiciones, la Política de
+          Privacidad y el Uso Aceptable en su versión vigente.
+        </span>
+      </label>
+
+      @if (error()) {
+        <p class="al-error" role="alert">{{ error() }}</p>
+      }
+
+      <div class="al-acciones">
+        <button
+          type="button"
+          class="btn btn-primary"
+          [disabled]="!acepto() || aceptando()"
+          (click)="aceptar()"
+        >
+          {{ aceptando() ? 'Guardando…' : 'Aceptar y continuar' }}
+        </button>
+        <button type="button" class="btn btn-ghost" (click)="salir()">
+          Cerrar sesión
+        </button>
+      </div>
+
+      <p class="al-nota">
+        Si no aceptas, no podrás usar el panel. Puedes cerrar sesión y volver
+        cuando quieras.
+      </p>
+    </section>
+  </div>
+}

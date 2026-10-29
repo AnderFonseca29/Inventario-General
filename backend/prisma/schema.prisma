@@ -135,6 +135,19 @@ enum EstadoSolicitudDerechos {
   RECHAZADA
 }
 
+enum DocumentoLegal {
+  TERMINOS
+  PRIVACIDAD
+  USO_ACEPTABLE
+}
+
+enum MetodoAceptacion {
+  PRIMER_LOGIN
+  CHECKOUT
+  REGISTRO
+  MANUAL
+}
+
 enum EstadoMembresia {
   ACTIVA
   VENCIDA
@@ -337,6 +350,7 @@ model Usuario {
   recepcionesMp           RecepcionMateriaPrima[] @relation("RecepcionResponsable")
   membresiasCreadas       MembresiaCliente[]      @relation("MembresiaCreador")
   solicitudesDerechos     SolicitudDerechos[]     @relation("SolicitudDerechosRespondedor")
+  aceptacionesLegales     AceptacionLegal[]
 
   @@index([empresaId])
   @@map("usuarios")
@@ -1101,4 +1115,25 @@ model SolicitudDerechos {
   @@index([correo])
   @@index([fechaRecepcion])
   @@map("solicitudes_derechos")
+}
+
+// ===================== ACEPTACIONES LEGALES ===============================
+
+model AceptacionLegal {
+  id         String           @id @default(uuid()) @db.Uuid
+  usuarioId  String           @db.Uuid
+  documento  DocumentoLegal
+  version    String
+  hash       String
+  metodo     MetodoAceptacion @default(PRIMER_LOGIN)
+  ip         String?
+  userAgent  String?
+  aceptadoEn DateTime         @default(now()) @db.Timestamptz(3)
+
+  usuario Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+
+  @@unique([usuarioId, documento, version])
+  @@index([usuarioId, documento])
+  @@index([aceptadoEn])
+  @@map("aceptaciones_legales")
 }

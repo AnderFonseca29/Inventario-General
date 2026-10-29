@@ -59,6 +59,20 @@ describe('RegistroComponent', () => {
     expect(form.hasError('noCoincide')).toBe(true);
   });
 
+  it('exige aceptar los documentos legales', () => {
+    const fixture = crear();
+    const { form } = fixture.componentInstance;
+    form.patchValue({
+      nombreEmpresa: 'Distribuidora XYZ',
+      nombreAdmin: 'Ana Perez',
+      email: 'ana@empresa.com',
+      password: 'ClaveSegura1',
+      confirmar: 'ClaveSegura1',
+    });
+    expect(form.controls.aceptaTerminos.hasError('required')).toBe(true);
+    expect(form.valid).toBe(false);
+  });
+
   it('acepta el formulario cuando todo es valido', () => {
     const fixture = crear();
     const { form } = fixture.componentInstance;
@@ -68,6 +82,7 @@ describe('RegistroComponent', () => {
       email: 'ana@empresa.com',
       password: 'ClaveSegura1',
       confirmar: 'ClaveSegura1',
+      aceptaTerminos: true,
     });
     expect(form.valid).toBe(true);
   });

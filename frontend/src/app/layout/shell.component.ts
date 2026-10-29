@@ -23,6 +23,7 @@ import { ModulosStateService } from '../core/services/modulos-state.service';
 import { Modulo } from '../core/models/modulo.model';
 import { IconComponent } from '../shared/icons';
 import { CambiarContrasenaComponent } from '../features/auth/cambiar-contrasena.component';
+import { AceptacionLegalComponent } from '../features/legal/aceptacion-legal.component';
 
 interface NavItem {
   label: string;
@@ -103,6 +104,7 @@ function leerPreferencia(): PreferenciaMenu {
     RouterLinkActive,
     IconComponent,
     CambiarContrasenaComponent,
+    AceptacionLegalComponent,
   ],
   template: `
     <div
@@ -275,6 +277,7 @@ function leerPreferencia(): PreferenciaMenu {
     </div>
 
     <app-cambiar-contrasena [(abierto)]="modalContrasena" />
+    <app-aceptacion-legal />
   `,
   styleUrl: './shell.component.scss',
 })

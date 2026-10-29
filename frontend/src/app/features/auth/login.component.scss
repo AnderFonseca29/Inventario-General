@@ -177,6 +177,44 @@
   font-weight: 600;
 }
 
+.registro-legal {
+  margin-top: 4px;
+}
+
+.legal-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--color-border, #dbe3ea);
+  border-radius: 10px;
+  background: var(--color-surface-alt, #f8fafc);
+  color: var(--color-text, #1e293b);
+  font-size: 12.5px;
+  line-height: 1.5;
+  cursor: pointer;
+}
+
+.legal-check input {
+  flex: 0 0 auto;
+  width: 17px;
+  height: 17px;
+  margin-top: 1px;
+  accent-color: var(--color-primary);
+}
+
+.legal-check a {
+  color: var(--color-primary);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.legal-check a:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
 .ver-btn {
   position: absolute;
   right: 8px;

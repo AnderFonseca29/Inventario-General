@@ -212,6 +212,23 @@ import { IconComponent } from '../../shared/icons';
                 }
               </div>
 
+              <div class="form-group registro-legal">
+                <label class="legal-check">
+                  <input type="checkbox" formControlName="aceptaTerminos" />
+                  <span>
+                    He leído y acepto los
+                    <a href="/legal/terminos-y-condiciones.md" target="_blank" rel="noopener noreferrer">Términos y Condiciones</a>,
+                    la
+                    <a href="/legal/politica-de-privacidad.md" target="_blank" rel="noopener noreferrer">Política de Privacidad</a>
+                    y el
+                    <a href="/legal/uso-aceptable.md" target="_blank" rel="noopener noreferrer">Uso Aceptable</a>.
+                  </span>
+                </label>
+                @if (form.controls.aceptaTerminos.touched && form.controls.aceptaTerminos.invalid) {
+                  <div class="form-error">Debes aceptar los documentos legales para continuar</div>
+                }
+              </div>
+
               <button type="submit" class="btn btn-primary btn-block" [disabled]="cargando()">
                 @if (cargando()) {
                   <span class="spinner" style="width:16px;height:16px;border-width:2px;margin:0" aria-hidden="true"></span>
@@ -253,6 +270,7 @@ export class RegistroComponent {
       telefono: [''],
       password: ['', [Validators.required, Validators.minLength(8)]],
       confirmar: ['', [Validators.required, Validators.minLength(8)]],
+      aceptaTerminos: [false, [Validators.requiredTrue]],
     },
     { validators: (g: any) => {
       const p = g.get('password')?.value;

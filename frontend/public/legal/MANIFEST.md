@@ -21,6 +21,15 @@ Cualquier cambio en un documento exige: (1) nueva versión, (2) nueva fecha, (3)
 - Contrato de encargo (DPA) → rama `feat/legal-encargado`.
 - Revisión por abogado con licencia en Colombia.
 
+## Aceptaciones electrónicas
+
+- Versión vigente: `0.1-borrador` (2026-10-28).
+- Documentos exigidos al usuario: Términos y Condiciones, Política de Privacidad y Uso Aceptable.
+- Fuente de verdad de versión y hash: `backend/src/legal/documentos-legales.ts`.
+- Registro: tabla `aceptaciones_legales` con usuario, documento, versión, hash, método, IP, agente de usuario y fecha.
+- El modal de aceptación no se puede cerrar con Escape ni con clic fuera; la única salida es aceptar o cerrar sesión.
+- Al cambiar un documento se debe crear una nueva versión, actualizar su hash, desplegar el backend y volver a pedir la aceptación.
+
 ## Verificación
 
 Para recalcular:
