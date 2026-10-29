@@ -338,6 +338,7 @@ const PASOS: Paso[] = [
           <a href="/legal/politica-de-cookies.md">Cookies</a>
           <a href="/legal/uso-aceptable.md">Uso aceptable</a>
           <a href="/legal/derechos-de-los-titulares.md">Derechos</a>
+          <a href="/legal/politica-de-retencion.md">Retención</a>
           <a routerLink="/derechos">Radicar solicitud</a>
           <button type="button" class="lp-footer-btn" (click)="abrirCookies()">
             Preferencias de cookies

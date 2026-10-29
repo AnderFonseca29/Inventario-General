@@ -9,6 +9,7 @@ export interface DecisionCookies {
 
 const CLAVE = 'inv_cookie_consent_v1';
 const VERSION = 1;
+const VIGENCIA_MS = 365 * 24 * 60 * 60 * 1000;
 
 @Injectable({ providedIn: 'root' })
 export class ConsentimientoService {
@@ -66,6 +67,15 @@ export class ConsentimientoService {
         typeof dato.analitica !== 'boolean' ||
         typeof dato.publicidad !== 'boolean'
       ) {
+        return null;
+      }
+      const fecha = Date.parse(String(dato.fecha ?? ''));
+      if (!Number.isFinite(fecha) || Date.now() - fecha > VIGENCIA_MS) {
+        try {
+          localStorage.removeItem(CLAVE);
+        } catch {
+          // Si el almacenamiento esta bloqueado, la decision simplemente no se usa.
+        }
         return null;
       }
       return {
