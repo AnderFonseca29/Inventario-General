@@ -766,7 +766,7 @@
   max-width: 1180px;
   margin: 0 auto;
   display: grid;
-  grid-template-columns: 2fr 1fr 1fr;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
   gap: 34px;
 }
 
@@ -800,6 +800,30 @@
 
 .lp-footer-col a:hover {
   color: #fff;
+}
+
+.lp-footer-col .lp-footer-btn {
+  display: block;
+  width: 100%;
+  padding: 6px 0;
+  border: 0;
+  background: transparent;
+  color: #94a3b8;
+  font: inherit;
+  font-size: 14px;
+  text-align: left;
+  cursor: pointer;
+  transition: color 0.18s;
+}
+
+.lp-footer-col .lp-footer-btn:hover {
+  color: #fff;
+}
+
+.lp-footer-col .lp-footer-btn:focus-visible {
+  outline: 3px solid #0ea5e9;
+  outline-offset: 2px;
+  border-radius: 4px;
 }
 
 .lp-footer-bottom {

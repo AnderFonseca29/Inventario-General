@@ -1,6 +1,7 @@
-import { Component, HostListener, signal } from '@angular/core';
+import { Component, HostListener, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { IconComponent } from '../../shared/icons';
+import { ConsentimientoService } from '../../core/services/consentimiento.service';
 
 interface Caracteristica {
   icono: string;
@@ -330,6 +331,16 @@ const PASOS: Paso[] = [
           <a routerLink="/login">Iniciar sesión</a>
           <a routerLink="/registro">Crear cuenta</a>
         </div>
+        <div class="lp-footer-col">
+          <h3>Legal</h3>
+          <a href="/legal/terminos-y-condiciones.md">Términos y condiciones</a>
+          <a href="/legal/politica-de-privacidad.md">Privacidad</a>
+          <a href="/legal/politica-de-cookies.md">Cookies</a>
+          <a href="/legal/uso-aceptable.md">Uso aceptable</a>
+          <button type="button" class="lp-footer-btn" (click)="abrirCookies()">
+            Preferencias de cookies
+          </button>
+        </div>
       </div>
       <div class="lp-footer-bottom">
         © {{ anio }} Stockora · Sistema de inventario multiempresa
@@ -339,6 +350,8 @@ const PASOS: Paso[] = [
   styleUrl: './landing.component.scss',
 })
 export class LandingComponent {
+  private readonly consentimiento = inject(ConsentimientoService);
+
   readonly anio = new Date().getFullYear();
   readonly menu = signal(false);
   readonly scrolled = signal(false);
@@ -397,5 +410,9 @@ export class LandingComponent {
   @HostListener('window:scroll')
   onScroll(): void {
     this.scrolled.set(window.scrollY > 12);
+  }
+
+  abrirCookies(): void {
+    this.consentimiento.abrirPanel();
   }
 }

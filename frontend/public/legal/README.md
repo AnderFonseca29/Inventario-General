@@ -14,6 +14,7 @@ Estos documentos se publican como archivos Markdown descargables e imprimibles. 
 | Política de Tratamiento | [`politica-de-tratamiento-de-datos.md`](./politica-de-tratamiento-de-datos.md) | Política completa exigida por el Decreto 1074 de 2015 |
 | Aviso de Privacidad | [`aviso-de-privacidad.md`](./aviso-de-privacidad.md) | Aviso breve para formularios y recolección |
 | Uso Aceptable | [`uso-aceptable.md`](./uso-aceptable.md) | Conductas prohibidas, seguridad y comunicaciones |
+| Política de Cookies | [`politica-de-cookies.md`](./politica-de-cookies.md) | Categorías, consentimiento y control de cookies |
 
 ## Cómo usarlos
 
