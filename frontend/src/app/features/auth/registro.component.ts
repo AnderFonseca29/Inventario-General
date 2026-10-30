@@ -1,7 +1,10 @@
-import { Component, inject, signal } from '@angular/core';
+﻿import { Component, computed, inject, signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { SeoService } from '../../core/services/seo.service';
+import { contrasenaSeguraValidator } from '../../core/validators/contrasena.validator';
+import { evaluarContrasena, LONGITUD_MINIMA } from '../../core/utils/contrasena';
 import { BrandIconComponent } from '../../shared/brand-icon.component';
 import { BrandMarkComponent } from '../../shared/brand-mark.component';
 
@@ -184,7 +187,7 @@ import { BrandMarkComponent } from '../../shared/brand-mark.component';
                       [type]="verClave() ? 'text' : 'password'"
                       class="brand-input"
                       formControlName="password"
-                      placeholder="Mínimo 8 caracteres"
+                      placeholder="Ej. Roble*2026"
                       autocomplete="new-password"
                       aria-required="true"
                       aria-describedby="passHelp"
@@ -200,9 +203,23 @@ import { BrandMarkComponent } from '../../shared/brand-mark.component';
                       <app-brand-icon [name]="verClave() ? 'eye-off' : 'eye'" class="brand-icon" />
                     </button>
                   </div>
-                  <p id="passHelp" class="brand-hint">Mínimo 8 caracteres.</p>
+                  <div class="auth__clave" [attr.data-fuerza]="claveEstado().fuerza">
+                    <div class="auth__clave-barra" aria-hidden="true"><span></span></div>
+                    <p class="auth__clave-texto">
+                      Seguridad: <strong>{{ etiquetaFuerza() }}</strong>
+                    </p>
+                  </div>
+                  <ul id="passHelp" class="auth__requisitos" aria-label="Requisitos de la contraseña">
+                    @for (requisito of claveEstado().requisitos; track requisito.id) {
+                      <li [class.auth__requisito--ok]="requisito.cumple">
+                        <span class="auth__requisito-marca" aria-hidden="true">{{ requisito.cumple ? '✓' : '○' }}</span>
+                        <span>{{ requisito.texto }}</span>
+                        <span class="brand-sr-only">{{ requisito.cumple ? 'cumplido' : 'pendiente' }}</span>
+                      </li>
+                    }
+                  </ul>
                   @if (form.controls.password.touched && form.controls.password.invalid) {
-                    <p class="brand-error">La contraseña debe tener al menos 8 caracteres.</p>
+                    <p class="brand-error">{{ primerErrorClave() }}</p>
                   }
                 </div>
               </div>
@@ -302,7 +319,10 @@ export class RegistroComponent {
       nombreAdmin: ['', [Validators.required, Validators.minLength(2)]],
       email: ['', [Validators.required, Validators.email]],
       telefono: [''],
-      password: ['', [Validators.required, Validators.minLength(8)]],
+      password: [
+        '',
+        [Validators.required, Validators.minLength(LONGITUD_MINIMA), contrasenaSeguraValidator],
+      ],
       confirmar: ['', [Validators.required, Validators.minLength(8)]],
       aceptaTerminos: [false, [Validators.requiredTrue]],
     },
@@ -314,6 +334,23 @@ export class RegistroComponent {
         return p === c ? null : { noCoincide: true };
       },
     },
+  );
+
+  private readonly claveTexto = toSignal(this.form.controls.password.valueChanges, {
+    initialValue: this.form.controls.password.value,
+  });
+
+  readonly claveEstado = computed(() => evaluarContrasena(this.claveTexto() ?? ''));
+
+  readonly etiquetaFuerza = computed(() => {
+    const fuerza = this.claveEstado().fuerza;
+    return fuerza === 'fuerte' ? 'fuerte' : fuerza === 'media' ? 'media' : 'débil';
+  });
+
+  readonly primerErrorClave = computed(
+    () =>
+      this.claveEstado().errores[0] ??
+      'La contraseña no cumple los requisitos de seguridad.',
   );
 
   constructor() {

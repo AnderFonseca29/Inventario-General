@@ -256,6 +256,74 @@
   height: 19px;
 }
 
+.auth__clave {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.auth__clave-barra {
+  flex: 1 1 auto;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--brand-border);
+  overflow: hidden;
+}
+
+.auth__clave-barra span {
+  display: block;
+  width: 20%;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--brand-danger);
+  transition:
+    width var(--brand-transition),
+    background-color var(--brand-transition);
+}
+
+.auth__clave[data-fuerza='media'] .auth__clave-barra span {
+  width: 60%;
+  background: var(--brand-primary);
+}
+
+.auth__clave[data-fuerza='fuerte'] .auth__clave-barra span {
+  width: 100%;
+  background: var(--brand-success);
+}
+
+.auth__clave-texto {
+  margin: 0;
+  color: var(--brand-text-muted);
+  font-size: 0.75rem;
+  white-space: nowrap;
+}
+
+.auth__requisitos {
+  display: grid;
+  gap: 3px;
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.auth__requisitos li {
+  display: flex;
+  gap: 7px;
+  color: var(--brand-text-muted);
+  font-size: 0.75rem;
+  line-height: 1.45;
+}
+
+.auth__requisitos li.auth__requisito--ok {
+  color: var(--brand-success);
+}
+
+.auth__requisito-marca {
+  flex: 0 0 auto;
+  font-weight: 700;
+}
+
 .auth__submit {
   margin-top: 8px;
 }
