@@ -1,4 +1,4 @@
-﻿import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
@@ -27,22 +27,31 @@ import { BrandMarkComponent } from '../../shared/brand-mark.component';
             Empieza con una operación ordenada desde el primer movimiento.
           </p>
           <p class="auth__aside-text">
-            Registra los datos de tu empresa y la persona administradora. La
-            solicitud queda lista para revisión.
+            Registra los datos de tu empresa y la persona administradora. La solicitud queda lista
+            para revisión.
           </p>
 
           <ul class="auth__points">
             <li>
               <app-brand-icon name="building" class="brand-icon" />
-              <span><strong>Multiempresa</strong> Los datos de cada empresa se mantienen separados.</span>
+              <span
+                ><strong>Multiempresa</strong> Los datos de cada empresa se mantienen
+                separados.</span
+              >
             </li>
             <li>
               <app-brand-icon name="box" class="brand-icon" />
-              <span><strong>Inventario trazable</strong> Movimientos con documento, consecutivo y auditoría.</span>
+              <span
+                ><strong>Inventario trazable</strong> Movimientos con documento, consecutivo y
+                auditoría.</span
+              >
             </li>
             <li>
               <app-brand-icon name="users" class="brand-icon" />
-              <span><strong>Roles y permisos</strong> Define qué puede hacer cada persona del equipo.</span>
+              <span
+                ><strong>Roles y permisos</strong> Define qué puede hacer cada persona del
+                equipo.</span
+              >
             </li>
           </ul>
         </div>
@@ -84,39 +93,252 @@ import { BrandMarkComponent } from '../../shared/brand-mark.component';
             }
 
             <form [formGroup]="form" (ngSubmit)="enviar()" novalidate>
+              <p class="auth__seccion">Datos de la empresa</p>
+
               <div class="auth__row">
                 <div class="brand-field auth__field">
+                  <label class="brand-label" for="razonSocial">
+                    Razón social <span aria-hidden="true">*</span>
+                  </label>
+                  <input
+                    id="razonSocial"
+                    type="text"
+                    class="brand-input"
+                    formControlName="razonSocial"
+                    placeholder="Ej. Distribuidora El Roble S.A.S."
+                    autocomplete="organization"
+                    aria-required="true"
+                    aria-describedby="razonSocial-help"
+                    [attr.aria-invalid]="
+                      form.controls.razonSocial.touched && form.controls.razonSocial.invalid
+                    "
+                  />
+                  <p id="razonSocial-help" class="brand-hint">
+                    Tal como aparece en el certificado de Cámara de Comercio.
+                  </p>
+                  @if (form.controls.razonSocial.touched && form.controls.razonSocial.invalid) {
+                    <p class="brand-error">Escribe la razón social (mínimo 3 caracteres).</p>
+                  }
+                </div>
+
+                <div class="brand-field auth__field">
                   <label class="brand-label" for="nombreEmpresa">
-                    Nombre de la empresa <span aria-hidden="true">*</span>
+                    Nombre comercial <span aria-hidden="true">*</span>
                   </label>
                   <input
                     id="nombreEmpresa"
                     type="text"
                     class="brand-input"
                     formControlName="nombreEmpresa"
-                    placeholder="Ej. Distribuidora El Roble"
-                    autocomplete="organization"
+                    placeholder="Ej. El Roble"
                     aria-required="true"
-                    [attr.aria-invalid]="form.controls.nombreEmpresa.touched && form.controls.nombreEmpresa.invalid"
-                    [attr.aria-describedby]="form.controls.nombreEmpresa.touched && form.controls.nombreEmpresa.invalid ? 'empresa-error' : null"
+                    aria-describedby="nombreEmpresa-help"
+                    [attr.aria-invalid]="
+                      form.controls.nombreEmpresa.touched && form.controls.nombreEmpresa.invalid
+                    "
                   />
+                  <p id="nombreEmpresa-help" class="brand-hint">
+                    Cómo verás la empresa dentro de Stockora.
+                  </p>
                   @if (form.controls.nombreEmpresa.touched && form.controls.nombreEmpresa.invalid) {
-                    <p id="empresa-error" class="brand-error">Escribe el nombre de la empresa (mínimo 2 caracteres).</p>
+                    <p class="brand-error">Escribe el nombre comercial (mínimo 2 caracteres).</p>
                   }
                 </div>
+              </div>
 
+              <div class="auth__row">
                 <div class="brand-field auth__field">
-                  <label class="brand-label" for="nit">NIT <span class="auth__optional">(opcional)</span></label>
+                  <label class="brand-label" for="nit"
+                    >NIT <span class="auth__optional">(opcional)</span></label
+                  >
                   <input
                     id="nit"
                     type="text"
                     class="brand-input"
                     formControlName="nit"
-                    placeholder="900123456-7"
+                    placeholder="Ej. 901.234.567-8"
                     autocomplete="off"
+                    aria-describedby="nit-help"
+                  />
+                  <p id="nit-help" class="brand-hint">
+                    Con dígito de verificación. Si aún no lo tienes, déjalo vacío.
+                  </p>
+                </div>
+
+                <div class="brand-field auth__field">
+                  <label class="brand-label" for="matricula">
+                    Matrícula mercantil <span class="auth__optional">(opcional)</span>
+                  </label>
+                  <input
+                    id="matricula"
+                    type="text"
+                    class="brand-input"
+                    formControlName="matricula"
+                    placeholder="Ej. 00123456-12"
+                    autocomplete="off"
+                    aria-describedby="matricula-help"
+                  />
+                  <p id="matricula-help" class="brand-hint">
+                    Número del certificado de existencia y representación.
+                  </p>
+                </div>
+              </div>
+
+              <div class="brand-field auth__field">
+                <label class="brand-label" for="direccion">
+                  Domicilio <span aria-hidden="true">*</span>
+                </label>
+                <input
+                  id="direccion"
+                  type="text"
+                  class="brand-input"
+                  formControlName="direccion"
+                  placeholder="Ej. Calle 93 No. 15-20, oficina 302"
+                  autocomplete="street-address"
+                  aria-required="true"
+                  aria-describedby="direccion-help"
+                  [attr.aria-invalid]="
+                    form.controls.direccion.touched && form.controls.direccion.invalid
+                  "
+                />
+                <p id="direccion-help" class="brand-hint">
+                  Dirección física donde opera la empresa.
+                </p>
+                @if (form.controls.direccion.touched && form.controls.direccion.invalid) {
+                  <p class="brand-error">Escribe el domicilio (mínimo 5 caracteres).</p>
+                }
+              </div>
+
+              <div class="auth__row">
+                <div class="brand-field auth__field">
+                  <label class="brand-label" for="ciudad">
+                    Ciudad <span aria-hidden="true">*</span>
+                  </label>
+                  <input
+                    id="ciudad"
+                    type="text"
+                    class="brand-input"
+                    formControlName="ciudad"
+                    placeholder="Ej. Bogotá D.C."
+                    autocomplete="address-level2"
+                    aria-required="true"
+                    [attr.aria-invalid]="
+                      form.controls.ciudad.touched && form.controls.ciudad.invalid
+                    "
+                  />
+                  @if (form.controls.ciudad.touched && form.controls.ciudad.invalid) {
+                    <p class="brand-error">Escribe la ciudad.</p>
+                  }
+                </div>
+
+                <div class="brand-field auth__field">
+                  <label class="brand-label" for="departamento">
+                    Departamento <span aria-hidden="true">*</span>
+                  </label>
+                  <input
+                    id="departamento"
+                    type="text"
+                    class="brand-input"
+                    formControlName="departamento"
+                    placeholder="Ej. Cundinamarca"
+                    autocomplete="address-level1"
+                    aria-required="true"
+                    [attr.aria-invalid]="
+                      form.controls.departamento.touched && form.controls.departamento.invalid
+                    "
+                  />
+                  @if (form.controls.departamento.touched && form.controls.departamento.invalid) {
+                    <p class="brand-error">Escribe el departamento.</p>
+                  }
+                </div>
+              </div>
+
+              <div class="auth__row">
+                <div class="brand-field auth__field">
+                  <label class="brand-label" for="representante">
+                    Representante legal <span aria-hidden="true">*</span>
+                  </label>
+                  <input
+                    id="representante"
+                    type="text"
+                    class="brand-input"
+                    formControlName="representante"
+                    placeholder="Ej. María Fernanda Gómez"
+                    autocomplete="name"
+                    aria-required="true"
+                    aria-describedby="representante-help"
+                    [attr.aria-invalid]="
+                      form.controls.representante.touched && form.controls.representante.invalid
+                    "
+                  />
+                  <p id="representante-help" class="brand-hint">
+                    Quien firma el contrato de tratamiento de datos.
+                  </p>
+                  @if (form.controls.representante.touched && form.controls.representante.invalid) {
+                    <p class="brand-error">Escribe el nombre del representante legal.</p>
+                  }
+                </div>
+
+                <div class="brand-field auth__field">
+                  <label class="brand-label" for="telefono">
+                    Teléfono <span class="auth__optional">(opcional)</span>
+                  </label>
+                  <input
+                    id="telefono"
+                    type="tel"
+                    class="brand-input"
+                    formControlName="telefono"
+                    placeholder="Ej. +57 601 555 0123"
+                    autocomplete="tel"
+                    inputmode="tel"
                   />
                 </div>
               </div>
+
+              <div class="auth__row">
+                <div class="brand-field auth__field">
+                  <label class="brand-label" for="correoDatos">
+                    Correo para temas de datos <span aria-hidden="true">*</span>
+                  </label>
+                  <input
+                    id="correoDatos"
+                    type="email"
+                    class="brand-input"
+                    formControlName="correoDatos"
+                    placeholder="Ej. privacidad@elroble.com"
+                    autocomplete="off"
+                    inputmode="email"
+                    aria-required="true"
+                    aria-describedby="correoDatos-help"
+                    [attr.aria-invalid]="
+                      form.controls.correoDatos.touched && form.controls.correoDatos.invalid
+                    "
+                  />
+                  <p id="correoDatos-help" class="brand-hint">
+                    Aquí llegan las solicitudes sobre datos personales.
+                  </p>
+                  @if (form.controls.correoDatos.touched && form.controls.correoDatos.invalid) {
+                    <p class="brand-error">Ingresa un correo válido.</p>
+                  }
+                </div>
+
+                <div class="brand-field auth__field">
+                  <label class="brand-label" for="sitioWeb"
+                    >Sitio web <span class="auth__optional">(opcional)</span></label
+                  >
+                  <input
+                    id="sitioWeb"
+                    type="url"
+                    class="brand-input"
+                    formControlName="sitioWeb"
+                    placeholder="Ej. https://elroble.com"
+                    autocomplete="url"
+                    inputmode="url"
+                  />
+                </div>
+              </div>
+
+              <p class="auth__seccion">Persona administradora</p>
 
               <div class="auth__row">
                 <div class="brand-field auth__field">
@@ -131,11 +353,19 @@ import { BrandMarkComponent } from '../../shared/brand-mark.component';
                     placeholder="Nombre completo"
                     autocomplete="name"
                     aria-required="true"
-                    [attr.aria-invalid]="form.controls.nombreAdmin.touched && form.controls.nombreAdmin.invalid"
-                    [attr.aria-describedby]="form.controls.nombreAdmin.touched && form.controls.nombreAdmin.invalid ? 'admin-error' : null"
+                    [attr.aria-invalid]="
+                      form.controls.nombreAdmin.touched && form.controls.nombreAdmin.invalid
+                    "
+                    [attr.aria-describedby]="
+                      form.controls.nombreAdmin.touched && form.controls.nombreAdmin.invalid
+                        ? 'admin-error'
+                        : null
+                    "
                   />
                   @if (form.controls.nombreAdmin.touched && form.controls.nombreAdmin.invalid) {
-                    <p id="admin-error" class="brand-error">Escribe el nombre (mínimo 2 caracteres).</p>
+                    <p id="admin-error" class="brand-error">
+                      Escribe el nombre (mínimo 2 caracteres).
+                    </p>
                   }
                 </div>
 
@@ -153,7 +383,11 @@ import { BrandMarkComponent } from '../../shared/brand-mark.component';
                     inputmode="email"
                     aria-required="true"
                     [attr.aria-invalid]="form.controls.email.touched && form.controls.email.invalid"
-                    [attr.aria-describedby]="form.controls.email.touched && form.controls.email.invalid ? 'email-error' : null"
+                    [attr.aria-describedby]="
+                      form.controls.email.touched && form.controls.email.invalid
+                        ? 'email-error'
+                        : null
+                    "
                   />
                   @if (form.controls.email.touched && form.controls.email.invalid) {
                     <p id="email-error" class="brand-error">Ingresa un correo válido.</p>
@@ -161,67 +395,56 @@ import { BrandMarkComponent } from '../../shared/brand-mark.component';
                 </div>
               </div>
 
-              <div class="auth__row">
-                <div class="brand-field auth__field">
-                  <label class="brand-label" for="telefono">
-                    Teléfono <span class="auth__optional">(opcional)</span>
-                  </label>
+              <div class="brand-field auth__field">
+                <label class="brand-label" for="password">
+                  Contraseña <span aria-hidden="true">*</span>
+                </label>
+                <div class="auth__password">
                   <input
-                    id="telefono"
-                    type="tel"
+                    id="password"
+                    [type]="verClave() ? 'text' : 'password'"
                     class="brand-input"
-                    formControlName="telefono"
-                    placeholder="3001234567"
-                    autocomplete="tel"
-                    inputmode="tel"
+                    formControlName="password"
+                    placeholder="Ej. Roble*2026"
+                    autocomplete="new-password"
+                    aria-required="true"
+                    aria-describedby="passHelp"
+                    [attr.aria-invalid]="
+                      form.controls.password.touched && form.controls.password.invalid
+                    "
                   />
+                  <button
+                    type="button"
+                    class="auth__eye"
+                    (click)="verClave.set(!verClave())"
+                    [attr.aria-label]="verClave() ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+                    [attr.aria-pressed]="verClave()"
+                  >
+                    <app-brand-icon [name]="verClave() ? 'eye-off' : 'eye'" class="brand-icon" />
+                  </button>
                 </div>
-
-                <div class="brand-field auth__field">
-                  <label class="brand-label" for="password">
-                    Contraseña <span aria-hidden="true">*</span>
-                  </label>
-                  <div class="auth__password">
-                    <input
-                      id="password"
-                      [type]="verClave() ? 'text' : 'password'"
-                      class="brand-input"
-                      formControlName="password"
-                      placeholder="Ej. Roble*2026"
-                      autocomplete="new-password"
-                      aria-required="true"
-                      aria-describedby="passHelp"
-                      [attr.aria-invalid]="form.controls.password.touched && form.controls.password.invalid"
-                    />
-                    <button
-                      type="button"
-                      class="auth__eye"
-                      (click)="verClave.set(!verClave())"
-                      [attr.aria-label]="verClave() ? 'Ocultar contraseña' : 'Mostrar contraseña'"
-                      [attr.aria-pressed]="verClave()"
-                    >
-                      <app-brand-icon [name]="verClave() ? 'eye-off' : 'eye'" class="brand-icon" />
-                    </button>
-                  </div>
-                  <div class="auth__clave" [attr.data-fuerza]="claveEstado().fuerza">
-                    <div class="auth__clave-barra" aria-hidden="true"><span></span></div>
-                    <p class="auth__clave-texto">
-                      Seguridad: <strong>{{ etiquetaFuerza() }}</strong>
-                    </p>
-                  </div>
-                  <ul id="passHelp" class="auth__requisitos" aria-label="Requisitos de la contraseña">
-                    @for (requisito of claveEstado().requisitos; track requisito.id) {
-                      <li [class.auth__requisito--ok]="requisito.cumple">
-                        <span class="auth__requisito-marca" aria-hidden="true">{{ requisito.cumple ? '✓' : '○' }}</span>
-                        <span>{{ requisito.texto }}</span>
-                        <span class="brand-sr-only">{{ requisito.cumple ? 'cumplido' : 'pendiente' }}</span>
-                      </li>
-                    }
-                  </ul>
-                  @if (form.controls.password.touched && form.controls.password.invalid) {
-                    <p class="brand-error">{{ primerErrorClave() }}</p>
+                <div class="auth__clave" [attr.data-fuerza]="claveEstado().fuerza">
+                  <div class="auth__clave-barra" aria-hidden="true"><span></span></div>
+                  <p class="auth__clave-texto">
+                    Seguridad: <strong>{{ etiquetaFuerza() }}</strong>
+                  </p>
+                </div>
+                <ul id="passHelp" class="auth__requisitos" aria-label="Requisitos de la contraseña">
+                  @for (requisito of claveEstado().requisitos; track requisito.id) {
+                    <li [class.auth__requisito--ok]="requisito.cumple">
+                      <span class="auth__requisito-marca" aria-hidden="true">{{
+                        requisito.cumple ? '✓' : '○'
+                      }}</span>
+                      <span>{{ requisito.texto }}</span>
+                      <span class="brand-sr-only">{{
+                        requisito.cumple ? 'cumplido' : 'pendiente'
+                      }}</span>
+                    </li>
                   }
-                </div>
+                </ul>
+                @if (form.controls.password.touched && form.controls.password.invalid) {
+                  <p class="brand-error">{{ primerErrorClave() }}</p>
+                }
               </div>
 
               <div class="brand-field auth__field">
@@ -251,24 +474,44 @@ import { BrandMarkComponent } from '../../shared/brand-mark.component';
                       type="checkbox"
                       formControlName="aceptaTerminos"
                       aria-required="true"
-                      [attr.aria-invalid]="form.controls.aceptaTerminos.touched && form.controls.aceptaTerminos.invalid"
-                      [attr.aria-describedby]="form.controls.aceptaTerminos.touched && form.controls.aceptaTerminos.invalid ? 'terminos-error' : null"
+                      [attr.aria-invalid]="
+                        form.controls.aceptaTerminos.touched && form.controls.aceptaTerminos.invalid
+                      "
+                      [attr.aria-describedby]="
+                        form.controls.aceptaTerminos.touched && form.controls.aceptaTerminos.invalid
+                          ? 'terminos-error'
+                          : null
+                      "
                     />
                     <span class="brand-check__box" aria-hidden="true"></span>
                   </span>
                   <span>
                     He leído y acepto los
-                    <a href="legal/terminos-y-condiciones.md" target="_blank" rel="noopener noreferrer">Términos y Condiciones</a>,
-                    la
-                    <a href="legal/politica-de-privacidad.md" target="_blank" rel="noopener noreferrer">Política de Privacidad</a>,
-                    el
-                    <a href="legal/aviso-de-privacidad.md" target="_blank" rel="noopener noreferrer">Aviso de Privacidad</a>
+                    <a
+                      href="legal/terminos-y-condiciones.md"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      >Términos y Condiciones</a
+                    >, la
+                    <a
+                      href="legal/politica-de-privacidad.md"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      >Política de Privacidad</a
+                    >, el
+                    <a href="legal/aviso-de-privacidad.md" target="_blank" rel="noopener noreferrer"
+                      >Aviso de Privacidad</a
+                    >
                     y el
-                    <a href="legal/uso-aceptable.md" target="_blank" rel="noopener noreferrer">Uso Aceptable</a>.
+                    <a href="legal/uso-aceptable.md" target="_blank" rel="noopener noreferrer"
+                      >Uso Aceptable</a
+                    >.
                   </span>
                 </label>
                 @if (form.controls.aceptaTerminos.touched && form.controls.aceptaTerminos.invalid) {
-                  <p id="terminos-error" class="brand-error">Debes aceptar los documentos legales para continuar.</p>
+                  <p id="terminos-error" class="brand-error">
+                    Debes aceptar los documentos legales para continuar.
+                  </p>
                 }
               </div>
 
@@ -314,16 +557,24 @@ export class RegistroComponent {
 
   readonly form = this.fb.nonNullable.group(
     {
+      razonSocial: ['', [Validators.required, Validators.minLength(3)]],
       nombreEmpresa: ['', [Validators.required, Validators.minLength(2)]],
-      nit: [''],
+      nit: ['', [Validators.pattern(/^[0-9.\-\s]{6,20}$/)]],
+      matricula: ['', [Validators.pattern(/^[0-9.\-\s]{4,20}$/)]],
+      direccion: ['', [Validators.required, Validators.minLength(5)]],
+      ciudad: ['', [Validators.required]],
+      departamento: ['', [Validators.required]],
+      representante: ['', [Validators.required, Validators.minLength(3)]],
+      telefono: ['', [Validators.pattern(/^[+0-9()\-\s]{7,20}$/)]],
+      correoDatos: ['', [Validators.required, Validators.email]],
+      sitioWeb: ['', [Validators.pattern(/^https?:\/\/[^\s]+\.[^\s]+$/)]],
       nombreAdmin: ['', [Validators.required, Validators.minLength(2)]],
       email: ['', [Validators.required, Validators.email]],
-      telefono: [''],
       password: [
         '',
         [Validators.required, Validators.minLength(LONGITUD_MINIMA), contrasenaSeguraValidator],
       ],
-      confirmar: ['', [Validators.required, Validators.minLength(8)]],
+      confirmar: ['', [Validators.required, Validators.minLength(LONGITUD_MINIMA)]],
       aceptaTerminos: [false, [Validators.requiredTrue]],
     },
     {
@@ -348,9 +599,7 @@ export class RegistroComponent {
   });
 
   readonly primerErrorClave = computed(
-    () =>
-      this.claveEstado().errores[0] ??
-      'La contraseña no cumple los requisitos de seguridad.',
+    () => this.claveEstado().errores[0] ?? 'La contraseña no cumple los requisitos de seguridad.',
   );
 
   constructor() {

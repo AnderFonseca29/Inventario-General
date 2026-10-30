@@ -1,4 +1,4 @@
-﻿import { evaluarContrasena, LONGITUD_MAXIMA, LONGITUD_MINIMA } from './contrasena';
+import { evaluarContrasena, LONGITUD_MAXIMA, LONGITUD_MINIMA } from './contrasena';
 
 describe('evaluarContrasena', () => {
   it('acepta una clave con variedad y longitud suficiente', () => {
