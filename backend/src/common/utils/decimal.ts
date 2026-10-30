@@ -20,8 +20,12 @@ import { Transform } from 'class-transformer';
 /** Decimales admitidos, alineados con `Decimal(18,4)` de Prisma. */
 export const DECIMALES_MAXIMOS = 4;
 
-/** Maximo representable con 4 decimales y 14 digitos enteros. */
-export const DECIMAL_MAXIMO = 99_999_999_999_999.9999;
+/**
+ * Cota segura en doble precision para 14 digitos enteros.
+ * El limite exacto de `Decimal(18,4)` no se puede representar en JavaScript;
+ * esta cota rechaza los valores que, tras redondear, superan los 14 enteros.
+ */
+export const DECIMAL_MAXIMO = 99_999_999_999_999;
 
 const REGEX_NUMERO_ES_CO = /^-?\d{1,3}(\.\d{3})*,\d+$/;
 const REGEX_NUMERO_PLAIN = /^-?\d+(\.\d+)?$/;

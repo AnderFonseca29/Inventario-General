@@ -18,14 +18,11 @@ describe('LegalService', () => {
     const prisma = {
       aceptacionLegal: {
         findMany: jest.fn(),
-        createMany: jest.fn(),
+        createMany: jest.fn<Promise<{ count: number }>, [{ data: { version: string }[] }]>(),
       },
     };
     const auditoria = { registrar: jest.fn().mockResolvedValue(undefined) };
-    const servicio = new LegalService(
-      prisma as never,
-      auditoria as never,
-    );
+    const servicio = new LegalService(prisma as never, auditoria as never);
     return { prisma, auditoria, servicio };
   };
 
@@ -86,11 +83,10 @@ describe('LegalService', () => {
       registradas: 3,
       version: VERSION_DOCUMENTOS_LEGALES,
     });
-    const datos = prisma.aceptacionLegal.createMany.mock.calls[0][0].data;
+    const llamada = prisma.aceptacionLegal.createMany.mock.calls[0][0];
+    const datos = llamada.data;
     expect(datos).toHaveLength(3);
-    expect(datos.every((d: { version: string }) => d.version === VERSION_DOCUMENTOS_LEGALES)).toBe(
-      true,
-    );
+    expect(datos.every((d) => d.version === VERSION_DOCUMENTOS_LEGALES)).toBe(true);
     expect(auditoria.registrar).toHaveBeenCalledWith(
       expect.objectContaining({
         accion: 'ACEPTAR_DOCUMENTOS_LEGALES',
@@ -104,8 +100,8 @@ describe('LegalService', () => {
   it('rechaza una aceptacion sin documentos vigentes', async () => {
     const { servicio } = crearMocks();
 
-    await expect(
-      servicio.aceptar(usuario, { documentos: [] }),
-    ).rejects.toBeInstanceOf(BadRequestException);
+    await expect(servicio.aceptar(usuario, { documentos: [] })).rejects.toBeInstanceOf(
+      BadRequestException,
+    );
   });
 });

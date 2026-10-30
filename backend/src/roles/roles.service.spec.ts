@@ -39,11 +39,7 @@ function crearServicio(rolExistente?: {
   };
   const auditoria = { registrar: jest.fn() };
   const permisosCache = { invalidar: jest.fn(), invalidarVarios: jest.fn() };
-  const servicio = new RolesService(
-    prisma as never,
-    auditoria as never,
-    permisosCache as never,
-  );
+  const servicio = new RolesService(prisma as never, auditoria as never, permisosCache as never);
   if (rolExistente) {
     jest.spyOn(servicio, 'obtener').mockResolvedValue(rolExistente as never);
   }
@@ -59,11 +55,7 @@ describe('RolesService - proteccion contra escalada (hallazgo E)', () => {
         {
           nombre: 'Rol escalado',
           descripcion: 'x',
-          permisos: [
-            'roles.administrar',
-            'usuarios.crear',
-            'inventario.ajustar',
-          ],
+          permisos: ['roles.administrar', 'usuarios.crear', 'inventario.ajustar'],
         },
         actorLimitado,
       ),
@@ -101,12 +93,7 @@ describe('RolesService - proteccion contra escalada (hallazgo E)', () => {
       ],
     });
     await expect(
-      servicio.actualizar(
-        'empresa-1',
-        'r-admin',
-        { descripcion: 'cambio' },
-        actorLimitado,
-      ),
+      servicio.actualizar('empresa-1', 'r-admin', { descripcion: 'cambio' }, actorLimitado),
     ).rejects.toThrow(ForbiddenException);
   });
 
@@ -117,9 +104,9 @@ describe('RolesService - proteccion contra escalada (hallazgo E)', () => {
       esSistema: false,
       permisos: [{ permiso: { codigo: 'inventario.ajustar' } }],
     });
-    await expect(
-      servicio.eliminar('empresa-1', 'r-admin', actorLimitado),
-    ).rejects.toThrow(ForbiddenException);
+    await expect(servicio.eliminar('empresa-1', 'r-admin', actorLimitado)).rejects.toThrow(
+      ForbiddenException,
+    );
   });
 
   it('el superadmin no queda sujeto a la validacion', async () => {
@@ -154,12 +141,9 @@ describe('RolesService - proteccion contra escalada (hallazgo E)', () => {
       esSistema: false,
       permisos: [],
     });
-    prisma.usuarioRol.findMany.mockResolvedValue([
-      { usuarioId: 'u1' },
-      { usuarioId: 'u2' },
-    ]);
-    prisma.$transaction.mockImplementation(async (cb: (tx: unknown) => unknown) =>
-      cb(prisma),
+    prisma.usuarioRol.findMany.mockResolvedValue([{ usuarioId: 'u1' }, { usuarioId: 'u2' }]);
+    prisma.$transaction.mockImplementation((cb: (tx: unknown) => unknown) =>
+      Promise.resolve(cb(prisma)),
     );
     prisma.rol.update.mockResolvedValue({ id: 'r-admin' });
 

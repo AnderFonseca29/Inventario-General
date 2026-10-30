@@ -1,3 +1,4 @@
+import type { NextFunction, Request, Response } from 'express';
 import { CorrelationIdMiddleware } from './correlation-id.middleware';
 
 describe('CorrelationIdMiddleware (hallazgo N)', () => {
@@ -8,21 +9,19 @@ describe('CorrelationIdMiddleware (hallazgo N)', () => {
   });
 
   function ejecutar(headers: Record<string, string>) {
-    const req: any = { headers };
-    const res: any = { setHeader: jest.fn() };
-    const next = jest.fn();
+    const req = { headers } as unknown as Request;
+    const setHeader = jest.fn();
+    const res = { setHeader } as unknown as Response;
+    const next = jest.fn() as unknown as NextFunction;
     middleware.use(req, res, next);
-    return { req, res, next };
+    return { req, setHeader, next };
   }
 
   it('genera un identificador cuando la peticion no trae ninguno', () => {
-    const { req, res, next } = ejecutar({});
+    const { req, setHeader, next } = ejecutar({});
     expect(req.correlationId).toBeDefined();
     expect(req.correlationId.length).toBeGreaterThan(0);
-    expect(res.setHeader).toHaveBeenCalledWith(
-      'X-Correlation-Id',
-      req.correlationId,
-    );
+    expect(setHeader).toHaveBeenCalledWith('X-Correlation-Id', req.correlationId);
     expect(next).toHaveBeenCalled();
   });
 

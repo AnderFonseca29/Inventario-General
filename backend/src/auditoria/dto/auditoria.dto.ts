@@ -1,10 +1,4 @@
-import { Type } from 'class-transformer';
-import {
-  IsDateString,
-  IsOptional,
-  IsString,
-  IsUUID,
-} from 'class-validator';
+import { IsDateString, IsOptional, IsString, IsUUID } from 'class-validator';
 import { PaginacionDto } from '../../common/dto/paginacion.dto';
 
 export class ListarAuditoriaDto extends PaginacionDto {

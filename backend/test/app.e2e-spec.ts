@@ -40,8 +40,9 @@ describe('Aplicacion (e2e)', () => {
       .get('/api/health')
       .expect(200)
       .expect((res) => {
-        expect(res.body.status).toBe('ok');
-        expect(typeof res.body.uptimeSegundos).toBe('number');
+        const body = res.body as { status?: unknown; uptimeSegundos?: unknown };
+        expect(body.status).toBe('ok');
+        expect(typeof body.uptimeSegundos).toBe('number');
       });
   });
 
@@ -50,8 +51,9 @@ describe('Aplicacion (e2e)', () => {
       .get('/api/health/ready')
       .expect(200)
       .expect((res) => {
-        expect(res.body.status).toBe('ok');
-        expect(res.body.baseDatos).toBe('ok');
+        const body = res.body as { status?: unknown; baseDatos?: unknown };
+        expect(body.status).toBe('ok');
+        expect(body.baseDatos).toBe('ok');
       });
   });
 

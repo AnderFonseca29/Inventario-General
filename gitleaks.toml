@@ -1,0 +1,12 @@
+# Falsos positivos verificados del repositorio.
+# No se excluyen archivos completos ni se desactivan reglas: solo se permiten
+# los valores de prueba y el token de ejemplo del badge de NestJS.
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Valores ficticios usados en pruebas y documentacion"
+regexes = [
+  '''abc123def456''',
+  '''Prueba(?:X|Y|Nueva)12345''',
+]

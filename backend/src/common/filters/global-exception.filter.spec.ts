@@ -4,12 +4,12 @@ import { GlobalExceptionFilter } from './global-exception.filter';
 
 interface HostFalso {
   host: ArgumentsHost;
-  json: jest.Mock;
+  json: jest.Mock<void, [{ message: string }]>;
   status: jest.Mock;
 }
 
 function hostConUrl(url: string): HostFalso {
-  const json = jest.fn();
+  const json = jest.fn<void, [{ message: string }]>();
   const status = jest.fn(() => ({ json }));
   const respuesta = { status };
   const host = {
@@ -81,7 +81,7 @@ describe('GlobalExceptionFilter (hallazgo L)', () => {
 
     filtro.catch(new Error('detalle interno secreto'), host);
 
-    const cuerpo = json.mock.calls[0][0] as { message: string };
+    const cuerpo = json.mock.calls[0][0];
     expect(cuerpo.message).not.toContain('detalle interno secreto');
   });
 });
