@@ -1,422 +1,152 @@
-import { Component, HostListener, inject, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
-import { IconComponent } from '../../shared/icons';
-import { ConsentimientoService } from '../../core/services/consentimiento.service';
-
-interface Caracteristica {
-  icono: string;
-  titulo: string;
-  texto: string;
-}
-
-interface Modulo {
-  icono: string;
-  nombre: string;
-  texto: string;
-}
-
-interface Paso {
-  numero: string;
-  titulo: string;
-  texto: string;
-}
-
-const CARACTERISTICAS: Caracteristica[] = [
-  {
-    icono: 'shield',
-    titulo: 'Multiempresa con aislamiento',
-    texto:
-      'Cada empresa opera con sus propios datos, usuarios y permisos, sin filtraciones entre cuentas.',
-  },
-  {
-    icono: 'box',
-    titulo: 'Inventario trazable',
-    texto:
-      'Entradas, salidas, traslados y ajustes con documento, consecutivo y auditoría de cada cambio.',
-  },
-  {
-    icono: 'truck',
-    titulo: 'Cargues y botellones',
-    texto:
-      'Asigna cargues a vendedores y controla la rotación de envases retornables con conciliación.',
-  },
-  {
-    icono: 'factory',
-    titulo: 'Producción y materias primas',
-    texto:
-      'Fórmulas, órdenes de producción y mermas con consumo real y costos internos calculados.',
-  },
-  {
-    icono: 'users',
-    titulo: 'Clientes y membresías',
-    texto:
-      'Administra clientes, planes y afiliaciones con vigencia y renovación bajo control.',
-  },
-  {
-    icono: 'audit',
-    titulo: 'Permisos y auditoría',
-    texto:
-      'Roles configurables por empresa y registro inmutable de quién hizo qué y cuándo.',
-  },
-];
-
-const MODULOS: Modulo[] = [
-  { icono: 'box', nombre: 'Catálogo', texto: 'Productos, categorías y unidades' },
-  { icono: 'box', nombre: 'Inventario', texto: 'Existencias y movimientos' },
-  { icono: 'factory', nombre: 'Producción', texto: 'Fórmulas y órdenes' },
-  { icono: 'users', nombre: 'Membresía', texto: 'Clientes y planes' },
-  { icono: 'report', nombre: 'Reportes', texto: 'Indicadores operativos' },
-  { icono: 'audit', nombre: 'Auditoría', texto: 'Trazabilidad completa' },
-];
-
-const PASOS: Paso[] = [
-  {
-    numero: '01',
-    titulo: 'Configura tu empresa',
-    texto:
-      'Registra los datos de tu empresa y define roles con los permisos exactos para cada equipo.',
-  },
-  {
-    numero: '02',
-    titulo: 'Carga tu catálogo',
-    texto:
-      'Da de alta productos, bodegas y presentaciones; el inventario queda listo para operar.',
-  },
-  {
-    numero: '03',
-    titulo: 'Opera y controla',
-    texto:
-      'Registra movimientos, cargues y producción. Consulta reportes y la auditoría en tiempo real.',
-  },
-];
+import { Component, inject } from '@angular/core';
+import { SeoService } from '../../core/services/seo.service';
+import { LandingNavComponent } from './sections/landing-nav.component';
+import { LandingHeroComponent } from './sections/landing-hero.component';
+import { ParaQuienComponent } from './sections/para-quien.component';
+import { CaracteristicasComponent } from './sections/caracteristicas.component';
+import { ModulosComponent } from './sections/modulos.component';
+import { VistaPreviaComponent } from './sections/vista-previa.component';
+import { ComoFuncionaComponent } from './sections/como-funciona.component';
+import { SeguridadComponent } from './sections/seguridad.component';
+import { PlanesComponent } from './sections/planes.component';
+import { FaqComponent } from './sections/faq.component';
+import { CtaFinalComponent } from './sections/cta-final.component';
+import { SiteFooterComponent } from './sections/site-footer.component';
+import { PLANES } from './landing.data';
 
 @Component({
   selector: 'app-landing',
-  imports: [RouterLink, IconComponent],
+  imports: [
+    LandingNavComponent,
+    LandingHeroComponent,
+    ParaQuienComponent,
+    CaracteristicasComponent,
+    ModulosComponent,
+    VistaPreviaComponent,
+    ComoFuncionaComponent,
+    SeguridadComponent,
+    PlanesComponent,
+    FaqComponent,
+    CtaFinalComponent,
+    SiteFooterComponent,
+  ],
   template: `
-    <header class="lp-nav" [class.solid]="scrolled()">
-      <div class="lp-nav-inner">
-        <a class="lp-brand" routerLink="/">
-          <span class="brand-logo">ST</span>
-          <span class="brand-text">Stockora</span>
-        </a>
+    <div class="brand-page landing-page">
+      <a class="brand-skip-link" href="#contenido">Saltar al contenido</a>
+      <app-landing-nav />
 
-        <nav class="lp-links">
-          <a href="#caracteristicas">Características</a>
-          <a href="#modulos">Módulos</a>
-          <a href="#como">Cómo funciona</a>
-          <a href="#planes">Planes</a>
-        </nav>
+      <main id="contenido" class="landing" tabindex="-1">
+        <app-landing-hero />
 
-        <div class="lp-nav-actions">
-          <a class="btn btn-ghost" routerLink="/login">Iniciar sesión</a>
-          <a class="btn btn-primary" routerLink="/registro">Comenzar gratis</a>
-        </div>
-
-        <button class="lp-burger" (click)="menu.set(!menu())" title="Menú" aria-label="Abrir menú" [attr.aria-expanded]="menu()">
-          <app-icon [name]="menu() ? 'close' : 'menu'" />
-        </button>
-      </div>
-
-      @if (menu()) {
-        <div class="lp-mobile">
-          <a href="#caracteristicas" (click)="menu.set(false)">Características</a>
-          <a href="#modulos" (click)="menu.set(false)">Módulos</a>
-          <a href="#como" (click)="menu.set(false)">Cómo funciona</a>
-          <a href="#planes" (click)="menu.set(false)">Planes</a>
-          <a class="btn btn-primary" routerLink="/registro" (click)="menu.set(false)">Crear cuenta</a>
-        </div>
-      }
-    </header>
-
-    <section class="lp-hero">
-      <div class="lp-hero-bg"></div>
-      <div class="lp-hero-inner">
-        <div class="lp-hero-copy anim-up">
-          <span class="lp-pill">
-            <app-icon name="spark" /> Inventario multiempresa en la nube
-          </span>
-          <h1>
-            Controla tu inventario,
-            <span class="grad">toda tu operación</span>
-            en un solo lugar
-          </h1>
-          <p>
-            Stockora centraliza catálogo, inventario, cargues, botellones,
-            producción y membresías con trazabilidad completa y aislamiento por
-            empresa.
-          </p>
-          <div class="lp-hero-cta">
-            <a class="btn btn-primary btn-lg" routerLink="/registro">
-              Comenzar ahora <app-icon name="arrow-right" />
-            </a>
-            <a class="btn btn-outline btn-lg" href="#caracteristicas">
-              Ver características
-            </a>
-          </div>
-          <div class="lp-hero-stats">
-            <div>
-              <strong>6</strong>
-              <span>Módulos integrados</span>
-            </div>
-            <div>
-              <strong>100%</strong>
-              <span>Trazabilidad</span>
-            </div>
-            <div>
-              <strong>Multi</strong>
-              <span>Empresa y rol</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="lp-hero-card anim-up">
-          <div class="mock-top">
-            <span class="dot"></span><span class="dot"></span><span class="dot"></span>
-            <span class="mock-title">Panel · Inventario</span>
-          </div>
-          <div class="mock-body">
-            <div class="mock-kpis">
-              <div class="mock-kpi">
-                <app-icon name="box" />
-                <div><strong>1.284</strong><span>Productos</span></div>
-              </div>
-              <div class="mock-kpi">
-                <app-icon name="truck" />
-                <div><strong>18</strong><span>Cargues activos</span></div>
-              </div>
-              <div class="mock-kpi">
-                <app-icon name="factory" />
-                <div><strong>7</strong><span>Órdenes</span></div>
-              </div>
-            </div>
-            <div class="mock-rows">
-              @for (r of mockRows; track r.nombre) {
-                <div class="mock-row">
-                  <span class="mock-avatar">{{ r.inicial }}</span>
-                  <div class="mock-row-main">
-                    <strong>{{ r.nombre }}</strong>
-                    <span>{{ r.modulo }}</span>
-                  </div>
-                  <span class="badge" [class]="r.clase">{{ r.estado }}</span>
-                </div>
-              }
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="lp-logos">
-      <span>Todo lo que tu operación necesita, sin hojas de cálculo</span>
-    </section>
-
-    <section class="lp-section" id="caracteristicas">
-      <div class="lp-head">
-        <span class="lp-eyebrow">Características</span>
-        <h2>Diseñado para operaciones que no pueden fallar</h2>
-        <p>
-          Cada función está pensada para mantener la integridad del inventario y
-          la claridad de los procesos.
-        </p>
-      </div>
-      <div class="lp-grid">
-        @for (c of caracteristicas; track c.titulo) {
-          <div class="lp-card">
-            <div class="lp-card-icon"><app-icon [name]="c.icono" /></div>
-            <h3>{{ c.titulo }}</h3>
-            <p>{{ c.texto }}</p>
-          </div>
+      <div id="para-quien" class="defer-anchor" aria-hidden="false">
+        @defer (on viewport; prefetch on idle) {
+          <app-para-quien />
+        } @placeholder (minimum 100ms) {
+          <div class="defer-slot" aria-hidden="true"></div>
         }
       </div>
-    </section>
 
-    <section class="lp-section alt" id="modulos">
-      <div class="lp-head">
-        <span class="lp-eyebrow">Módulos</span>
-        <h2>Seis módulos que cubren todo el ciclo</h2>
-        <p>Actívalos según tu plan y el tamaño de tu operación.</p>
-      </div>
-      <div class="lp-modules">
-        @for (m of modulos; track m.nombre) {
-          <div class="lp-module">
-            <div class="lp-card-icon"><app-icon [name]="m.icono" /></div>
-            <div>
-              <h3>{{ m.nombre }}</h3>
-              <p>{{ m.texto }}</p>
-            </div>
-          </div>
+      <div id="caracteristicas" class="defer-anchor">
+        @defer (on viewport; prefetch on idle) {
+          <app-caracteristicas />
+        } @placeholder (minimum 100ms) {
+          <div class="defer-slot" aria-hidden="true"></div>
         }
       </div>
-    </section>
 
-    <section class="lp-section" id="como">
-      <div class="lp-head">
-        <span class="lp-eyebrow">Cómo funciona</span>
-        <h2>En marcha en tres pasos</h2>
-      </div>
-      <div class="lp-steps">
-        @for (p of pasos; track p.numero) {
-          <div class="lp-step">
-            <span class="lp-step-num">{{ p.numero }}</span>
-            <h3>{{ p.titulo }}</h3>
-            <p>{{ p.texto }}</p>
-          </div>
+      <div id="modulos" class="defer-anchor">
+        @defer (on viewport; prefetch on idle) {
+          <app-modulos />
+        } @placeholder (minimum 100ms) {
+          <div class="defer-slot" aria-hidden="true"></div>
         }
       </div>
-    </section>
 
-    <section class="lp-section alt" id="planes">
-      <div class="lp-head">
-        <span class="lp-eyebrow">Planes</span>
-        <h2>Precios simples que crecen contigo</h2>
-        <p>Sin costos ocultos. Cambia de plan cuando quieras.</p>
-        <p class="lp-note">
-          Precios mensuales en pesos colombianos (COP).
-          [DATO PENDIENTE: confirmar con el contador si el IVA está incluido]
-        </p>
-      </div>
-      <div class="lp-plans">
-        @for (pl of planes; track pl.nombre) {
-          <div class="lp-plan" [class.destacado]="pl.destacado">
-            @if (pl.destacado) {
-              <span class="lp-plan-tag">Más elegido</span>
-            }
-            <h3>{{ pl.nombre }}</h3>
-            <p class="lp-plan-desc">{{ pl.descripcion }}</p>
-            <div class="lp-plan-price">
-              <span class="lp-plan-amount">{{ pl.precio }}</span>
-              <span class="lp-plan-period">{{ pl.periodo }}</span>
-            </div>
-            <ul>
-              @for (f of pl.incluye; track f) {
-                <li><app-icon name="check" /> {{ f }}</li>
-              }
-            </ul>
-            <a class="btn btn-block" [class]="pl.destacado ? 'btn-primary' : 'btn-outline'" routerLink="/registro">
-              Elegir {{ pl.nombre }}
-            </a>
-          </div>
+      <div id="vista-previa" class="defer-anchor">
+        @defer (on viewport; prefetch on idle) {
+          <app-vista-previa />
+        } @placeholder (minimum 100ms) {
+          <div class="defer-slot" aria-hidden="true"></div>
         }
       </div>
-    </section>
 
-    <section class="lp-cta">
-      <div class="lp-cta-inner">
-        <h2>Empieza a controlar tu inventario hoy</h2>
-        <p>Crea tu cuenta y ten tu operación ordenada desde el primer día.</p>
-            <a class="btn btn-primary btn-lg" routerLink="/registro">
-              Crear mi cuenta <app-icon name="arrow-right" />
-            </a>
+      <div id="como-funciona" class="defer-anchor">
+        @defer (on viewport; prefetch on idle) {
+          <app-como-funciona />
+        } @placeholder (minimum 100ms) {
+          <div class="defer-slot" aria-hidden="true"></div>
+        }
       </div>
-    </section>
 
-    <footer class="lp-footer">
-      <div class="lp-footer-inner">
-        <div class="lp-footer-brand">
-          <a class="lp-brand" routerLink="/">
-            <span class="brand-logo">ST</span>
-            <span class="brand-text">Stockora</span>
-          </a>
-          <p>Plataforma de inventario multiempresa con trazabilidad completa.</p>
-        </div>
-        <div class="lp-footer-col">
-          <h3>Producto</h3>
-          <a href="#caracteristicas">Características</a>
-          <a href="#modulos">Módulos</a>
-          <a href="#planes">Planes</a>
-        </div>
-        <div class="lp-footer-col">
-          <h3>Cuenta</h3>
-          <a routerLink="/login">Iniciar sesión</a>
-          <a routerLink="/registro">Crear cuenta</a>
-        </div>
-        <div class="lp-footer-col">
-          <h3>Legal</h3>
-          <a href="/legal/terminos-y-condiciones.md">Términos y condiciones</a>
-          <a href="/legal/politica-de-privacidad.md">Privacidad</a>
-          <a href="/legal/politica-de-cookies.md">Cookies</a>
-          <a href="/legal/uso-aceptable.md">Uso aceptable</a>
-          <a href="/legal/derechos-de-los-titulares.md">Derechos</a>
-          <a href="/legal/politica-de-retencion.md">Retención</a>
-          <a href="/legal/contrato-de-encargo.md">Encargo (DPA)</a>
-          <a routerLink="/derechos">Radicar solicitud</a>
-          <button type="button" class="lp-footer-btn" (click)="abrirCookies()">
-            Preferencias de cookies
-          </button>
-        </div>
+      <div id="seguridad" class="defer-anchor">
+        @defer (on viewport; prefetch on idle) {
+          <app-seguridad />
+        } @placeholder (minimum 100ms) {
+          <div class="defer-slot" aria-hidden="true"></div>
+        }
       </div>
-      <div class="lp-footer-bottom">
-        © {{ anio }} Stockora · Sistema de inventario multiempresa
+
+      <div id="planes" class="defer-anchor">
+        @defer (on viewport; prefetch on idle) {
+          <app-planes />
+        } @placeholder (minimum 100ms) {
+          <div class="defer-slot" aria-hidden="true"></div>
+        }
       </div>
-    </footer>
+
+      <div id="preguntas" class="defer-anchor">
+        @defer (on viewport; prefetch on idle) {
+          <app-faq />
+        } @placeholder (minimum 100ms) {
+          <div class="defer-slot" aria-hidden="true"></div>
+        }
+      </div>
+
+      <div class="defer-anchor">
+        @defer (on viewport; prefetch on idle) {
+          <app-cta-final />
+        } @placeholder (minimum 100ms) {
+          <div class="defer-slot defer-slot--cta" aria-hidden="true"></div>
+        }
+      </div>
+    </main>
+
+    @defer (on viewport; prefetch on idle) {
+      <app-site-footer />
+    } @placeholder (minimum 100ms) {
+      <div class="defer-slot defer-slot--footer" aria-hidden="true"></div>
+    }
+    </div>
   `,
   styleUrl: './landing.component.scss',
 })
 export class LandingComponent {
-  private readonly consentimiento = inject(ConsentimientoService);
-
-  readonly anio = new Date().getFullYear();
-  readonly menu = signal(false);
-  readonly scrolled = signal(false);
-
-  readonly caracteristicas = CARACTERISTICAS;
-  readonly modulos = MODULOS;
-  readonly pasos = PASOS;
-
-  readonly mockRows = [
-    { inicial: 'A', nombre: 'Bodega Central', modulo: 'Inventario', estado: 'Activo', clase: 'badge-success' },
-    { inicial: 'P', nombre: 'Planta Norte', modulo: 'Producción', estado: 'En proceso', clase: 'badge-warn' },
-    { inicial: 'V', nombre: 'Ruta Vendedor 3', modulo: 'Cargues', estado: 'Confirmado', clase: 'badge-primary' },
-  ];
-
-  readonly planes = [
-    {
-      nombre: 'Básico',
-      descripcion: 'Para equipos pequeños que inician.',
-      precio: '$60.000',
-      periodo: '/ mes',
-      destacado: false,
-      incluye: ['Catálogo e inventario', 'Hasta 5 usuarios', 'Reportes esenciales'],
-    },
-    {
-      nombre: 'Medio',
-      descripcion: 'Para operaciones en crecimiento.',
-      precio: '$90.000',
-      periodo: '/ mes',
-      destacado: true,
-      incluye: [
-        'Todo lo del plan Básico',
-        'Cargues y botellones',
-        'Producción y membresías',
-        'Reportes avanzados',
-      ],
-    },
-    {
-      nombre: 'Premium',
-      descripcion: 'Para operaciones multisede.',
-      precio: '$120.000',
-      periodo: '/ mes',
-      destacado: false,
-      incluye: [
-        'Todo lo del plan Medio',
-        'Módulos ilimitados',
-        'Usuarios ilimitados',
-        'Soporte prioritario',
-      ],
-    },
-  ];
+  private readonly seo = inject(SeoService);
 
   constructor() {
-    this.scrolled.set(window.scrollY > 12);
-  }
+    this.seo.setPagina({
+      titulo: 'Stockora | Inventario, producción y membresías en una sola plataforma',
+      descripcion:
+        'Controla catálogo, inventario, cargues, botellones, producción y membresías con datos separados por empresa y trazabilidad de cada movimiento.',
+      ruta: '/',
+    });
 
-  @HostListener('window:scroll')
-  onScroll(): void {
-    this.scrolled.set(window.scrollY > 12);
-  }
-
-  abrirCookies(): void {
-    this.consentimiento.abrirPanel();
+    this.seo.setDatosEstructurados({
+      '@context': 'https://schema.org',
+      '@type': 'SoftwareApplication',
+      name: 'Stockora',
+      applicationCategory: 'BusinessApplication',
+      operatingSystem: 'Web',
+      inLanguage: 'es-CO',
+      description:
+        'Plataforma de inventario multiempresa para catálogo, inventario, cargues, botellones, producción, membresías y auditoría.',
+      offers: PLANES.map((plan) => ({
+        '@type': 'Offer',
+        name: plan.nombre,
+        price: String(plan.precioMensual),
+        priceCurrency: 'COP',
+        url: this.seo.url('/registro'),
+      })),
+    });
   }
 }

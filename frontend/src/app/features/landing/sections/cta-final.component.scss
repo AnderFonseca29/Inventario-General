@@ -1,0 +1,73 @@
+.cta {
+  position: relative;
+  overflow: hidden;
+  background: var(--brand-espresso);
+  color: var(--brand-on-dark);
+}
+
+.cta__leaves {
+  position: absolute;
+  top: -100px;
+  right: -60px;
+  width: 540px;
+  height: 500px;
+  pointer-events: none;
+}
+
+.cta__inner {
+  position: relative;
+  z-index: 1;
+  padding-block: clamp(64px, 9vw, 104px);
+  text-align: center;
+}
+
+.cta__eyebrow {
+  display: inline-block;
+  margin-bottom: 16px;
+  color: var(--brand-peach);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+.cta h2 {
+  max-width: 18ch;
+  margin: 0 auto 18px;
+  font-size: clamp(2rem, 4.8vw, 3.5rem);
+  line-height: 1.14;
+}
+
+.cta p {
+  max-width: 56ch;
+  margin: 0 auto 30px;
+  color: var(--brand-on-dark);
+  font-size: clamp(0.9375rem, 1.3vw, 1.0625rem);
+  line-height: 1.65;
+  opacity: 0.82;
+}
+
+.cta .brand-btn--inverse {
+  min-width: 190px;
+}
+
+@media (max-width: 640px) {
+  .cta__leaves {
+    top: -70px;
+    right: -180px;
+    opacity: 0.8;
+  }
+
+  .cta__inner {
+    text-align: left;
+  }
+
+  .cta h2,
+  .cta p {
+    margin-left: 0;
+  }
+
+  .cta .brand-btn {
+    width: 100%;
+  }
+}

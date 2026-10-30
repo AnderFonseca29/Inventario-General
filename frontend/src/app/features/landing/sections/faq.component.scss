@@ -1,0 +1,119 @@
+.faq {
+  border-block: 1px solid var(--brand-border);
+  background: var(--brand-surface);
+}
+
+.faq__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 0.72fr) minmax(0, 1.28fr);
+  gap: clamp(36px, 7vw, 90px);
+  align-items: start;
+}
+
+.faq__intro {
+  position: sticky;
+  top: calc(var(--brand-nav-h) + 32px);
+}
+
+.faq__list {
+  border-top: 1px solid var(--brand-border);
+}
+
+.faq__item {
+  border-bottom: 1px solid var(--brand-border);
+}
+
+.faq__item summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  min-height: 64px;
+  padding: 16px 2px;
+  color: var(--brand-text);
+  font-family: var(--brand-font-serif);
+  font-size: 1.1rem;
+  font-weight: 600;
+  line-height: 1.4;
+  cursor: pointer;
+  list-style: none;
+}
+
+.faq__item summary::-webkit-details-marker {
+  display: none;
+}
+
+.faq__item summary:hover {
+  color: var(--brand-primary-dark);
+}
+
+.faq__item summary:focus-visible {
+  outline-offset: 2px;
+}
+
+.faq__toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  flex: 0 0 auto;
+  border: 1px solid var(--brand-border);
+  border-radius: 50%;
+  color: var(--brand-primary);
+}
+
+.faq__toggle app-brand-icon {
+  width: 16px;
+  height: 16px;
+}
+
+.faq__icon-minus {
+  display: none;
+}
+
+.faq__item[open] .faq__icon-plus {
+  display: none;
+}
+
+.faq__item[open] .faq__icon-minus {
+  display: inline-flex;
+}
+
+.faq__item p {
+  max-width: 62ch;
+  padding: 0 52px 20px 2px;
+  color: var(--brand-text-muted);
+  font-size: 0.9375rem;
+  line-height: 1.65;
+  animation: faqIn 240ms ease both;
+}
+
+@keyframes faqIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+
+@media (max-width: 860px) {
+  .faq__grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 28px;
+  }
+
+  .faq__intro {
+    position: static;
+  }
+}
+
+@media (max-width: 520px) {
+  .faq__item summary {
+    gap: 12px;
+    font-size: 1rem;
+  }
+
+  .faq__item p {
+    padding-right: 2px;
+  }
+}
