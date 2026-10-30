@@ -1,12 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Stockora">
-  <defs>
-    <linearGradient id="stockora-gradiente" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#4f46e5" />
-      <stop offset="1" stop-color="#0ea5e9" />
-    </linearGradient>
-  </defs>
-  <rect x="0" y="0" width="64" height="64" rx="17.6" fill="url(#stockora-gradiente)" />
-  <text x="32" y="32" dy="0.35em" fill="#ffffff" text-anchor="middle"
+  <rect width="64" height="64" rx="16" fill="#9C4426" />
+  <path d="M47 14c-8 1-13 5-14 13 7 0 12-4 14-13Z" fill="#E8B85C" opacity=".9" />
+  <text x="30" y="33" dy="0.35em" fill="#FAF6F0" text-anchor="middle"
     font-family="'Segoe UI', system-ui, -apple-system, Roboto, Helvetica, Arial, sans-serif"
-    font-size="29" font-weight="800" letter-spacing="-0.5">ST</text>
+    font-size="27" font-weight="800" letter-spacing="-0.5">ST</text>
 </svg>

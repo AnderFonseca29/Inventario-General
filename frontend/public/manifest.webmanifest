@@ -1,15 +1,16 @@
 {
+  "id": "./",
   "name": "Stockora - Inventario General",
   "short_name": "Stockora",
-  "description": "Gestión de inventario, producción y ventas para pequeñas y medianas empresas.",
+  "description": "Inventario, cargues, botellones, producción y membresías con datos separados por empresa.",
   "lang": "es-CO",
   "dir": "ltr",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait-primary",
-  "background_color": "#f4f6fb",
-  "theme_color": "#4f46e5",
+  "background_color": "#FAF6F0",
+  "theme_color": "#9C4426",
   "categories": ["business", "productivity"],
   "icons": [
     {
