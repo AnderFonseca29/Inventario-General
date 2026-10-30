@@ -1,104 +1,113 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { IconComponent } from '../../shared/icons';
+import { SeoService } from '../../core/services/seo.service';
+import { BrandIconComponent } from '../../shared/brand-icon.component';
+import { BrandMarkComponent } from '../../shared/brand-mark.component';
 
 @Component({
   selector: 'app-registro',
-  imports: [ReactiveFormsModule, RouterLink, IconComponent],
+  imports: [ReactiveFormsModule, RouterLink, BrandIconComponent, BrandMarkComponent],
   template: `
-    <div class="login-page">
-      <div class="login-aside">
-        <a class="aside-brand" routerLink="/">
-          <span class="brand-logo">ST</span>
-          <span>Stockora</span>
+    <div class="auth brand-page">
+      <a class="brand-skip-link" href="#auth-main">Saltar al contenido</a>
+
+      <aside class="auth__aside">
+        <app-brand-icon name="leaf" class="auth__leaf" />
+        <a class="auth__brand" routerLink="/" aria-label="ST Stockora, ir al inicio">
+          <app-brand-mark [tamano]="'lg'" />
         </a>
 
-        <div class="aside-copy">
-          <h2>Crea tu cuenta</h2>
-          <p>
-            Solicita el alta de tu empresa para empezar a gestionar inventario,
-            cargues, botellones y producción desde un solo lugar.
+        <div class="auth__aside-copy">
+          <span class="brand-eyebrow">Nueva empresa</span>
+          <p class="auth__aside-title">
+            Empieza con una operación ordenada desde el primer movimiento.
+          </p>
+          <p class="auth__aside-text">
+            Registra los datos de tu empresa y la persona administradora. La
+            solicitud queda lista para revisión.
           </p>
 
-          <ul class="features">
+          <ul class="auth__points">
             <li>
-              <app-icon name="shield" />
-              <div>
-                <strong>Multiempresa</strong>
-                <span>Aislamiento total entre empresas.</span>
-              </div>
+              <app-brand-icon name="building" class="brand-icon" />
+              <span><strong>Multiempresa</strong> Los datos de cada empresa se mantienen separados.</span>
             </li>
             <li>
-              <app-icon name="box" />
-              <div>
-                <strong>Inventario trazable</strong>
-                <span>Movimientos auditados y controlados.</span>
-              </div>
+              <app-brand-icon name="box" class="brand-icon" />
+              <span><strong>Inventario trazable</strong> Movimientos con documento, consecutivo y auditoría.</span>
             </li>
             <li>
-              <app-icon name="users" />
-              <div>
-                <strong>Roles y permisos</strong>
-                <span>Asigna accesos por perfil.</span>
-              </div>
+              <app-brand-icon name="users" class="brand-icon" />
+              <span><strong>Roles y permisos</strong> Define qué puede hacer cada persona del equipo.</span>
             </li>
           </ul>
         </div>
 
-        <div class="aside-foot">© {{ anio }} · Sistema de inventario multiempresa</div>
-      </div>
+        <p class="auth__aside-foot">© {{ anio }} Stockora · Inventario multiempresa</p>
+      </aside>
 
-      <div class="login-main">
-        <div class="login-card registro-card">
-          <div class="login-logo">
-            <span class="brand-logo">ST</span>
+      <main id="auth-main" class="auth__main" tabindex="-1">
+        <div class="auth__panel auth__panel--registro">
+          <a class="auth__mobile-brand" routerLink="/" aria-label="ST Stockora, ir al inicio">
+            <app-brand-mark />
+          </a>
+
+          <div class="auth__header">
+            <span class="auth__kicker">Solicitud de acceso</span>
+            <h1>Crear cuenta</h1>
+            <p>Cuéntanos de tu empresa para preparar el alta.</p>
           </div>
-          <h1>Crear cuenta</h1>
-          <p class="login-sub">Registra los datos para solicitar acceso</p>
 
           @if (enviado()) {
-            <div class="alert alert-success">
-              <app-icon name="check" />
+            <div class="auth__alert auth__alert--success" role="status" aria-live="polite">
+              <app-brand-icon name="check" class="brand-icon" />
               <span>Solicitud enviada. Un administrador revisará tu registro.</span>
             </div>
-            <div class="registro-actions">
-              <a class="btn btn-outline btn-block" routerLink="/login">Volver a iniciar sesión</a>
-              <a class="btn btn-ghost btn-block" routerLink="/">Ir al inicio</a>
+            <div class="auth__success-actions">
+              <a class="brand-btn brand-btn--primary brand-btn--block" routerLink="/login">
+                Volver a iniciar sesión
+              </a>
+              <a class="brand-btn brand-btn--secondary brand-btn--block" routerLink="/">
+                Ir al inicio
+              </a>
             </div>
           } @else {
             @if (error()) {
-              <div class="alert alert-error" role="alert" aria-live="polite">
-                <app-icon name="warning" />
+              <div class="auth__alert auth__alert--error" role="alert" aria-live="polite">
+                <app-brand-icon name="warning" class="brand-icon" />
                 <span>{{ error() }}</span>
               </div>
             }
 
             <form [formGroup]="form" (ngSubmit)="enviar()" novalidate>
-              <div class="form-row">
-                <div class="form-group">
-                  <label for="nombreEmpresa">Nombre de la empresa <span aria-hidden="true">*</span></label>
+              <div class="auth__row">
+                <div class="brand-field auth__field">
+                  <label class="brand-label" for="nombreEmpresa">
+                    Nombre de la empresa <span aria-hidden="true">*</span>
+                  </label>
                   <input
                     id="nombreEmpresa"
                     type="text"
-                    class="form-control"
+                    class="brand-input"
                     formControlName="nombreEmpresa"
-                    placeholder="Ej. Distribuidora XYZ"
+                    placeholder="Ej. Distribuidora El Roble"
                     autocomplete="organization"
-                    [class.is-invalid]="form.controls.nombreEmpresa.touched && form.controls.nombreEmpresa.invalid"
                     aria-required="true"
+                    [attr.aria-invalid]="form.controls.nombreEmpresa.touched && form.controls.nombreEmpresa.invalid"
+                    [attr.aria-describedby]="form.controls.nombreEmpresa.touched && form.controls.nombreEmpresa.invalid ? 'empresa-error' : null"
                   />
                   @if (form.controls.nombreEmpresa.touched && form.controls.nombreEmpresa.invalid) {
-                    <div class="form-error">El nombre de la empresa es obligatorio (mínimo 2 caracteres)</div>
+                    <p id="empresa-error" class="brand-error">Escribe el nombre de la empresa (mínimo 2 caracteres).</p>
                   }
                 </div>
 
-                <div class="form-group">
-                  <label for="nit">NIT (opcional)</label>
+                <div class="brand-field auth__field">
+                  <label class="brand-label" for="nit">NIT <span class="auth__optional">(opcional)</span></label>
                   <input
                     id="nit"
                     type="text"
-                    class="form-control"
+                    class="brand-input"
                     formControlName="nit"
                     placeholder="900123456-7"
                     autocomplete="off"
@@ -106,52 +115,58 @@ import { IconComponent } from '../../shared/icons';
                 </div>
               </div>
 
-              <div class="form-row">
-                <div class="form-group">
-                  <label for="nombreAdmin">Nombre del administrador <span aria-hidden="true">*</span></label>
+              <div class="auth__row">
+                <div class="brand-field auth__field">
+                  <label class="brand-label" for="nombreAdmin">
+                    Nombre del administrador <span aria-hidden="true">*</span>
+                  </label>
                   <input
                     id="nombreAdmin"
                     type="text"
-                    class="form-control"
+                    class="brand-input"
                     formControlName="nombreAdmin"
                     placeholder="Nombre completo"
                     autocomplete="name"
-                    [class.is-invalid]="form.controls.nombreAdmin.touched && form.controls.nombreAdmin.invalid"
                     aria-required="true"
+                    [attr.aria-invalid]="form.controls.nombreAdmin.touched && form.controls.nombreAdmin.invalid"
+                    [attr.aria-describedby]="form.controls.nombreAdmin.touched && form.controls.nombreAdmin.invalid ? 'admin-error' : null"
                   />
                   @if (form.controls.nombreAdmin.touched && form.controls.nombreAdmin.invalid) {
-                    <div class="form-error">El nombre es obligatorio (mínimo 2 caracteres)</div>
+                    <p id="admin-error" class="brand-error">Escribe el nombre (mínimo 2 caracteres).</p>
                   }
                 </div>
 
-                <div class="form-group">
-                  <label for="email">Correo electrónico <span aria-hidden="true">*</span></label>
-                  <div class="control-icon">
-                    <app-icon name="mail" />
-                    <input
-                      id="email"
-                      type="email"
-                      class="form-control"
-                      formControlName="email"
-                      placeholder="usuario@empresa.com"
-                      autocomplete="email"
-                      [class.is-invalid]="form.controls.email.touched && form.controls.email.invalid"
-                      aria-required="true"
-                    />
-                  </div>
+                <div class="brand-field auth__field">
+                  <label class="brand-label" for="email">
+                    Correo electrónico <span aria-hidden="true">*</span>
+                  </label>
+                  <input
+                    id="email"
+                    type="email"
+                    class="brand-input"
+                    formControlName="email"
+                    placeholder="usuario@empresa.com"
+                    autocomplete="email"
+                    inputmode="email"
+                    aria-required="true"
+                    [attr.aria-invalid]="form.controls.email.touched && form.controls.email.invalid"
+                    [attr.aria-describedby]="form.controls.email.touched && form.controls.email.invalid ? 'email-error' : null"
+                  />
                   @if (form.controls.email.touched && form.controls.email.invalid) {
-                    <div class="form-error">Ingresa un correo válido</div>
+                    <p id="email-error" class="brand-error">Ingresa un correo válido.</p>
                   }
                 </div>
               </div>
 
-              <div class="form-row">
-                <div class="form-group">
-                  <label for="telefono">Teléfono (opcional)</label>
+              <div class="auth__row">
+                <div class="brand-field auth__field">
+                  <label class="brand-label" for="telefono">
+                    Teléfono <span class="auth__optional">(opcional)</span>
+                  </label>
                   <input
                     id="telefono"
                     type="tel"
-                    class="form-control"
+                    class="brand-input"
                     formControlName="telefono"
                     placeholder="3001234567"
                     autocomplete="tel"
@@ -159,103 +174,117 @@ import { IconComponent } from '../../shared/icons';
                   />
                 </div>
 
-                <div class="form-group">
-                  <label for="password">Contraseña <span aria-hidden="true">*</span></label>
-                  <div class="control-icon">
-                    <app-icon name="lock" />
+                <div class="brand-field auth__field">
+                  <label class="brand-label" for="password">
+                    Contraseña <span aria-hidden="true">*</span>
+                  </label>
+                  <div class="auth__password">
                     <input
                       id="password"
                       [type]="verClave() ? 'text' : 'password'"
-                      class="form-control"
+                      class="brand-input"
                       formControlName="password"
                       placeholder="Mínimo 8 caracteres"
                       autocomplete="new-password"
-                      style="padding-right: 44px"
-                      [class.is-invalid]="form.controls.password.touched && form.controls.password.invalid"
                       aria-required="true"
                       aria-describedby="passHelp"
+                      [attr.aria-invalid]="form.controls.password.touched && form.controls.password.invalid"
                     />
                     <button
                       type="button"
-                      class="ver-btn"
+                      class="auth__eye"
                       (click)="verClave.set(!verClave())"
                       [attr.aria-label]="verClave() ? 'Ocultar contraseña' : 'Mostrar contraseña'"
-                      [title]="verClave() ? 'Ocultar' : 'Mostrar'"
+                      [attr.aria-pressed]="verClave()"
                     >
-                      <app-icon name="eye" />
+                      <app-brand-icon [name]="verClave() ? 'eye-off' : 'eye'" class="brand-icon" />
                     </button>
                   </div>
-                  <small id="passHelp" class="form-hint">Mínimo 8 caracteres</small>
+                  <p id="passHelp" class="brand-hint">Mínimo 8 caracteres.</p>
                   @if (form.controls.password.touched && form.controls.password.invalid) {
-                    <div class="form-error">La contraseña debe tener al menos 8 caracteres</div>
+                    <p class="brand-error">La contraseña debe tener al menos 8 caracteres.</p>
                   }
                 </div>
               </div>
 
-              <div class="form-group">
-                <label for="confirmar">Confirmar contraseña <span aria-hidden="true">*</span></label>
-                <div class="control-icon">
-                  <app-icon name="lock" />
-                  <input
-                    id="confirmar"
-                    [type]="verClave() ? 'text' : 'password'"
-                    class="form-control"
-                    formControlName="confirmar"
-                    placeholder="Repite la contraseña"
-                    autocomplete="new-password"
-                    [class.is-invalid]="form.touched && form.hasError('noCoincide')"
-                    aria-required="true"
-                  />
-                </div>
+              <div class="brand-field auth__field">
+                <label class="brand-label" for="confirmar">
+                  Confirmar contraseña <span aria-hidden="true">*</span>
+                </label>
+                <input
+                  id="confirmar"
+                  [type]="verClave() ? 'text' : 'password'"
+                  class="brand-input"
+                  formControlName="confirmar"
+                  placeholder="Repite la contraseña"
+                  autocomplete="new-password"
+                  aria-required="true"
+                  aria-describedby="confirmar-error"
+                  [attr.aria-invalid]="form.touched && form.hasError('noCoincide')"
+                />
                 @if (form.touched && form.hasError('noCoincide')) {
-                  <div class="form-error">Las contraseñas no coinciden</div>
+                  <p id="confirmar-error" class="brand-error">Las contraseñas no coinciden.</p>
                 }
               </div>
 
-              <div class="form-group registro-legal">
-                <label class="legal-check">
-                  <input type="checkbox" formControlName="aceptaTerminos" />
+              <div class="brand-field auth__field">
+                <label class="brand-check">
+                  <input
+                    type="checkbox"
+                    formControlName="aceptaTerminos"
+                    aria-required="true"
+                    [attr.aria-invalid]="form.controls.aceptaTerminos.touched && form.controls.aceptaTerminos.invalid"
+                    [attr.aria-describedby]="form.controls.aceptaTerminos.touched && form.controls.aceptaTerminos.invalid ? 'terminos-error' : null"
+                  />
                   <span>
                     He leído y acepto los
-                    <a href="/legal/terminos-y-condiciones.md" target="_blank" rel="noopener noreferrer">Términos y Condiciones</a>,
+                    <a href="legal/terminos-y-condiciones.md" target="_blank" rel="noopener noreferrer">Términos y Condiciones</a>,
                     la
-                    <a href="/legal/politica-de-privacidad.md" target="_blank" rel="noopener noreferrer">Política de Privacidad</a>,
+                    <a href="legal/politica-de-privacidad.md" target="_blank" rel="noopener noreferrer">Política de Privacidad</a>,
                     el
-                    <a href="/legal/aviso-de-privacidad.md" target="_blank" rel="noopener noreferrer">Aviso de Privacidad</a>
+                    <a href="legal/aviso-de-privacidad.md" target="_blank" rel="noopener noreferrer">Aviso de Privacidad</a>
                     y el
-                    <a href="/legal/uso-aceptable.md" target="_blank" rel="noopener noreferrer">Uso Aceptable</a>.
+                    <a href="legal/uso-aceptable.md" target="_blank" rel="noopener noreferrer">Uso Aceptable</a>.
                   </span>
                 </label>
                 @if (form.controls.aceptaTerminos.touched && form.controls.aceptaTerminos.invalid) {
-                  <div class="form-error">Debes aceptar los documentos legales para continuar</div>
+                  <p id="terminos-error" class="brand-error">Debes aceptar los documentos legales para continuar.</p>
                 }
               </div>
 
-              <button type="submit" class="btn btn-primary btn-block" [disabled]="cargando()">
+              <button
+                type="submit"
+                class="brand-btn brand-btn--primary brand-btn--block brand-btn--lg auth__submit"
+                [disabled]="cargando()"
+                [attr.aria-busy]="cargando()"
+              >
                 @if (cargando()) {
-                  <span class="spinner" style="width:16px;height:16px;border-width:2px;margin:0" aria-hidden="true"></span>
+                  <span class="auth__spinner" aria-hidden="true"></span>
                   Enviando…
                 } @else {
                   Solicitar acceso
-                  <app-icon name="arrow-right" />
+                  <app-brand-icon name="arrow" class="brand-icon" />
                 }
               </button>
 
-              <p class="registro-login">
+              <p class="auth__login-link">
                 ¿Ya tienes cuenta?
                 <a routerLink="/login">Iniciar sesión</a>
               </p>
             </form>
           }
+
+          <a class="auth__back" routerLink="/">Volver al inicio</a>
         </div>
-      </div>
+      </main>
     </div>
   `,
-  styleUrl: './login.component.scss'
+  styleUrl: './login.component.scss',
 })
 export class RegistroComponent {
   private readonly fb = inject(FormBuilder);
   private readonly router = inject(Router);
+  private readonly seo = inject(SeoService);
 
   readonly anio = new Date().getFullYear();
   readonly cargando = signal(false);
@@ -274,13 +303,24 @@ export class RegistroComponent {
       confirmar: ['', [Validators.required, Validators.minLength(8)]],
       aceptaTerminos: [false, [Validators.requiredTrue]],
     },
-    { validators: (g: any) => {
-      const p = g.get('password')?.value;
-      const c = g.get('confirmar')?.value;
-      if (!p || !c) return null;
-      return p === c ? null : { noCoincide: true };
-    } }
+    {
+      validators: (g) => {
+        const p = g.get('password')?.value;
+        const c = g.get('confirmar')?.value;
+        if (!p || !c) return null;
+        return p === c ? null : { noCoincide: true };
+      },
+    },
   );
+
+  constructor() {
+    this.seo.setPagina({
+      titulo: 'Crear cuenta | Stockora',
+      descripcion:
+        'Solicita el alta de tu empresa en Stockora y empieza a ordenar inventario, producción y membresías.',
+      ruta: '/registro',
+    });
+  }
 
   enviar(): void {
     if (this.form.invalid) {
@@ -292,7 +332,7 @@ export class RegistroComponent {
     this.cargando.set(true);
     this.error.set(null);
 
-    // Simulación de envío: el alta real la gestiona el superadministrador
+    // Simulación de envío: el alta real la gestiona el superadministrador.
     setTimeout(() => {
       this.cargando.set(false);
       this.enviado.set(true);

@@ -18,7 +18,7 @@ import { ConsentimientoService } from '../core/services/consentimiento.service';
                 Usamos cookies necesarias para el servicio y, con tu permiso,
                 analíticas y publicitarias. Puedes aceptar, rechazar o
                 configurar.
-                <a href="/legal/politica-de-cookies.md">Política de cookies</a>.
+                <a href="legal/politica-de-cookies.md">Política de cookies</a>.
               </p>
             </div>
             <div class="cookie-acciones">
@@ -89,6 +89,7 @@ import { ConsentimientoService } from '../core/services/consentimiento.service';
         display: flex;
         justify-content: center;
         pointer-events: none;
+        font-family: var(--brand-font-sans);
       }
       .cookie-caja {
         pointer-events: auto;
@@ -104,11 +105,11 @@ import { ConsentimientoService } from '../core/services/consentimiento.service';
         justify-content: space-between;
         gap: 1rem;
         padding: 1rem 1.25rem;
-        border: 1px solid #d7dce5;
-        border-radius: 14px;
-        background: #ffffff;
-        color: #0f172a;
-        box-shadow: 0 12px 40px rgba(15, 23, 42, 0.2);
+        border: 1px solid var(--brand-border);
+        border-radius: var(--brand-radius-lg);
+        background: var(--brand-surface);
+        color: var(--brand-text);
+        box-shadow: var(--brand-shadow-lg);
       }
       .cookie-texto {
         flex: 1 1 320px;
@@ -117,17 +118,24 @@ import { ConsentimientoService } from '../core/services/consentimiento.service';
       .cookie-texto strong {
         display: block;
         margin-bottom: 0.35rem;
-        font-size: 1rem;
+        color: var(--brand-text);
+        font-family: var(--brand-font-serif);
+        font-size: 1.05rem;
+        font-weight: 600;
       }
       .cookie-texto p {
         margin: 0;
+        color: var(--brand-text-muted);
         font-size: 0.9rem;
-        line-height: 1.5;
-        color: #334155;
+        line-height: 1.55;
       }
       .cookie-texto a {
-        color: #0f766e;
-        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        min-height: 44px;
+        padding-inline: 2px;
+        color: var(--brand-primary-dark);
+        font-weight: 650;
       }
       .cookie-acciones {
         display: flex;
@@ -138,33 +146,35 @@ import { ConsentimientoService } from '../core/services/consentimiento.service';
       .cookie-acciones button {
         min-height: 44px;
         padding: 0 1rem;
-        border-radius: 10px;
+        border-radius: var(--brand-radius-sm);
         font: inherit;
         font-weight: 600;
         cursor: pointer;
       }
       .cookie-acciones .sec {
-        border: 1px solid #94a3b8;
-        background: #ffffff;
-        color: #0f172a;
+        border: 1px solid var(--brand-border-control);
+        background: var(--brand-surface);
+        color: var(--brand-text);
       }
       .cookie-acciones .pri {
-        border: 1px solid #0f766e;
-        background: #0f766e;
-        color: #ffffff;
+        border: 1px solid var(--brand-primary);
+        background: var(--brand-primary);
+        color: var(--brand-primary-contrast);
       }
       .cookie-acciones button:focus-visible,
       .fila input:focus-visible {
-        outline: 3px solid #0ea5e9;
-        outline-offset: 2px;
+        outline: 2px solid var(--brand-primary);
+        outline-offset: 3px;
       }
       .fila {
         display: flex;
         align-items: center;
         justify-content: space-between;
         gap: 1rem;
-        padding: 0.55rem 0;
-        border-bottom: 1px solid #e2e8f0;
+        min-height: 52px;
+        padding: 0.45rem 0;
+        border-bottom: 1px solid var(--brand-border);
+        cursor: pointer;
       }
       .fila:last-of-type {
         border-bottom: 0;
@@ -174,14 +184,17 @@ import { ConsentimientoService } from '../core/services/consentimiento.service';
         flex-direction: column;
         gap: 0.15rem;
       }
+      .fila b {
+        color: var(--brand-text);
+      }
       .fila small {
-        color: #475569;
+        color: var(--brand-text-muted);
         font-size: 0.8rem;
       }
       .fila input {
         width: 22px;
         height: 22px;
-        accent-color: #0f766e;
+        accent-color: var(--brand-primary);
         flex: 0 0 auto;
       }
       @media (max-width: 640px) {
