@@ -20,7 +20,7 @@ jobs:
       - name: Comprobar mojibake, UTF-8 valido y BOM
         run: node scripts/check-encoding.mjs
 
-      - name: Normalizar (simulacion: no debe quedar nada pendiente)
+      - name: "Normalizar (simulacion: no debe quedar nada pendiente)"
         run: |
           node scripts/fix-encoding.mjs > fix.txt
           if grep -qE "Simulacion|AVISOS" fix.txt; then
