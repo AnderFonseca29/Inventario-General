@@ -556,12 +556,53 @@
   cursor: pointer;
 }
 
-.brand-check input {
-  width: 18px;
-  height: 18px;
-  margin: 2px 0 0;
+.brand-check__control {
+  position: relative;
+  display: inline-flex;
+  width: 20px;
+  height: 20px;
+  margin-top: 1px;
   flex: 0 0 auto;
-  accent-color: var(--brand-primary);
+}
+
+.brand-check__control input {
+  position: absolute;
+  inset: -12px;
+  width: 44px;
+  height: 44px;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.brand-check__box {
+  display: grid;
+  width: 20px;
+  height: 20px;
+  place-items: center;
+  border: 1.5px solid var(--brand-border-strong);
+  border-radius: 5px;
+  background: var(--brand-surface);
+  pointer-events: none;
+}
+
+.brand-check__control input:checked + .brand-check__box {
+  border-color: var(--brand-primary);
+  background: var(--brand-primary);
+}
+
+.brand-check__control input:checked + .brand-check__box::after {
+  width: 10px;
+  height: 5px;
+  border-bottom: 2px solid var(--brand-primary-contrast);
+  border-left: 2px solid var(--brand-primary-contrast);
+  content: '';
+  transform: rotate(-45deg) translateY(-1px);
+}
+
+.brand-check__control input:focus-visible + .brand-check__box {
+  outline: 2px solid var(--brand-primary);
+  outline-offset: 2px;
 }
 
 .brand-check a {

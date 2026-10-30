@@ -229,13 +229,16 @@ import { BrandMarkComponent } from '../../shared/brand-mark.component';
 
               <div class="brand-field auth__field">
                 <label class="brand-check">
-                  <input
-                    type="checkbox"
-                    formControlName="aceptaTerminos"
-                    aria-required="true"
-                    [attr.aria-invalid]="form.controls.aceptaTerminos.touched && form.controls.aceptaTerminos.invalid"
-                    [attr.aria-describedby]="form.controls.aceptaTerminos.touched && form.controls.aceptaTerminos.invalid ? 'terminos-error' : null"
-                  />
+                  <span class="brand-check__control">
+                    <input
+                      type="checkbox"
+                      formControlName="aceptaTerminos"
+                      aria-required="true"
+                      [attr.aria-invalid]="form.controls.aceptaTerminos.touched && form.controls.aceptaTerminos.invalid"
+                      [attr.aria-describedby]="form.controls.aceptaTerminos.touched && form.controls.aceptaTerminos.invalid ? 'terminos-error' : null"
+                    />
+                    <span class="brand-check__box" aria-hidden="true"></span>
+                  </span>
                   <span>
                     He leído y acepto los
                     <a href="legal/terminos-y-condiciones.md" target="_blank" rel="noopener noreferrer">Términos y Condiciones</a>,
