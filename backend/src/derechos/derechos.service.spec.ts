@@ -1,11 +1,9 @@
 import { NotFoundException } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
-import {
-  EstadoSolicitudDerechos,
-  TipoSolicitudDerechos,
-} from '@prisma/client';
+import { EstadoSolicitudDerechos, TipoSolicitudDerechos } from '@prisma/client';
 import { AuditoriaService } from '../auditoria/auditoria.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { ListarDerechosDto } from './dto/derecho.dto';
 import { DerechosService } from './derechos.service';
 
 describe('DerechosService', () => {
@@ -18,6 +16,7 @@ describe('DerechosService', () => {
       update: jest.Mock;
       findMany: jest.Mock;
       count: jest.Mock;
+      groupBy: jest.Mock;
     };
     $transaction: jest.Mock;
   };
@@ -32,6 +31,7 @@ describe('DerechosService', () => {
         update: jest.fn(),
         findMany: jest.fn(),
         count: jest.fn(),
+        groupBy: jest.fn(),
       },
       $transaction: jest.fn(),
     };
@@ -73,9 +73,7 @@ describe('DerechosService', () => {
 
     expect(resultado.radicado).toMatch(/^DER-\d{8}-[A-F0-9]{8}$/);
     expect(resultado.estado).toBe(EstadoSolicitudDerechos.RECIBIDA);
-    expect(resultado.fechaLimite.getTime()).toBeGreaterThan(
-      resultado.fechaRecepcion.getTime(),
-    );
+    expect(resultado.fechaLimite.getTime()).toBeGreaterThan(resultado.fechaRecepcion.getTime());
     expect(auditoria.registrar).toHaveBeenCalledWith(
       expect.objectContaining({ accion: 'RADICAR_SOLICITUD_DERECHOS' }),
     );
@@ -101,10 +99,7 @@ describe('DerechosService', () => {
     };
     prisma.solicitudDerechos.findFirst.mockResolvedValue(atendida);
 
-    const resultado = await service.consultar(
-      'der-20261028-abcdef12',
-      'ana@example.com',
-    );
+    const resultado = await service.consultar('der-20261028-abcdef12', 'ana@example.com');
 
     expect(resultado).toEqual(atendida);
     expect(prisma.solicitudDerechos.findFirst).toHaveBeenCalledWith(
@@ -115,6 +110,40 @@ describe('DerechosService', () => {
         },
         select: expect.objectContaining({ respuesta: true }),
       }),
+    );
+  });
+
+  it('lista con filtros y resume los estados de la bandeja', async () => {
+    prisma.$transaction.mockResolvedValue([
+      [{ id: 'solicitud-1' }],
+      1,
+      [
+        { estado: EstadoSolicitudDerechos.RECIBIDA, _count: 2 },
+        { estado: EstadoSolicitudDerechos.EN_TRAMITE, _count: 1 },
+        { estado: EstadoSolicitudDerechos.RESPONDIDA, _count: 4 },
+      ],
+      3,
+    ]);
+
+    const filtros = Object.assign(new ListarDerechosDto(), {
+      pagina: 2,
+      limite: 10,
+      estado: EstadoSolicitudDerechos.RECIBIDA,
+      buscar: 'ana',
+    });
+
+    const resultado = await service.listar(filtros);
+
+    expect(resultado.total).toBe(1);
+    expect(resultado.pagina).toBe(2);
+    expect(resultado.limite).toBe(10);
+    expect(resultado.resumen).toEqual({
+      abiertas: 3,
+      respondidas: 4,
+      vencidas: 3,
+    });
+    expect(prisma.solicitudDerechos.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({ skip: 10, take: 10 }),
     );
   });
 

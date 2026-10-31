@@ -1,9 +1,10 @@
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import {
-  ConflictException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
-import { Prisma, SolicitudDerechos, TipoSolicitudDerechos, EstadoSolicitudDerechos } from '@prisma/client';
+  Prisma,
+  SolicitudDerechos,
+  TipoSolicitudDerechos,
+  EstadoSolicitudDerechos,
+} from '@prisma/client';
 import { randomUUID } from 'node:crypto';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditoriaService } from '../auditoria/auditoria.service';
@@ -21,11 +22,7 @@ export class DerechosService {
     private readonly auditoria: AuditoriaService,
   ) {}
 
-  async crear(
-    dto: CrearSolicitudDerechosDto,
-    ip?: string | null,
-    userAgent?: string | null,
-  ) {
+  async crear(dto: CrearSolicitudDerechosDto, ip?: string | null, userAgent?: string | null) {
     const fechaRecepcion = new Date();
     const dias = dto.tipo === TipoSolicitudDerechos.CONSULTA ? 10 : 15;
     const fechaLimite = sumarDiasHabiles(fechaRecepcion, dias);
@@ -60,19 +57,14 @@ export class DerechosService {
 
         return this.resumen(creada);
       } catch (error) {
-        if (
-          error instanceof Prisma.PrismaClientKnownRequestError &&
-          error.code === 'P2002'
-        ) {
+        if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
           continue;
         }
         throw error;
       }
     }
 
-    throw new ConflictException(
-      'No fue posible generar el radicado. Intente nuevamente.',
-    );
+    throw new ConflictException('No fue posible generar el radicado. Intente nuevamente.');
   }
 
   async consultar(radicado: string, correo: string) {
@@ -118,7 +110,7 @@ export class DerechosService {
         : {}),
     };
 
-    const [items, total] = await this.prisma.$transaction([
+    const [items, total, porEstado, vencidas] = await this.prisma.$transaction([
       this.prisma.solicitudDerechos.findMany({
         where,
         orderBy: { fechaRecepcion: 'desc' },
@@ -126,14 +118,47 @@ export class DerechosService {
         take: dto.take,
       }),
       this.prisma.solicitudDerechos.count({ where }),
+      this.prisma.solicitudDerechos.groupBy({
+        by: ['estado'],
+        orderBy: { estado: 'asc' },
+        _count: true,
+      }),
+      this.prisma.solicitudDerechos.count({
+        where: {
+          estado: {
+            in: [EstadoSolicitudDerechos.RECIBIDA, EstadoSolicitudDerechos.EN_TRAMITE],
+          },
+          fechaLimite: { lt: new Date() },
+        },
+      }),
     ]);
 
-    return { items, total, pagina: dto.pagina ?? 1, limite: dto.take };
+    const contar = (estado: EstadoSolicitudDerechos): number => {
+      const fila = porEstado.find((item) => item.estado === estado);
+      return typeof fila?._count === 'number' ? fila._count : 0;
+    };
+
+    return {
+      items,
+      total,
+      pagina: dto.pagina ?? 1,
+      limite: dto.take,
+      resumen: {
+        abiertas:
+          contar(EstadoSolicitudDerechos.RECIBIDA) + contar(EstadoSolicitudDerechos.EN_TRAMITE),
+        respondidas:
+          contar(EstadoSolicitudDerechos.RESPONDIDA) + contar(EstadoSolicitudDerechos.CERRADA),
+        vencidas,
+      },
+    };
   }
 
   async obtener(id: string) {
     const solicitud = await this.prisma.solicitudDerechos.findUnique({
       where: { id },
+      include: {
+        respondidoPor: { select: { nombre: true, email: true } },
+      },
     });
     if (!solicitud) {
       throw new NotFoundException('Solicitud no encontrada.');
@@ -141,12 +166,7 @@ export class DerechosService {
     return solicitud;
   }
 
-  async responder(
-    id: string,
-    dto: ResponderDerechosDto,
-    usuarioId: string,
-    ip?: string | null,
-  ) {
+  async responder(id: string, dto: ResponderDerechosDto, usuarioId: string, ip?: string | null) {
     const anterior = await this.prisma.solicitudDerechos.findUnique({
       where: { id },
     });

@@ -141,6 +141,14 @@ export const routes: Routes = [
           ),
         canActivate: [superAdminGuard],
       },
+      {
+        path: 'derechos',
+        loadComponent: () =>
+          import('./features/derechos/derechos-admin.component').then(
+            (m) => m.DerechosAdminComponent,
+          ),
+        canActivate: [superAdminGuard],
+      },
     ],
   },
   {

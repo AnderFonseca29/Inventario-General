@@ -59,6 +59,7 @@ const NAV: NavSeccion[] = [
       },
       { label: 'Mi empresa', icono: 'building', ruta: '/app/mi-empresa', permiso: 'empresa.configurar' },
       { label: 'Empresas', icono: 'building', ruta: '/app/empresas', soloSuperAdmin: true },
+      { label: 'Derechos y PQR', icono: 'mail', ruta: '/app/derechos', soloSuperAdmin: true },
     ],
   },
 ];

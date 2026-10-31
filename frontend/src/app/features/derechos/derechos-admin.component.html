@@ -1,0 +1,345 @@
+<div class="page-header">
+  <div>
+    <div class="page-title">Derechos y PQR</div>
+    <div class="page-subtitle">
+      Bandeja de solicitudes de datos personales. Solo el superadministrador puede ver los datos del
+      solicitante y responder.
+    </div>
+  </div>
+  <button class="btn btn-ghost" (click)="cargar()" title="Actualizar">
+    <app-icon name="refresh" /> Actualizar
+  </button>
+</div>
+
+<div class="stats-grid stagger">
+  <div class="stat-card">
+    <div class="stat-icon tint-primary"><app-icon name="mail" /></div>
+    <div>
+      <div class="stat-value">{{ total() }}</div>
+      <div class="stat-label">Solicitudes</div>
+      <div class="stat-sub">Radicadas en total</div>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon tint-accent"><app-icon name="clock" /></div>
+    <div>
+      <div class="stat-value">{{ resumen().abiertas }}</div>
+      <div class="stat-label">Abiertas</div>
+      <div class="stat-sub">Pendientes de respuesta</div>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon tint-warn"><app-icon name="warning" /></div>
+    <div>
+      <div class="stat-value">{{ resumen().vencidas }}</div>
+      <div class="stat-label">Vencidas</div>
+      <div class="stat-sub">Fuera del plazo legal</div>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon tint-success"><app-icon name="check" /></div>
+    <div>
+      <div class="stat-value">{{ resumen().respondidas }}</div>
+      <div class="stat-label">Atendidas</div>
+      <div class="stat-sub">Respondidas o cerradas</div>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="table-toolbar">
+    <div class="filtros">
+      <div class="control-icon search">
+        <app-icon name="search" />
+        <input
+          class="form-control"
+          placeholder="Buscar radicado, nombre, documento o correo."
+          [value]="fBuscar()"
+          (input)="programarBusqueda($any($event.target).value)"
+          (keyup.enter)="cargar(1)"
+        />
+      </div>
+      <select
+        class="form-control"
+        aria-label="Filtrar por estado"
+        [value]="fEstado()"
+        (change)="cambiarEstado($any($event.target).value)"
+      >
+        <option value="">Todos los estados</option>
+        @for (estado of estados; track estado) {
+          <option [value]="estado">{{ etiquetaEstado(estado) }}</option>
+        }
+      </select>
+      <select
+        class="form-control"
+        aria-label="Filtrar por tipo"
+        [value]="fTipo()"
+        (change)="cambiarTipo($any($event.target).value)"
+      >
+        <option value="">Todos los tipos</option>
+        @for (tipo of tipos; track tipo) {
+          <option [value]="tipo">{{ etiquetaTipo(tipo) }}</option>
+        }
+      </select>
+      @if (hayFiltros()) {
+        <button class="btn btn-ghost btn-sm" (click)="limpiarFiltros()">Limpiar filtros</button>
+      }
+    </div>
+  </div>
+
+  <div class="table-wrap">
+    @if (cargando()) {
+      @for (i of [1, 2, 3, 4]; track i) {
+        <div class="skeleton-row">
+          <div class="skeleton skeleton-circle"></div>
+          <div style="flex: 1">
+            <div class="skeleton" style="width: 30%; margin-bottom: 8px"></div>
+            <div class="skeleton" style="width: 50%"></div>
+          </div>
+          <div class="skeleton" style="width: 90px"></div>
+        </div>
+      }
+    } @else if (items().length === 0) {
+      <div class="empty">
+        <app-icon name="mail" />
+        <div class="empty-title">
+          {{ hayFiltros() ? 'Sin resultados' : 'Sin solicitudes' }}
+        </div>
+        <div>
+          {{
+            hayFiltros()
+              ? 'Ajusta la búsqueda o los filtros.'
+              : 'Las solicitudes radicadas desde /derechos aparecerán aquí.'
+          }}
+        </div>
+      </div>
+    } @else {
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Solicitante</th>
+            <th>Contacto</th>
+            <th>Tipo</th>
+            <th>Estado</th>
+            <th>Recibida</th>
+            <th>Límite</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (solicitud of items(); track solicitud.id) {
+            <tr>
+              <td>
+                <div class="cell-main">
+                  <span class="avatar">{{ iniciales(solicitud.nombre) }}</span>
+                  <div>
+                    <div class="cell-strong">{{ solicitud.nombre }}</div>
+                    <div class="cell-muted pqr-radicado">
+                      {{ solicitud.radicado }}
+                    </div>
+                  </div>
+                </div>
+              </td>
+              <td class="cell-muted">{{ solicitud.correo }}</td>
+              <td>{{ etiquetaTipo(solicitud.tipo) }}</td>
+              <td>
+                <span [class]="claseEstado(solicitud.estado)">
+                  <span class="dot"></span>{{ etiquetaEstado(solicitud.estado) }}
+                </span>
+              </td>
+              <td class="cell-muted">
+                {{ solicitud.fechaRecepcion | fechaCol: 'shortDate' }}
+              </td>
+              <td>
+                <span [class.pqr-vencida]="plazoVencido(solicitud)">
+                  {{ solicitud.fechaLimite | fechaCol: 'shortDate' }}
+                </span>
+                @if (plazoVencido(solicitud)) {
+                  <span class="badge badge-danger">Vencida</span>
+                }
+              </td>
+              <td class="actions">
+                <button
+                  class="btn btn-ghost btn-sm"
+                  (click)="abrirDetalle(solicitud)"
+                  title="Ver y responder"
+                >
+                  <app-icon name="eye" /> Ver
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  </div>
+
+  @if (!cargando() && total() > 0) {
+    <div class="pqr-pager">
+      <span class="cell-muted"> {{ desde() }}–{{ hasta() }} de {{ total() }} </span>
+      <div class="pqr-pager-botones">
+        <button class="btn btn-ghost btn-sm" [disabled]="pagina() <= 1" (click)="cambiarPagina(-1)">
+          Anterior
+        </button>
+        <span>Página {{ pagina() }} de {{ totalPaginas() }}</span>
+        <button
+          class="btn btn-ghost btn-sm"
+          [disabled]="pagina() >= totalPaginas()"
+          (click)="cambiarPagina(1)"
+        >
+          Siguiente
+        </button>
+      </div>
+    </div>
+  }
+</div>
+
+@if (detalleAbierto()) {
+  <div class="modal-backdrop" (click)="cerrarDetalle()">
+    <div
+      class="modal modal-lg"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="pqr-titulo"
+      (click)="$event.stopPropagation()"
+    >
+      <div class="modal-header">
+        <h3 id="pqr-titulo">Solicitud {{ detalle()?.radicado ?? '' }}</h3>
+        <button class="icon-btn" (click)="cerrarDetalle()" aria-label="Cerrar" title="Cerrar">
+          <app-icon name="close" />
+        </button>
+      </div>
+
+      <div class="modal-body">
+        @if (errorDetalle(); as error) {
+          <div class="alert alert-error">
+            <app-icon name="warning" /><span>{{ error }}</span>
+          </div>
+        }
+
+        @if (cargandoDetalle()) {
+          <p class="form-hint">Cargando el detalle de la solicitud…</p>
+        }
+
+        @if (detalle(); as d) {
+          <div class="pqr-meta">
+            <div>
+              <span>Tipo</span>
+              <strong>{{ etiquetaTipo(d.tipo) }}</strong>
+            </div>
+            <div>
+              <span>Estado</span>
+              <span [class]="claseEstado(d.estado)">
+                <span class="dot"></span>{{ etiquetaEstado(d.estado) }}
+              </span>
+            </div>
+            <div>
+              <span>Recibida</span>
+              <strong>{{ d.fechaRecepcion | fechaCol: 'short' }}</strong>
+            </div>
+            <div>
+              <span>Límite</span>
+              <strong [class.pqr-vencida]="plazoVencido(d)">
+                {{ d.fechaLimite | fechaCol: 'short' }}
+              </strong>
+            </div>
+            <div>
+              <span>Documento</span>
+              <strong>{{ d.documento }}</strong>
+            </div>
+            <div>
+              <span>Correo</span>
+              <a [href]="'mailto:' + d.correo">{{ d.correo }}</a>
+            </div>
+            @if (d.telefono) {
+              <div>
+                <span>Teléfono</span>
+                <strong>{{ d.telefono }}</strong>
+              </div>
+            }
+            @if (d.empresa) {
+              <div>
+                <span>Empresa</span>
+                <strong>{{ d.empresa }}</strong>
+              </div>
+            }
+          </div>
+
+          <div class="seccion">Mensaje del solicitante</div>
+          <p class="pqr-mensaje">{{ d.mensaje }}</p>
+
+          @if (d.respuesta) {
+            <div class="seccion">Respuesta registrada</div>
+            <p class="pqr-mensaje">{{ d.respuesta }}</p>
+            <p class="form-hint">
+              {{ d.fechaRespuesta | fechaCol: 'short' }}
+              @if (d.respondidoPor) {
+                · {{ d.respondidoPor.nombre }} ({{ d.respondidoPor.email }})
+              }
+            </p>
+          }
+
+          <div class="seccion">
+            {{ d.respuesta ? 'Actualizar respuesta' : 'Responder' }}
+          </div>
+          <p class="form-hint">
+            La respuesta queda visible en la consulta pública con el radicado y el correo del
+            solicitante. Mínimo 20 caracteres.
+          </p>
+
+          <form [formGroup]="form" (ngSubmit)="guardarRespuesta()">
+            <div class="form-group">
+              <label for="pqr-respuesta">Respuesta *</label>
+              <textarea
+                id="pqr-respuesta"
+                class="form-control"
+                rows="6"
+                formControlName="respuesta"
+                [class.is-invalid]="
+                  form.controls.respuesta.touched && form.controls.respuesta.invalid
+                "
+              ></textarea>
+              @if (form.controls.respuesta.touched && form.controls.respuesta.invalid) {
+                <div class="form-error">Escribe una respuesta de al menos 20 caracteres.</div>
+              }
+            </div>
+
+            <div class="form-group">
+              <label for="pqr-estado">Estado al guardar</label>
+              <select id="pqr-estado" class="form-control" formControlName="estado">
+                <option value="RESPONDIDA">Respondida</option>
+                <option value="CERRADA">Cerrada</option>
+                <option value="RECHAZADA">Rechazada</option>
+              </select>
+            </div>
+          </form>
+
+          @if (d.ip || d.userAgent) {
+            <p class="pqr-origen">
+              Origen:
+              @if (d.ip) {
+                <span>{{ d.ip }}</span>
+              }
+              @if (d.userAgent) {
+                <span class="pqr-ua" [title]="d.userAgent">
+                  {{ d.userAgent }}
+                </span>
+              }
+            </p>
+          }
+        }
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-ghost" (click)="cerrarDetalle()">Cancelar</button>
+        <button
+          class="btn btn-primary"
+          [disabled]="respondiendo() || cargandoDetalle() || !detalle()"
+          (click)="guardarRespuesta()"
+        >
+          {{ respondiendo() ? 'Enviando…' : 'Enviar respuesta' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
