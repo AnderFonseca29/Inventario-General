@@ -9,6 +9,7 @@ import {
   Query,
   Req,
 } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 import type { Request } from 'express';
 import { DerechosService } from './derechos.service';
 import {
@@ -27,6 +28,7 @@ export class DerechosController {
   constructor(private readonly derechosService: DerechosService) {}
 
   @Public()
+  @Throttle({ default: { limit: 5, ttl: 60_000 } })
   @Post()
   crear(@Body() dto: CrearSolicitudDerechosDto, @Req() req: Request) {
     return this.derechosService.crear(
@@ -37,6 +39,7 @@ export class DerechosController {
   }
 
   @Public()
+  @Throttle({ default: { limit: 20, ttl: 60_000 } })
   @Get('consulta/:radicado')
   consultar(
     @Param('radicado') radicado: string,

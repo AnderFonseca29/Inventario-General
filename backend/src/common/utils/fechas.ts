@@ -17,6 +17,8 @@
  * zona explicita se respetan tal cual.
  */
 
+import { festivosDe } from './festivos-colombia';
+
 /** Zona horaria de operacion del negocio. */
 export const ZONA_HORARIA = 'America/Bogota';
 
@@ -141,9 +143,10 @@ export function finDelDiaUtc(entrada: unknown): Date | undefined {
 }
 
 /**
- * Suma dias habiles (lunes a viernes) a una fecha y devuelve el final de ese
- * dia en hora Colombia. No descuenta festivos: el llamador debe ajustar si el
- * vencimiento coincide con uno. [VERIFICAR: calendario de festivos.]
+ * Suma dias habiles a una fecha y devuelve el final de ese dia en hora
+ * Colombia. No cuenta sabados, domingos ni festivos nacionales
+ * (Ley 51 de 1983), porque los plazos legales de PQR se cuentan en dias
+ * habiles.
  */
 export function sumarDiasHabiles(desde: Date, dias: number): Date {
   const partes = new Intl.DateTimeFormat('en-CA', {
@@ -158,12 +161,24 @@ export function sumarDiasHabiles(desde: Date, dias: number): Date {
   let cursor = new Date(
     Date.UTC(valor('year'), valor('month') - 1, valor('day'), 12),
   );
+  const anio = valor('year');
+  // La suma puede cruzar de ano (por ejemplo, radicado el 20 de diciembre).
+  const festivos = new Set([
+    ...festivosDe(anio),
+    ...festivosDe(anio + 1),
+  ]);
   let sumados = 0;
   const total = Math.max(0, Math.trunc(dias));
   while (sumados < total) {
     cursor = new Date(cursor.getTime() + 24 * 60 * 60 * 1000);
     const diaSemana = cursor.getUTCDay();
-    if (diaSemana !== 0 && diaSemana !== 6) sumados += 1;
+    if (
+      diaSemana !== 0 &&
+      diaSemana !== 6 &&
+      !festivos.has(cursor.toISOString().slice(0, 10))
+    ) {
+      sumados += 1;
+    }
   }
 
   return utcDesdeHoraLocal(

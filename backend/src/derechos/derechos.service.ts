@@ -88,6 +88,7 @@ export class DerechosService {
         fechaRecepcion: true,
         fechaLimite: true,
         fechaRespuesta: true,
+        respuesta: true,
       },
     });
 

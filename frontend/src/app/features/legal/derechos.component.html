@@ -4,7 +4,11 @@
       <span class="brand-logo">ST</span>
       <span>Stockora</span>
     </a>
-    <a class="der-back" routerLink="/">Volver al inicio</a>
+    <nav class="der-nav" aria-label="Información legal">
+      <a routerLink="/legal">Centro legal</a>
+      <a routerLink="/contacto">Contacto</a>
+      <a class="der-back" routerLink="/">Volver al inicio</a>
+    </nav>
   </header>
 
   <main class="der-main">
@@ -37,7 +41,7 @@
         solicitud a esa empresa, que actúa como responsable.
       </p>
 
-      <a class="der-doc" href="/legal/derechos-de-los-titulares.md">
+      <a class="der-doc" routerLink="/legal/derechos">
         Leer el procedimiento completo
       </a>
     </section>
@@ -49,9 +53,17 @@
           <h2 id="titulo-formulario">Solicitud radicada</h2>
           <p>Guarda este número para consultar el estado:</p>
           <strong class="der-radicado">{{ r.radicado }}</strong>
+          <button type="button" class="der-copiar" (click)="copiarRadicado()">
+            {{ copiado() ? 'Copiado' : 'Copiar radicado' }}
+          </button>
           <p class="der-fechas">
             Recibida: {{ r.fechaRecepcion | date: 'dd/MM/yyyy' }} · Límite:
-            {{ r.fechaLimite | date: 'dd/MM/yyyy' }}
+            {{ r.fechaLimite | date: 'dd/MM/yyyy' }} · Estado:
+            {{ estados[r.estado] }}
+          </p>
+          <p class="der-ayuda">
+            Puedes consultar el avance con este radicado y el correo que
+            registraste.
           </p>
           <div class="der-acciones">
             <button type="button" class="der-btn sec" (click)="nueva()">
@@ -160,16 +172,12 @@
                 <span>
                   Autorizo el tratamiento de mis datos para atender esta
                   solicitud, conforme a la
-                  <a href="/legal/politica-de-privacidad.md" target="_blank" rel="noopener">
-                    política de privacidad</a
-                  >, al
-                  <a href="/legal/aviso-de-privacidad.md" target="_blank" rel="noopener">
-                    aviso de privacidad</a
-                  >
+                  <a routerLink="/legal/privacidad">política de privacidad</a>,
+                  al
+                  <a routerLink="/legal/aviso">aviso de privacidad</a>
                   y al
-                  <a href="/legal/derechos-de-los-titulares.md" target="_blank" rel="noopener">
-                    procedimiento de derechos</a
-                  >. *
+                  <a routerLink="/legal/derechos">procedimiento de derechos</a>.
+                  *
                 </span>
               </label>
               @if (invalido('autorizacion')) {
@@ -220,12 +228,28 @@
     @if (consulta(); as c) {
       <div class="der-resultado" role="status">
         <p><b>Radicado:</b> {{ c.radicado }}</p>
-        <p><b>Estado:</b> {{ c.estado }}</p>
+        <p><b>Tipo:</b> {{ tipos[c.tipo] }}</p>
+        <p>
+          <b>Estado:</b> {{ estados[c.estado] }}
+          @if (plazoVencido(c)) {
+            <span class="der-vencido">Plazo vencido</span>
+          }
+        </p>
         <p><b>Recibida:</b> {{ c.fechaRecepcion | date: 'dd/MM/yyyy' }}</p>
         <p><b>Límite:</b> {{ c.fechaLimite | date: 'dd/MM/yyyy' }}</p>
         @if (c.fechaRespuesta) {
           <p><b>Respondida:</b> {{ c.fechaRespuesta | date: 'dd/MM/yyyy' }}</p>
         }
+        @if (c.respuesta) {
+          <div class="der-respuesta">
+            <b>Respuesta</b>
+            <p>{{ c.respuesta }}</p>
+          </div>
+        }
+        <p class="der-ayuda">
+          Si no estás de acuerdo con la respuesta, puedes radicar un
+          <a routerLink="/legal/derechos">reclamo</a>.
+        </p>
       </div>
     }
   </section>
@@ -233,10 +257,12 @@
   <footer class="der-footer">
     <span>© {{ anio }} Stockora</span>
     <nav aria-label="Enlaces legales">
-      <a href="/legal/terminos-y-condiciones.md">Términos</a>
-      <a href="/legal/politica-de-privacidad.md">Privacidad</a>
-      <a href="/legal/derechos-de-los-titulares.md">Derechos</a>
-      <a href="/legal/politica-de-cookies.md">Cookies</a>
+      <a routerLink="/legal">Centro legal</a>
+      <a routerLink="/legal/terminos">Términos</a>
+      <a routerLink="/legal/privacidad">Privacidad</a>
+      <a routerLink="/legal/derechos">Derechos</a>
+      <a routerLink="/legal/cookies">Cookies</a>
+      <a routerLink="/contacto">Contacto</a>
     </nav>
   </footer>
 </div>

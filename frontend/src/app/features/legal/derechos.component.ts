@@ -6,6 +6,7 @@ import { IconComponent } from '../../shared/icons';
 import {
   ConsultaDerechos,
   DerechosService,
+  EstadoSolicitudDerechos,
   RadicadoDerechos,
   TipoSolicitudDerechos,
 } from '../../core/services/derechos.service';
@@ -33,11 +34,29 @@ export class DerechosComponent {
   readonly enviando = signal(false);
   readonly error = signal<string | null>(null);
   readonly radicado = signal<RadicadoDerechos | null>(null);
+  readonly copiado = signal(false);
 
   readonly consultando = signal(false);
   readonly errorConsulta = signal<string | null>(null);
   readonly consulta = signal<ConsultaDerechos | null>(null);
   readonly ultimoCorreo = signal('');
+
+  readonly estados: Record<EstadoSolicitudDerechos, string> = {
+    RECIBIDA: 'Recibida',
+    EN_TRAMITE: 'En trámite',
+    RESPONDIDA: 'Respondida',
+    CERRADA: 'Cerrada',
+    RECHAZADA: 'Rechazada',
+  };
+
+  readonly tipos: Record<TipoSolicitudDerechos, string> = {
+    ACCESO: 'Acceso a mis datos',
+    CONSULTA: 'Consulta',
+    RECTIFICACION: 'Rectificación',
+    SUPRESION: 'Supresión',
+    REVOCATORIA: 'Revocatoria de autorización',
+    RECLAMO: 'Reclamo',
+  };
 
   readonly form = this.fb.nonNullable.group({
     tipo: this.fb.nonNullable.control<TipoSolicitudDerechos>('CONSULTA', [
@@ -147,6 +166,28 @@ export class DerechosComponent {
   nueva(): void {
     this.radicado.set(null);
     this.error.set(null);
+    this.copiado.set(false);
+  }
+
+  async copiarRadicado(): Promise<void> {
+    const actual = this.radicado();
+    if (!actual || !navigator.clipboard) return;
+
+    try {
+      await navigator.clipboard.writeText(actual.radicado);
+      this.copiado.set(true);
+      setTimeout(() => this.copiado.set(false), 2500);
+    } catch {
+      this.copiado.set(false);
+    }
+  }
+
+  /** Un plazo vencido solo aplica mientras la solicitud siga abierta. */
+  plazoVencido(consulta: ConsultaDerechos): boolean {
+    if (['RESPONDIDA', 'CERRADA', 'RECHAZADA'].includes(consulta.estado)) {
+      return false;
+    }
+    return new Date(consulta.fechaLimite).getTime() < Date.now();
   }
 
   prepararConsulta(): void {

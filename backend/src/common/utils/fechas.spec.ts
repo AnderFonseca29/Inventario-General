@@ -58,4 +58,13 @@ describe('fechas (hallazgo T)', () => {
     const limite = sumarDiasHabiles(desde, 10);
     expect(limite.toISOString()).toBe('2026-01-30T04:59:59.999Z');
   });
+
+  it('tampoco cuenta los festivos nacionales', () => {
+    // Del lunes 5 al viernes 9 de enero hay 4 dias habiles; el 6 no es
+    // festivo porque se traslada al lunes 12 (Ley 51), que si se salta.
+    // El quinto dia habil es el martes 13.
+    const desde = aInstanteUtc('2026-01-05')!;
+    const limite = sumarDiasHabiles(desde, 5);
+    expect(limite.toISOString()).toBe('2026-01-14T04:59:59.999Z');
+  });
 });

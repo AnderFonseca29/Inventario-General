@@ -50,6 +50,25 @@
   text-decoration: underline;
 }
 
+.der-nav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+  font-size: 0.88rem;
+}
+
+.der-nav a {
+  color: #334155;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.der-nav a:hover {
+  color: #0f766e;
+  text-decoration: underline;
+}
+
 .der-main {
   width: 100%;
   max-width: 1180px;
@@ -198,6 +217,8 @@
 .campo textarea:focus-visible,
 .der-btn:focus-visible,
 .der-back:focus-visible,
+.der-nav a:focus-visible,
+.der-copiar:focus-visible,
 .der-doc:focus-visible,
 .der-footer a:focus-visible {
   outline: 3px solid #0ea5e9;
@@ -312,6 +333,26 @@
   font-size: 0.85rem;
 }
 
+.der-copiar {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  margin-bottom: 0.4rem;
+  padding: 0 0.8rem;
+  border: 1px solid #0f766e;
+  border-radius: 8px;
+  background: #fff;
+  color: #0f766e;
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.der-copiar:hover {
+  background: #f0fdfa;
+}
+
 .der-acciones {
   display: flex;
   flex-wrap: wrap;
@@ -370,6 +411,39 @@
   color: #166534;
   font-size: 0.88rem;
   overflow-wrap: anywhere;
+}
+
+.der-resultado a {
+  color: #166534;
+  font-weight: 700;
+}
+
+.der-vencido {
+  display: inline-block;
+  margin-left: 0.4rem;
+  padding: 0.1rem 0.45rem;
+  border-radius: 999px;
+  background: #fef3f2;
+  color: #b42318;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.der-respuesta {
+  margin-top: 0.6rem;
+  padding: 0.6rem 0.7rem;
+  border: 1px solid #bbf7d0;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.der-respuesta b {
+  color: #166534;
+  font-size: 0.85rem;
+}
+
+.der-respuesta p {
+  white-space: pre-line;
 }
 
 .der-footer {

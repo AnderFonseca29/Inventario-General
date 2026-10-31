@@ -25,18 +25,27 @@ export interface CrearSolicitudDerechos {
 export interface RadicadoDerechos {
   radicado: string;
   tipo: TipoSolicitudDerechos;
-  estado: string;
+  estado: EstadoSolicitudDerechos;
   fechaRecepcion: string;
   fechaLimite: string;
 }
 
+export type EstadoSolicitudDerechos =
+  | 'RECIBIDA'
+  | 'EN_TRAMITE'
+  | 'RESPONDIDA'
+  | 'CERRADA'
+  | 'RECHAZADA';
+
 export interface ConsultaDerechos {
   radicado: string;
   tipo: TipoSolicitudDerechos;
-  estado: string;
+  estado: EstadoSolicitudDerechos;
   fechaRecepcion: string;
   fechaLimite: string;
   fechaRespuesta: string | null;
+  /** Texto de la respuesta, disponible cuando el estado es RESPONDIDA o CERRADA. */
+  respuesta: string | null;
 }
 
 @Injectable({ providedIn: 'root' })

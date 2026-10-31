@@ -89,6 +89,35 @@ describe('DerechosService', () => {
     ).rejects.toBeInstanceOf(NotFoundException);
   });
 
+  it('devuelve la respuesta cuando la solicitud ya fue atendida', async () => {
+    const atendida = {
+      radicado: 'DER-20261028-ABCDEF12',
+      tipo: TipoSolicitudDerechos.CONSULTA,
+      estado: EstadoSolicitudDerechos.RESPONDIDA,
+      fechaRecepcion: new Date('2026-10-28T15:00:00.000Z'),
+      fechaLimite: new Date('2026-11-11T04:59:59.999Z'),
+      fechaRespuesta: new Date('2026-10-30T15:00:00.000Z'),
+      respuesta: 'Se remitió la información solicitada por correo.',
+    };
+    prisma.solicitudDerechos.findFirst.mockResolvedValue(atendida);
+
+    const resultado = await service.consultar(
+      'der-20261028-abcdef12',
+      'ana@example.com',
+    );
+
+    expect(resultado).toEqual(atendida);
+    expect(prisma.solicitudDerechos.findFirst).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: {
+          radicado: 'DER-20261028-ABCDEF12',
+          correo: { equals: 'ana@example.com', mode: 'insensitive' },
+        },
+        select: expect.objectContaining({ respuesta: true }),
+      }),
+    );
+  });
+
   it('responde y deja auditoria de la solicitud', async () => {
     const anterior = {
       id: '22222222-2222-2222-2222-222222222222',
