@@ -3,7 +3,7 @@
 > **BORRADOR: REVISIÓN OBLIGATORIA POR ABOGADO**
 > No son documentos definitivos. No sustituyen asesoría legal profesional.
 
-Estos documentos se publican como archivos Markdown descargables e imprimibles. La versión, fecha y hash de cada uno se registran en `MANIFEST.md`.
+Estos documentos se publican como archivos Markdown y se leen en la aplicación en `/legal` (índice) y `/legal/<clave>` (cada documento), con opción de imprimir o guardar en PDF. La versión, fecha y hash de cada uno se registran en `MANIFEST.md`.
 
 ## Índice
 
@@ -21,10 +21,11 @@ Estos documentos se publican como archivos Markdown descargables e imprimibles. 
 
 ## Cómo usarlos
 
-1. **Descargar:** abra la URL `/legal/<archivo>.md` o descárguelo desde el navegador.
-2. **Imprimir:** use la impresión del navegador; el texto está en formato lineal.
-3. **Aceptar:** la aceptación debe registrarse con versión, fecha, hash e identificador de sesión.
-4. **Actualizar:** cualquier cambio exige nueva versión, fecha y hash en `MANIFEST.md`.
+1. **Leer:** abra `/legal` en la aplicación o la URL directa `/legal/<clave>`.
+2. **Descargar:** el archivo Markdown original está en `/legal/<archivo>.md`.
+3. **Imprimir:** desde la página del documento, con el botón «Imprimir o guardar en PDF».
+4. **Aceptar:** la aceptación debe registrarse con versión, fecha, hash e identificador de sesión.
+5. **Actualizar:** cualquier cambio exige nueva versión, fecha y hash en `MANIFEST.md`, y ejecutar `npm run verificar:legal`.
 
 ## Datos pendientes
 

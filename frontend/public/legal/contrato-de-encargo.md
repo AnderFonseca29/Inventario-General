@@ -1,7 +1,7 @@
 # Contrato de Encargo de Tratamiento de Datos Personales (DPA)
 
 > **BORRADOR: REVISIÓN OBLIGATORIA POR ABOGADO**
-> Versión: 0.1-borrador · Fecha: 28 de octubre de 2026 · Idioma: español (Colombia)
+> Versión: 0.2-borrador · Fecha: 30 de octubre de 2026 · Idioma: español (Colombia)
 
 Este contrato regula el tratamiento de datos personales que el **Cliente** (Responsable) entrega a **Stockora** (Encargado) para usar la plataforma. No reemplaza la relación contractual principal entre las partes.
 

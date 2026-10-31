@@ -1,7 +1,7 @@
 # Aviso de Privacidad
 
 > **BORRADOR: REVISIÓN OBLIGATORIA POR ABOGADO**
-> Versión: 0.1-borrador · Fecha: 28 de octubre de 2026 · Idioma: español (Colombia)
+> Versión: 0.2-borrador · Fecha: 30 de octubre de 2026 · Idioma: español (Colombia)
 
 Este aviso se muestra antes de recolectar datos personales en formularios, registros, solicitudes de contacto y canales equivalentes.
 
@@ -32,11 +32,11 @@ No se usan para fines distintos sin su autorización.
 
 Usted puede conocer, actualizar, rectificar y suprimir sus datos, solicitar prueba de la autorización, revocarla y presentar quejas ante la Superintendencia de Industria y Comercio (SIC).
 
-Para ejercerlos escriba a **[DATO PENDIENTE: privacidad@dominio]** o a **[DATO PENDIENTE: pqr@dominio]**. Las consultas se responden en **10 días hábiles** y los reclamos en **15 días hábiles**.
+Para ejercerlos use el **[formulario de derechos y PQR](../derechos)**, que genera un radicado inmediato, o escriba a **[DATO PENDIENTE: privacidad@dominio]** o a **[DATO PENDIENTE: pqr@dominio]**. Las consultas se responden en **10 días hábiles** y los reclamos en **15 días hábiles**.
 
 ## 5. Política completa
 
-Consulte la **Política de Tratamiento de Datos Personales** en `/legal/politica-de-tratamiento-de-datos.md`.
+Consulte la **[Política de Tratamiento de Datos Personales](tratamiento)**.
 
 ## 6. Autorización
 

@@ -107,6 +107,17 @@
   text-decoration: none;
 }
 
+.footer__legal {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.footer__pendiente {
+  color: var(--brand-ochre-light);
+  font-size: 0.6875rem;
+}
+
 .footer__top app-brand-icon {
   width: 15px;
   height: 15px;

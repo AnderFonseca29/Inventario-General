@@ -2,7 +2,7 @@
 
 > **BORRADOR: REVISIÓN OBLIGATORIA POR ABOGADO**
 > Documento original de Stockora. No sustituye la revisión de un abogado con licencia en Colombia.
-> Versión: 0.1-borrador · Fecha: 28 de octubre de 2026 · Idioma: español (Colombia)
+> Versión: 0.2-borrador · Fecha: 30 de octubre de 2026 · Idioma: español (Colombia)
 
 ## 1. Identificación del Responsable
 
@@ -125,7 +125,7 @@ El Titular tiene derecho a:
 
 - Correo: [DATO PENDIENTE: privacidad@dominio]
 - Correo PQR: [DATO PENDIENTE: pqr@dominio]
-- Formulario: [DATO PENDIENTE: URL del formulario de derechos]
+- Formulario: `/derechos` (radicado inmediato)
 - Dirección física: [DATO PENDIENTE: dirección]
 
 ### 9.2 Procedimiento

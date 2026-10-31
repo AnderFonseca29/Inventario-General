@@ -1,0 +1,139 @@
+<app-encabezado-publico />
+
+<main class="ct-main brand-container" id="contenido">
+  <section class="ct-hero" aria-labelledby="titulo-contacto">
+    <p class="ct-kicker">Contacto</p>
+    <h1 id="titulo-contacto">Hablemos por el canal correcto</h1>
+    <p class="ct-lead">
+      Elige el canal según lo que necesites. Las solicitudes sobre datos personales se radican en el
+      formulario de derechos y reciben un número de radicado.
+    </p>
+  </section>
+
+  <div class="ct-grid">
+    <section class="ct-card" aria-labelledby="ct-derechos">
+      <h2 id="ct-derechos">Derechos y PQR</h2>
+      <p>
+        Acceso, corrección, supresión, revocatoria del consentimiento, consultas y reclamos. Recibes
+        un radicado al instante y respuesta dentro de los plazos legales: 10 días hábiles para
+        consultas y 15 para reclamos.
+      </p>
+      <a class="ct-btn" routerLink="/derechos">Radicar en el formulario</a>
+    </section>
+
+    <section class="ct-card" aria-labelledby="ct-privacidad">
+      <h2 id="ct-privacidad">Privacidad y datos personales</h2>
+      <p>Para asuntos de tratamiento de datos que no requieran radicado:</p>
+      @if (esPendiente(identidad.correoPrivacidad)) {
+        <p class="ct-pendiente">{{ identidad.correoPrivacidad }}</p>
+      } @else {
+        <p>
+          <a [href]="'mailto:' + identidad.correoPrivacidad">{{ identidad.correoPrivacidad }}</a>
+        </p>
+      }
+      <p class="ct-nota">
+        Lee la
+        <a routerLink="/legal/privacidad">Política de Privacidad</a> y la
+        <a routerLink="/legal/tratamiento">Política de Tratamiento</a>.
+      </p>
+    </section>
+
+    <section class="ct-card" aria-labelledby="ct-seguridad">
+      <h2 id="ct-seguridad">Seguridad</h2>
+      <p>
+        Reporta vulnerabilidades, accesos sospechosos o incidentes que afecten la confidencialidad
+        de tu información.
+      </p>
+      @if (esPendiente(identidad.correoSeguridad)) {
+        <p class="ct-pendiente">{{ identidad.correoSeguridad }}</p>
+      } @else {
+        <p>
+          <a [href]="'mailto:' + identidad.correoSeguridad">{{ identidad.correoSeguridad }}</a>
+        </p>
+      }
+      <p class="ct-nota">
+        Incluye fecha, módulo afectado y pasos para reproducir el problema. No envíes contraseñas ni
+        datos completos de terceros.
+      </p>
+    </section>
+
+    <section class="ct-card" aria-labelledby="ct-soporte">
+      <h2 id="ct-soporte">Soporte, planes y facturación</h2>
+      <p>
+        Dudas sobre tu cuenta, la prueba gratuita de 7 días, el plan contratado o el pago de la
+        membresía.
+      </p>
+      @if (esPendiente(identidad.correoContacto)) {
+        <p class="ct-pendiente">{{ identidad.correoContacto }}</p>
+      } @else {
+        <p>
+          <a [href]="'mailto:' + identidad.correoContacto">{{ identidad.correoContacto }}</a>
+        </p>
+      }
+      <p class="ct-nota">
+        Horario de atención:
+        @if (esPendiente(identidad.horario)) {
+          <span class="ct-pendiente">{{ identidad.horario }}</span>
+        } @else {
+          {{ identidad.horario }}
+        }
+      </p>
+    </section>
+  </div>
+
+  <section class="ct-identidad" aria-labelledby="ct-titulo-identidad">
+    <h2 id="ct-titulo-identidad">Quién responde</h2>
+
+    @if (borrador) {
+      <p class="ct-aviso" role="note">
+        Los datos de identificación del prestador están pendientes de completar. Se muestran como
+        marcadores para no publicar información inventada.
+      </p>
+    }
+
+    <dl class="ct-datos">
+      <div>
+        <dt>Razón social</dt>
+        <dd [class.ct-pendiente]="esPendiente(identidad.razonSocial)">
+          {{ identidad.razonSocial }}
+        </dd>
+      </div>
+      <div>
+        <dt>NIT</dt>
+        <dd [class.ct-pendiente]="esPendiente(identidad.nit)">{{ identidad.nit }}</dd>
+      </div>
+      <div>
+        <dt>Domicilio</dt>
+        <dd [class.ct-pendiente]="esPendiente(identidad.domicilio)">
+          {{ identidad.domicilio }}
+        </dd>
+      </div>
+      <div>
+        <dt>Matrícula mercantil</dt>
+        <dd [class.ct-pendiente]="esPendiente(identidad.matricula)">
+          {{ identidad.matricula }}
+        </dd>
+      </div>
+      <div>
+        <dt>Representante legal</dt>
+        <dd [class.ct-pendiente]="esPendiente(identidad.representante)">
+          {{ identidad.representante }}
+        </dd>
+      </div>
+      <div>
+        <dt>Teléfono</dt>
+        <dd [class.ct-pendiente]="esPendiente(identidad.telefono)">
+          {{ identidad.telefono }}
+        </dd>
+      </div>
+      <div>
+        <dt>Sitio web</dt>
+        <dd [class.ct-pendiente]="esPendiente(identidad.sitioWeb)">
+          {{ identidad.sitioWeb }}
+        </dd>
+      </div>
+    </dl>
+  </section>
+</main>
+
+<app-site-footer />

@@ -7,8 +7,8 @@ import { DocumentoLegal } from '@prisma/client';
  * backend no confia en la version que envia el navegador: siempre registra la
  * que esta definida aqui.
  */
-export const VERSION_DOCUMENTOS_LEGALES = '0.1-borrador';
-export const FECHA_DOCUMENTOS_LEGALES = '2026-10-28';
+export const VERSION_DOCUMENTOS_LEGALES = '0.2-borrador';
+export const FECHA_DOCUMENTOS_LEGALES = '2026-10-30';
 
 export interface DocumentoLegalVigente {
   documento: DocumentoLegal;
@@ -23,20 +23,20 @@ export const DOCUMENTOS_LEGALES_VIGENTES: DocumentoLegalVigente[] = [
     titulo: 'Términos y Condiciones',
     ruta: '/legal/terminos-y-condiciones.md',
     hash:
-      '903582a2104c9470fd8b3c85dd0938b4d787908c4159d0eddc16f62a22cad6a7',
+      '8352867ad633d1bb6eaae10120fd3a7ba59c068f88d56c06c1f1c86eebc91965',
   },
   {
     documento: DocumentoLegal.PRIVACIDAD,
     titulo: 'Política de Privacidad',
     ruta: '/legal/politica-de-privacidad.md',
     hash:
-      '3c9026d9e6fbb70cdd0782248ad34be5d6b6686b03593ae204413bd6f863d398',
+      'e9caa7a2abff0fc92b769e51c970a7c0d633c73cf922da87202261a51e1d6c0a',
   },
   {
     documento: DocumentoLegal.USO_ACEPTABLE,
     titulo: 'Uso Aceptable',
     ruta: '/legal/uso-aceptable.md',
     hash:
-      '9715c4a3e4bd8b5a48fd0abea583699060aeb581be90f763618154eb9d300918',
+      '793971d6364e17a67d666479d0a8f9c185e951b8451bd6fa2384c5d6c23db198',
   },
 ];

@@ -1,29 +1,31 @@
 # Registro de versiones y hashes
 
 > **BORRADOR: REVISIÓN OBLIGATORIA POR ABOGADO**
-> Fecha de cálculo: 28 de octubre de 2026 · Algoritmo: SHA-256
+> Fecha de cálculo: 30 de octubre de 2026 · Algoritmo: SHA-256
 
 Cualquier cambio en un documento exige: (1) nueva versión, (2) nueva fecha, (3) nuevo hash y (4) registro en este manifiesto. No se debe publicar un documento sin hash actualizado.
 
 | Documento | Versión | Fecha | SHA-256 | Estado | Rama |
 |---|---|---|---|---|---|
-| `aviso-de-privacidad.md` | 0.1-borrador | 2026-10-28 | `52736494699839315c173e5eb50ab1c8c281aa8e136b26282c949c2b55350a83` | Borrador | `feat/legal-documentos` |
-| `politica-de-privacidad.md` | 0.1-borrador | 2026-10-28 | `3c9026d9e6fbb70cdd0782248ad34be5d6b6686b03593ae204413bd6f863d398` | Borrador | `feat/legal-documentos` |
-| `politica-de-cookies.md` | 0.1-borrador | 2026-10-28 | `92c4751304f36e1719001efa001747215e049521cd689aed1ccd6691d8bfed66` | Borrador | `feat/legal-cookies` |
-| `contrato-de-encargo.md` | 0.1-borrador | 2026-10-28 | `9eb6e79006fe4084a4cc11ce69c8abea3b373114fb60e529a6704e83da8ccb2b` | Borrador | `feat/legal-encargado` |
-| `derechos-de-los-titulares.md` | 0.1-borrador | 2026-10-28 | `54fed2e1d9c561bb13eca9cee9b5ded37625106357b85b2645591d4057729ad2` | Borrador | `feat/legal-derechos-titulares` |
-| `politica-de-retencion.md` | 0.1-borrador | 2026-10-28 | `b5954a29092a086f950734e76c113a3bd9d4468709d1926ba6f3879a365eaa14` | Borrador | `feat/legal-retencion` |
-| `politica-de-tratamiento-de-datos.md` | 0.1-borrador | 2026-10-28 | `2ba5102565594c84f3f0c56f12429bea545b0ddc2074de87a1015b5652ce576b` | Borrador | `feat/legal-documentos` |
-| `terminos-y-condiciones.md` | 0.1-borrador | 2026-10-28 | `903582a2104c9470fd8b3c85dd0938b4d787908c4159d0eddc16f62a22cad6a7` | Borrador | `feat/legal-documentos` |
-| `uso-aceptable.md` | 0.1-borrador | 2026-10-28 | `9715c4a3e4bd8b5a48fd0abea583699060aeb581be90f763618154eb9d300918` | Borrador | `feat/legal-documentos` |
+| `aviso-de-privacidad.md` | 0.2-borrador | 2026-10-30 | `eeb9e847b6b30e5493a8d328d5621117eb2f8b4b720a539e2af4bd55ca062ea5` | Borrador | `feat/registro-directo` |
+| `contrato-de-encargo.md` | 0.2-borrador | 2026-10-30 | `6d65f343f4dddcd24fcd14798a45323a18dd58a8b59216d1cc862568586b3f84` | Borrador | `feat/registro-directo` |
+| `derechos-de-los-titulares.md` | 0.2-borrador | 2026-10-30 | `9122a31f572e2b1742448e56fd44c27ad8ca4b36a5e77c1b3fee42d02c8dbd31` | Borrador | `feat/registro-directo` |
+| `politica-de-cookies.md` | 0.2-borrador | 2026-10-30 | `1cc7e30c09c254b995f0916ce9267d499ebc9f98310edb8ad2ff8e37c7f295be` | Borrador | `feat/registro-directo` |
+| `politica-de-privacidad.md` | 0.2-borrador | 2026-10-30 | `e9caa7a2abff0fc92b769e51c970a7c0d633c73cf922da87202261a51e1d6c0a` | Borrador | `feat/registro-directo` |
+| `politica-de-retencion.md` | 0.2-borrador | 2026-10-30 | `0be4b36ec7bd916e358e01b250cf2d782ee19048abf81f42abf1f3a3837f17ea` | Borrador | `feat/registro-directo` |
+| `politica-de-tratamiento-de-datos.md` | 0.2-borrador | 2026-10-30 | `b2a9db942c5cb2727c982cd6ee63d5e8bc47622f0b934e2b062c42d1ae0dbf0d` | Borrador | `feat/registro-directo` |
+| `terminos-y-condiciones.md` | 0.2-borrador | 2026-10-30 | `8352867ad633d1bb6eaae10120fd3a7ba59c068f88d56c06c1f1c86eebc91965` | Borrador | `feat/registro-directo` |
+| `uso-aceptable.md` | 0.2-borrador | 2026-10-30 | `793971d6364e17a67d666479d0a8f9c185e951b8451bd6fa2384c5d6c23db198` | Borrador | `feat/registro-directo` |
 
 ## Pendientes de esta rama
 
 - Revisión por abogado con licencia en Colombia.
+- Completar la identidad legal del prestador (razón social, NIT, domicilio, correo, teléfono, matrícula y representante legal) en los nueve documentos y en `src/app/core/legal/documentos.ts`.
+- Actualizar los documentos del plan cuando exista facturación electrónica y pasarela de pagos habilitada.
 
 ## Aceptaciones electrónicas
 
-- Versión vigente: `0.1-borrador` (2026-10-28).
+- Versión vigente: `0.2-borrador` (2026-10-30).
 - Documentos exigidos al usuario: Términos y Condiciones, Política de Privacidad y Uso Aceptable.
 - Fuente de verdad de versión y hash: `backend/src/legal/documentos-legales.ts`.
 - Registro: tabla `aceptaciones_legales` con usuario, documento, versión, hash, método, IP, agente de usuario y fecha.
@@ -32,7 +34,9 @@ Cualquier cambio en un documento exige: (1) nueva versión, (2) nueva fecha, (3)
 
 ## Verificación
 
-Para recalcular:
+`npm run verificar:legal` comprueba que estos hashes coincidan con los archivos, que el catálogo del frontend y el backend registren la misma versión y que no se publique en modo `final` con datos pendientes.
+
+Para recalcular manualmente:
 
 ```powershell
 Get-ChildItem frontend/public/legal/*.md |

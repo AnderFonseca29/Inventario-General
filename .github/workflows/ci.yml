@@ -103,6 +103,9 @@ jobs:
       - name: Instalar dependencias
         run: npm ci
 
+      - name: Verificar documentos legales
+        run: npm run verificar:legal
+
       - name: Build
         run: npm run build
 

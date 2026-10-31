@@ -6,7 +6,7 @@ import {
   inject,
 } from '@angular/core';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
-import { provideRouter, withComponentInputBinding } from '@angular/router';
+import { provideRouter, withComponentInputBinding, withInMemoryScrolling } from '@angular/router';
 import { provideServiceWorker } from '@angular/service-worker';
 
 import { routes } from './app.routes';
@@ -17,7 +17,13 @@ import { errorInterceptor } from './core/interceptors/error.interceptor';
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
-    provideRouter(routes, withComponentInputBinding()),
+    provideRouter(
+      routes,
+      withComponentInputBinding(),
+      // Permite que los enlaces del pie (`/#planes`) funcionen desde cualquier
+      // página pública y no solo desde la portada.
+      withInMemoryScrolling({ anchorScrolling: 'enabled' }),
+    ),
     provideHttpClient(withInterceptors([authInterceptor, errorInterceptor])),
     provideAppInitializer(() => inject(AuthService).inicializar()),
     // PWA (hallazgo W): el service worker solo se registra en producción,

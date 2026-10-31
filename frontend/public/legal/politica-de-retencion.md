@@ -1,7 +1,7 @@
 # Política de Retención y Eliminación de Datos Personales
 
 > **BORRADOR: REVISIÓN OBLIGATORIA POR ABOGADO**
-> Versión: 0.1-borrador · Fecha: 28 de octubre de 2026 · Idioma: español (Colombia)
+> Versión: 0.2-borrador · Fecha: 30 de octubre de 2026 · Idioma: español (Colombia)
 
 Esta política define cuánto tiempo conserva Stockora los datos personales, cómo los elimina o anonimiza y qué evidencia queda de cada purga. Aplica a Stockora como **Responsable** de los datos de sus usuarios y como **Encargada** de los datos que las empresas-cliente cargan en la plataforma.
 

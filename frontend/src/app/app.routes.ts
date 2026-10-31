@@ -150,5 +150,32 @@ export const routes: Routes = [
         (m) => m.DerechosComponent,
       ),
   },
-  { path: '**', redirectTo: '' },
+  {
+    path: 'legal',
+    loadComponent: () =>
+      import('./features/legal/centro-legal.component').then(
+        (m) => m.CentroLegalComponent,
+      ),
+  },
+  {
+    path: 'legal/:clave',
+    loadComponent: () =>
+      import('./features/legal/documento-legal.component').then(
+        (m) => m.DocumentoLegalComponent,
+      ),
+  },
+  {
+    path: 'contacto',
+    loadComponent: () =>
+      import('./features/legal/contacto.component').then(
+        (m) => m.ContactoComponent,
+      ),
+  },
+  {
+    path: '**',
+    loadComponent: () =>
+      import('./features/no-encontrado/no-encontrado.component').then(
+        (m) => m.NoEncontradoComponent,
+      ),
+  },
 ];

@@ -488,25 +488,11 @@ import { BrandMarkComponent } from '../../shared/brand-mark.component';
                   </span>
                   <span>
                     He leído y acepto los
-                    <a
-                      href="legal/terminos-y-condiciones.md"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      >Términos y Condiciones</a
-                    >, la
-                    <a
-                      href="legal/politica-de-privacidad.md"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      >Política de Privacidad</a
-                    >, el
-                    <a href="legal/aviso-de-privacidad.md" target="_blank" rel="noopener noreferrer"
-                      >Aviso de Privacidad</a
-                    >
+                    <a routerLink="/legal/terminos">Términos y Condiciones</a>, la
+                    <a routerLink="/legal/privacidad">Política de Privacidad</a>, el
+                    <a routerLink="/legal/aviso">Aviso de Privacidad</a>
                     y el
-                    <a href="legal/uso-aceptable.md" target="_blank" rel="noopener noreferrer"
-                      >Uso Aceptable</a
-                    >.
+                    <a routerLink="/legal/uso-aceptable">Uso Aceptable</a>.
                   </span>
                 </label>
                 @if (form.controls.aceptaTerminos.touched && form.controls.aceptaTerminos.invalid) {

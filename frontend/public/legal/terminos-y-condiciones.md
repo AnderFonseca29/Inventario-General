@@ -1,7 +1,7 @@
 # Términos y Condiciones de Uso de Stockora
 
 > **BORRADOR: REVISIÓN OBLIGATORIA POR ABOGADO**
-> Versión: 0.1-borrador · Fecha: 28 de octubre de 2026 · Idioma: español (Colombia)
+> Versión: 0.2-borrador · Fecha: 30 de octubre de 2026 · Idioma: español (Colombia)
 
 ## 1. Identificación del prestador
 
@@ -35,10 +35,11 @@
 
 ## 4. Prueba gratuita
 
-1. La prueba gratuita dura **3 días calendario**, más **1 día de gracia** para regularizar el pago.
+1. Al completar el registro público se crea la cuenta de inmediato, sin aprobación manual, con una prueba gratuita de **7 días calendario** en el plan **Medio**.
 2. Durante la prueba, el servicio puede tener limitaciones funcionales o de capacidad.
-3. Al finalizar la prueba, si no hay pago, el acceso se suspende. Los datos se conservan por el plazo de retención aplicable.
+3. Al finalizar la prueba, si no hay pago, se aplican los **15 días de gracia** del plan antes de suspender el acceso. Los datos se conservan por el plazo de retención aplicable.
 4. La prueba es por empresa y no es acumulable con otras promociones, salvo indicación expresa.
+5. El Cliente puede contratar un plan pagado en cualquier momento durante la prueba; el cobro inicia en la fecha de contratación.
 
 ## 5. Planes y precios
 
@@ -58,7 +59,7 @@
 1. El pago se realiza por periodo (mensual o anual) mediante la pasarela habilitada (**Wompi** u otra).
 2. Stockora no almacena datos completos de tarjetas; los procesa la pasarela.
 3. El Cliente autoriza el cobro del periodo contratado y, si aplica, la renovación automática, que puede desactivar antes del siguiente ciclo.
-4. Si el pago no se realiza, Stockora puede aplicar el día de gracia y luego suspender el servicio.
+4. Si el pago no se realiza, Stockora puede aplicar los **15 días de gracia** del plan y luego suspender el servicio.
 5. Los pagos realizados no son reembolsables por periodos ya consumidos, salvo los derechos que la ley reconozca al consumidor.
 6. **[VERIFICAR: integración y habilitación real de Wompi. Mientras no esté activa, no se realizarán cobros.]**
 
@@ -73,7 +74,7 @@
 
 ## 8. Uso aceptable
 
-El Cliente se obliga a cumplir la **Política de Uso Aceptable** (`/legal/uso-aceptable.md`). En particular, no puede:
+El Cliente se obliga a cumplir la **[Política de Uso Aceptable](uso-aceptable)**. En particular, no puede:
 
 - Usar el servicio para fines ilícitos, fraudulentos o contrarios a la ley.
 - Cargar datos sensibles o de menores sin base legal.
@@ -127,7 +128,7 @@ El Cliente indemnizará a Stockora por reclamos de terceros derivados de: (i) da
 
 1. Stockora puede modificar estos términos. Los cambios sustanciales se comunican con al menos **15 días** de antelación.
 2. Si el Cliente no acepta, puede terminar el contrato antes de la entrada en vigencia.
-3. La versión, fecha y hash se registran en `/legal/MANIFEST.md`.
+3. La versión, fecha y hash se registran en el manifiesto de versiones que se publica junto con los documentos legales.
 
 ## 16. Ley aplicable y controversias
 
@@ -138,6 +139,7 @@ El Cliente indemnizará a Stockora por reclamos de terceros derivados de: (i) da
 
 ## 17. PQR y contacto
 
+- Formulario de derechos y PQR: `/derechos` (genera radicado inmediato)
 - PQR: [DATO PENDIENTE: pqr@dominio]
 - Protección de datos: [DATO PENDIENTE: privacidad@dominio]
 - Seguridad: [DATO PENDIENTE: seguridad@dominio]

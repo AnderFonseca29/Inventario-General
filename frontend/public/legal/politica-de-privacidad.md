@@ -1,7 +1,7 @@
 # Política de Privacidad
 
 > **BORRADOR: REVISIÓN OBLIGATORIA POR ABOGADO**
-> Versión: 0.1-borrador · Fecha: 28 de octubre de 2026 · Idioma: español (Colombia)
+> Versión: 0.2-borrador · Fecha: 30 de octubre de 2026 · Idioma: español (Colombia)
 
 Esta política explica, en lenguaje claro, cómo Stockora trata los datos personales de quienes visitan el sitio, crean una cuenta o usan la plataforma.
 
@@ -23,7 +23,7 @@ Para peticiones, quejas y reclamos: [DATO PENDIENTE: pqr@dominio].
 
 - Datos técnicos: dirección IP, tipo de navegador, dispositivo, páginas visitadas y fecha/hora.
 - Cookies analíticas y publicitarias **solo si usted las acepta** en el banner de cookies.
-- Datos que usted envía voluntariamente en el formulario de contacto.
+- Datos que usted envía voluntariamente en el formulario público de derechos y PQR.
 
 ### 2.2 Si crea una cuenta o usa la plataforma
 
@@ -71,7 +71,7 @@ Usamos proveedores en Estados Unidos (por ejemplo, Render, Vercel y GitHub) y se
 
 ## 7. Cuánto tiempo conservamos
 
-Conservamos los datos mientras sean necesarios para la finalidad y para cumplir obligaciones legales. Los plazos específicos están en la **Política de Retención** (`/legal/politica-de-retencion.md`). Al vencer el plazo, suprimimos o anonimizamos el dato.
+Conservamos los datos mientras sean necesarios para la finalidad y para cumplir obligaciones legales. Los plazos específicos están en la **[Política de Retención](retencion)**. Al vencer el plazo, suprimimos o anonimizamos el dato.
 
 ## 8. Sus derechos
 
@@ -84,7 +84,7 @@ Usted puede:
 - Presentar quejas ante la SIC.
 - Acceder gratuitamente al menos una vez al mes.
 
-**Cómo ejercerlos:** escriba a [DATO PENDIENTE: privacidad@dominio] con nombre, documento, correo y descripción. Verificaremos su identidad. Las consultas se responden en **10 días hábiles** y los reclamos en **15 días hábiles**.
+**Cómo ejercerlos:** use el **[formulario de derechos y PQR](../derechos)**, que genera un radicado inmediato, o escriba a [DATO PENDIENTE: privacidad@dominio] con nombre, documento, correo y descripción. Verificaremos su identidad. Las consultas se responden en **10 días hábiles** y los reclamos en **15 días hábiles**.
 
 ## 9. Seguridad
 
@@ -92,7 +92,7 @@ Aplicamos medidas técnicas y organizativas: control de acceso por roles, cifrad
 
 ## 10. Cookies
 
-Usamos cookies necesarias para el funcionamiento y, solo con su consentimiento, cookies analíticas y publicitarias en páginas públicas. En `/app` no ejecutamos GA4 ni Meta Pixel. Ver **Política de Cookies** (`/legal/politica-de-cookies.md`).
+Usamos cookies necesarias para el funcionamiento y, solo con su consentimiento, cookies analíticas y publicitarias en páginas públicas. En `/app` no ejecutamos GA4 ni Meta Pixel. Ver la **[Política de Cookies](cookies)**.
 
 ## 11. Menores de edad
 
@@ -100,7 +100,7 @@ El servicio es para mayores de 18 años o para personas jurídicas representadas
 
 ## 12. Cambios
 
-Podemos actualizar esta política. Los cambios sustanciales se comunicarán antes de aplicarse. La versión, fecha y hash se registran en `/legal/MANIFEST.md`.
+Podemos actualizar esta política. Los cambios sustanciales se comunicarán antes de aplicarse. La versión, fecha y hash se registran en el manifiesto de versiones que se publica junto con los documentos legales.
 
 ## 13. Contacto y autoridad
 

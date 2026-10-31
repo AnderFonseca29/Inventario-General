@@ -1,0 +1,54 @@
+<app-encabezado-publico />
+
+<main class="legal-main brand-container" id="contenido">
+  <section class="legal-hero" aria-labelledby="titulo-legal">
+    <p class="legal-kicker">Información legal</p>
+    <h1 id="titulo-legal">Centro legal</h1>
+    <p class="legal-lead">
+      Aquí están los documentos que rigen el uso de Stockora y el tratamiento de datos personales.
+      Puedes leerlos en pantalla, imprimirlos o guardarlos.
+    </p>
+    <p class="legal-meta">Versión {{ version }} · Actualizados el {{ fecha }}</p>
+
+    @if (borrador) {
+      <p class="legal-draft" role="note">
+        <strong>Borrador en revisión.</strong>
+        Los documentos están pendientes de revisión por un abogado con licencia en Colombia y de
+        completar los datos de identificación del prestador.
+      </p>
+    }
+  </section>
+
+  <div class="legal-acciones">
+    <a class="legal-btn" routerLink="/derechos">Ejercer mis derechos</a>
+    <a class="legal-btn legal-btn--sec" routerLink="/contacto">Canales de contacto</a>
+  </div>
+
+  @for (grupo of grupos; track grupo) {
+    <section class="legal-grupo" [attr.aria-labelledby]="'grupo-' + $index">
+      <h2 [id]="'grupo-' + $index">{{ grupo }}</h2>
+      <ul class="legal-lista">
+        @for (documento of documentosPorGrupo(grupo); track documento.clave) {
+          <li>
+            <a class="legal-card" [routerLink]="['/legal', documento.clave]">
+              <span class="legal-card__titulo">{{ documento.titulo }}</span>
+              <span class="legal-card__resumen">{{ documento.resumen }}</span>
+              <span class="legal-card__accion">Leer documento →</span>
+            </a>
+          </li>
+        }
+      </ul>
+    </section>
+  }
+
+  <section class="legal-nota" aria-labelledby="titulo-nota">
+    <h2 id="titulo-nota">¿Necesitas el texto completo o una copia?</h2>
+    <p>
+      Cada documento indica su versión y su fecha. Si necesitas una copia para un proceso interno,
+      puedes imprimirla desde el navegador o escribir a
+      <a routerLink="/contacto">nuestros canales de contacto</a>.
+    </p>
+  </section>
+</main>
+
+<app-site-footer />

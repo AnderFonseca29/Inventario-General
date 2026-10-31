@@ -1,7 +1,7 @@
 # Derechos de los Titulares de Datos Personales
 
 > **BORRADOR: REVISIÓN OBLIGATORIA POR ABOGADO**
-> Versión: 0.1-borrador · Fecha: 28 de octubre de 2026 · Idioma: español (Colombia)
+> Versión: 0.2-borrador · Fecha: 30 de octubre de 2026 · Idioma: español (Colombia)
 
 Este documento explica cómo ejercer los derechos previstos en la Ley 1581 de 2012 y en el Capítulo 25 del Decreto 1074 de 2015.
 
@@ -42,7 +42,7 @@ El Titular puede:
 
 Puede presentar la solicitud por cualquiera de estos medios:
 
-1. Formulario web: `/derechos` (recomendado; genera radicado inmediato).
+1. Formulario web: **[formulario de derechos y PQR](../derechos)** (recomendado; genera radicado inmediato).
 2. Correo: [DATO PENDIENTE: privacidad@dominio].
 3. Correo PQR: [DATO PENDIENTE: pqr@dominio].
 4. Escrito físico: [DATO PENDIENTE: dirección], con copia del documento de identidad.
