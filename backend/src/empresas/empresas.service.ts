@@ -7,11 +7,7 @@ import { Prisma } from '@prisma/client';
 import * as argon2 from 'argon2';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditoriaService } from '../auditoria/auditoria.service';
-import {
-  PERMISOS_POR_ROL_SISTEMA,
-  ROLES_SISTEMA,
-} from '../common/constants/permisos';
-import { MODULOS_SISTEMA } from '../common/constants/modulos';
+import { AprovisionamientoService } from './aprovisionamiento.service';
 import { CreateEmpresaDto, UpdateEmpresaDto } from './dto/empresa.dto';
 
 @Injectable()
@@ -19,54 +15,8 @@ export class EmpresasService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly auditoria: AuditoriaService,
+    private readonly aprovisionamiento: AprovisionamientoService,
   ) {}
-
-  private async crearRolesSistema(
-    tx: Prisma.TransactionClient,
-    empresaId: string,
-  ) {
-    const permisos = await tx.permiso.findMany({
-      select: { id: true, codigo: true },
-    });
-    const porCodigo = new Map(permisos.map((p) => [p.codigo, p.id]));
-
-    for (const [nombreRol, codigos] of Object.entries(
-      PERMISOS_POR_ROL_SISTEMA,
-    )) {
-      const permisoIds = codigos
-        .map((codigo) => porCodigo.get(codigo))
-        .filter((id): id is string => Boolean(id));
-
-      await tx.rol.create({
-        data: {
-          empresaId,
-          nombre: nombreRol,
-          esSistema: true,
-          permisos: { create: permisoIds.map((permisoId) => ({ permisoId })) },
-        },
-      });
-    }
-  }
-
-  private async crearModulosSistema(
-    tx: Prisma.TransactionClient,
-    empresaId: string,
-  ) {
-    await tx.modulo.createMany({
-      data: MODULOS_SISTEMA.map((modulo) => ({
-        empresaId,
-        clave: modulo.clave,
-        nombre: modulo.nombre,
-        descripcion: modulo.descripcion,
-        icono: modulo.icono,
-        orden: modulo.orden,
-        ruta: modulo.ruta,
-        tipo: 'SISTEMA' as const,
-        implementado: modulo.implementado,
-      })),
-      skipDuplicates: true,
-    });
-  }
 
   async crear(dto: CreateEmpresaDto, actorId: string, ip?: string) {
     const email = dto.admin.email.toLowerCase();
@@ -87,45 +37,29 @@ export class EmpresasService {
 
     const passwordHash = await argon2.hash(dto.admin.password);
 
-    const empresa = await this.prisma.$transaction(async (tx) => {
-      const nueva = await tx.empresa.create({
-        data: {
+    const resultado = await this.prisma.$transaction((tx) =>
+      this.aprovisionamiento.crear(
+        tx,
+        {
           nombre: dto.nombre,
+          razonSocial: dto.razonSocial ?? dto.nombre,
           nit: dto.nit,
-          razonSocial: dto.razonSocial,
-          email: dto.email,
-          telefono: dto.telefono,
           direccion: dto.direccion,
+          telefono: dto.telefono,
+          email: dto.email,
         },
-      });
-
-      await this.crearRolesSistema(tx, nueva.id);
-      await this.crearModulosSistema(tx, nueva.id);
-
-      const rolAdmin = await tx.rol.findFirst({
-        where: { empresaId: nueva.id, nombre: ROLES_SISTEMA.ADMINISTRADOR },
-      });
-
-      const admin = await tx.usuario.create({
-        data: {
-          empresaId: nueva.id,
+        {
           nombre: dto.admin.nombre,
           email,
           passwordHash,
-          esSuperAdmin: false,
-          // El administrador creado con la empresa es su dueno: es la unica
-          // cuenta autorizada para el modulo de membresias (pago).
-          esPropietario: true,
+          // El alta manual del superadministrador no pasa por verificación
+          // de correo: la cuenta se entrega ya activa.
+          emailVerificado: true,
         },
-      });
-
-      if (rolAdmin) {
-        await tx.usuarioRol.create({
-          data: { usuarioId: admin.id, rolId: rolAdmin.id },
-        });
-      }
-
-      return nueva;
+      ),
+    );
+    const empresa = await this.prisma.empresa.findUniqueOrThrow({
+      where: { id: resultado.empresa.id },
     });
 
     await this.auditoria.registrar({

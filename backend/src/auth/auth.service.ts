@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   HttpException,
   Injectable,
   UnauthorizedException,
@@ -7,15 +8,26 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import type { JwtSignOptions } from '@nestjs/jwt';
+import { Prisma } from '@prisma/client';
 import { createHash, randomUUID } from 'crypto';
 import * as argon2 from 'argon2';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditoriaService } from '../auditoria/auditoria.service';
 import { PermisosCacheService } from '../common/cache/permisos-cache.service';
 import { AuthenticatedUser } from '../common/types/authenticated-user';
+import {
+  DIAS_PRUEBA,
+  AprovisionamientoService,
+} from '../empresas/aprovisionamiento.service';
+import {
+  DOCUMENTOS_LEGALES_VIGENTES,
+  VERSION_DOCUMENTOS_LEGALES,
+} from '../legal/documentos-legales';
 import { LoginDto } from './dto/login.dto';
 import { RefreshDto } from './dto/refresh.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
+import { RegistroDto } from './dto/registro.dto';
+import { CaptchaService } from './captcha.service';
 
 @Injectable()
 export class AuthService {
@@ -25,6 +37,8 @@ export class AuthService {
     private readonly config: ConfigService,
     private readonly auditoria: AuditoriaService,
     private readonly permisosCache: PermisosCacheService,
+    private readonly aprovisionamiento: AprovisionamientoService,
+    private readonly captcha: CaptchaService,
   ) {}
 
   private hashToken(token: string): string {
@@ -250,6 +264,108 @@ export class AuthService {
       this.registrarIntento(email, ip, true),
     ]);
 
+    return { ...tokens, user };
+  }
+
+  /**
+   * Registro público: crea empresa, propietario y prueba en una transacción y
+   * devuelve la misma forma que el login, para que el cliente entre directo.
+   */
+  async registro(dto: RegistroDto, ip?: string, userAgent?: string) {
+    await this.captcha.verificar(dto.captchaToken, ip);
+
+    const email = dto.email.trim().toLowerCase();
+    const correoDatos = dto.correoDatos.trim().toLowerCase();
+
+    const existe = await this.prisma.usuario.findUnique({
+      where: { email },
+      select: { id: true },
+    });
+    if (existe) {
+      throw new ConflictException(
+        'Ese correo ya tiene una cuenta. Inicia sesión o recupera tu contraseña.',
+      );
+    }
+
+    const passwordHash = await argon2.hash(dto.password);
+    // Sin proveedor de correo configurado no se puede verificar la cuenta:
+    // se deja habilitada para no bloquear a usuarios reales.
+    const correoHabilitado =
+      this.config.get<string>('EMAIL_ENABLED') === 'true';
+
+    let alta: Awaited<ReturnType<AprovisionamientoService['crear']>>;
+    try {
+      alta = await this.prisma.$transaction(async (tx) => {
+        const creada = await this.aprovisionamiento.crear(
+          tx,
+          {
+            nombre: dto.nombre,
+            razonSocial: dto.razonSocial,
+            nit: dto.nit ?? null,
+            matricula: dto.matricula ?? null,
+            direccion: dto.direccion,
+            ciudad: dto.ciudad,
+            departamento: dto.departamento,
+            representante: dto.representante,
+            telefono: dto.telefono ?? null,
+            correoDatos,
+            sitioWeb: dto.sitioWeb ?? null,
+            email: correoDatos,
+          },
+          {
+            nombre: dto.nombreAdmin,
+            email,
+            passwordHash,
+            emailVerificado: !correoHabilitado,
+          },
+        );
+
+        // La versión y el hash los fija el servidor: el navegador solo envía
+        // que aceptó.
+        await tx.aceptacionLegal.createMany({
+          data: DOCUMENTOS_LEGALES_VIGENTES.map((documento) => ({
+            usuarioId: creada.administrador.id,
+            documento: documento.documento,
+            version: VERSION_DOCUMENTOS_LEGALES,
+            hash: documento.hash,
+            metodo: 'REGISTRO' as const,
+            ip,
+            userAgent,
+          })),
+          skipDuplicates: true,
+        });
+
+        return creada;
+      });
+    } catch (error) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2002'
+      ) {
+        throw new ConflictException(
+          'El correo o el NIT ya están registrados. Si es tu empresa, inicia sesión.',
+        );
+      }
+      throw error;
+    }
+
+    await this.auditoria.registrar({
+      empresaId: alta.empresa.id,
+      usuarioId: alta.administrador.id,
+      accion: 'empresa.registro_publico',
+      entidad: 'Empresa',
+      entidadId: alta.empresa.id,
+      datosNuevos: {
+        nombre: alta.empresa.nombre,
+        nit: alta.empresa.nit,
+        plan: alta.plan.codigo,
+        diasPrueba: DIAS_PRUEBA,
+      },
+      ip,
+    });
+
+    const user = await this.loadAuthenticatedUser(alta.administrador.id);
+    const tokens = await this.emitirTokens(user, ip, userAgent);
     return { ...tokens, user };
   }
 

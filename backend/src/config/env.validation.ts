@@ -8,6 +8,9 @@ export interface AppEnv {
   JWT_REFRESH_EXPIRES_IN: string;
   CORS_ORIGINS: string;
   PERMISOS_CACHE_TTL_SEGUNDOS: number;
+  EMAIL_ENABLED: string;
+  TURNSTILE_ENABLED: string;
+  TURNSTILE_SECRET_KEY?: string;
 }
 
 export function validateEnv(config: Record<string, unknown>): AppEnv {
@@ -46,5 +49,10 @@ export function validateEnv(config: Record<string, unknown>): AppEnv {
     PERMISOS_CACHE_TTL_SEGUNDOS: Number(
       config.PERMISOS_CACHE_TTL_SEGUNDOS ?? 60,
     ),
+    // Banderas de integraciones opcionales: por defecto apagadas para no
+    // dar por hecho un servicio que no está configurado.
+    EMAIL_ENABLED: (config.EMAIL_ENABLED as string) ?? 'false',
+    TURNSTILE_ENABLED: (config.TURNSTILE_ENABLED as string) ?? 'false',
+    TURNSTILE_SECRET_KEY: config.TURNSTILE_SECRET_KEY as string | undefined,
   };
 }

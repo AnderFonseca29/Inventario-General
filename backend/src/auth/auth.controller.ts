@@ -5,6 +5,7 @@ import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { RefreshDto } from './dto/refresh.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
+import { RegistroDto } from './dto/registro.dto';
 import { Public } from '../common/decorators/public.decorator';
 import { RequiereEmpresa } from '../common/decorators/permisos.decorator';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
@@ -24,6 +25,14 @@ export class AuthController {
   @Throttle({ default: { limit: 10, ttl: 60000 } })
   login(@Body() dto: LoginDto, @Req() req: Request) {
     return this.authService.login(dto, req.ip, req.headers['user-agent']);
+  }
+
+  @Public()
+  @Post('registro')
+  // Registro público: límite estricto por IP para frenar altas masivas.
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
+  registro(@Body() dto: RegistroDto, @Req() req: Request) {
+    return this.authService.registro(dto, req.ip, req.headers['user-agent']);
   }
 
   @Public()

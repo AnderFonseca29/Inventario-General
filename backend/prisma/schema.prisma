@@ -215,6 +215,14 @@ model Empresa {
   email       String?
   telefono    String?
   direccion   String?
+  // Datos que el cliente ingresa en el registro y alimentan el contrato de
+  // tratamiento de datos y el pie del sitio.
+  ciudad        String?
+  departamento  String?
+  representante String?
+  matricula     String?
+  correoDatos   String?
+  sitioWeb      String?
   estado      EstadoEmpresa @default(ACTIVA)
   createdAt   DateTime      @default(now()) @db.Timestamptz(3)
   updatedAt   DateTime      @updatedAt @db.Timestamptz(3)
@@ -325,6 +333,10 @@ model Usuario {
   // Dueno de la empresa: unica cuenta autorizada para ver y administer el
   // modulo de membresias (pago de la suscripcion) y los reportes del modulo.
   esPropietario Boolean  @default(false)
+  // Se pone en false cuando EMAIL_ENABLED=true y la cuenta debe confirmar el
+  // correo antes de operar. Sin proveedor de correo configurado queda en true
+  // para no bloquear a los usuarios reales.
+  emailVerificado Boolean @default(true)
   ultimoLogin  DateTime? @db.Timestamptz(3)
   createdAt    DateTime  @default(now()) @db.Timestamptz(3)
   updatedAt    DateTime  @updatedAt @db.Timestamptz(3)

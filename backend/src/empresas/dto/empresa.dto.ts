@@ -47,6 +47,30 @@ export class CreateEmpresaDto {
   @IsString()
   direccion?: string;
 
+  @IsOptional()
+  @IsString()
+  ciudad?: string;
+
+  @IsOptional()
+  @IsString()
+  departamento?: string;
+
+  @IsOptional()
+  @IsString()
+  representante?: string;
+
+  @IsOptional()
+  @IsString()
+  matricula?: string;
+
+  @IsOptional()
+  @IsEmail()
+  correoDatos?: string;
+
+  @IsOptional()
+  @IsString()
+  sitioWeb?: string;
+
   @ValidateNested()
   @Type(() => AdminEmpresaDto)
   admin!: AdminEmpresaDto;
@@ -77,6 +101,30 @@ export class UpdateEmpresaDto {
   @IsOptional()
   @IsString()
   direccion?: string;
+
+  @IsOptional()
+  @IsString()
+  ciudad?: string;
+
+  @IsOptional()
+  @IsString()
+  departamento?: string;
+
+  @IsOptional()
+  @IsString()
+  representante?: string;
+
+  @IsOptional()
+  @IsString()
+  matricula?: string;
+
+  @IsOptional()
+  @IsEmail()
+  correoDatos?: string;
+
+  @IsOptional()
+  @IsString()
+  sitioWeb?: string;
 }
 
 export class UpdateEstadoEmpresaDto {
