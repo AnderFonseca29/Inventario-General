@@ -3,6 +3,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { SeoService } from '../../core/services/seo.service';
+import { AuthService } from '../../core/services/auth.service';
 import { contrasenaSeguraValidator } from '../../core/validators/contrasena.validator';
 import { evaluarContrasena, LONGITUD_MINIMA } from '../../core/utils/contrasena';
 import { BrandIconComponent } from '../../shared/brand-icon.component';
@@ -27,8 +28,8 @@ import { BrandMarkComponent } from '../../shared/brand-mark.component';
             Empieza con una operación ordenada desde el primer movimiento.
           </p>
           <p class="auth__aside-text">
-            Registra los datos de tu empresa y la persona administradora. La solicitud queda lista
-            para revisión.
+            Registra los datos de tu empresa y la persona administradora. La cuenta queda activa
+            con 7 días de prueba.
           </p>
 
           <ul class="auth__points">
@@ -66,19 +67,19 @@ import { BrandMarkComponent } from '../../shared/brand-mark.component';
           </a>
 
           <div class="auth__header">
-            <span class="auth__kicker">Solicitud de acceso</span>
+            <span class="auth__kicker">Registro de empresa</span>
             <h1>Crear cuenta</h1>
-            <p>Cuéntanos de tu empresa para preparar el alta.</p>
+            <p>Completa los datos de tu empresa y empieza la prueba de 7 días.</p>
           </div>
 
           @if (enviado()) {
             <div class="auth__alert auth__alert--success" role="status" aria-live="polite">
               <app-brand-icon name="check" class="brand-icon" />
-              <span>Solicitud enviada. Un administrador revisará tu registro.</span>
+              <span>Cuenta creada. Te estamos llevando a tu panel.</span>
             </div>
             <div class="auth__success-actions">
-              <a class="brand-btn brand-btn--primary brand-btn--block" routerLink="/login">
-                Volver a iniciar sesión
+              <a class="brand-btn brand-btn--primary brand-btn--block" routerLink="/app/dashboard">
+                Ir a mi panel
               </a>
               <a class="brand-btn brand-btn--secondary brand-btn--block" routerLink="/">
                 Ir al inicio
@@ -525,7 +526,7 @@ import { BrandMarkComponent } from '../../shared/brand-mark.component';
                   <span class="auth__spinner" aria-hidden="true"></span>
                   Enviando…
                 } @else {
-                  Solicitar acceso
+                  Crear cuenta y empezar
                   <app-brand-icon name="arrow" class="brand-icon" />
                 }
               </button>
@@ -548,6 +549,7 @@ export class RegistroComponent {
   private readonly fb = inject(FormBuilder);
   private readonly router = inject(Router);
   private readonly seo = inject(SeoService);
+  private readonly auth = inject(AuthService);
 
   readonly anio = new Date().getFullYear();
   readonly cargando = signal(false);
@@ -606,7 +608,7 @@ export class RegistroComponent {
     this.seo.setPagina({
       titulo: 'Crear cuenta | Stockora',
       descripcion:
-        'Solicita el alta de tu empresa en Stockora y empieza a ordenar inventario, producción y membresías.',
+        'Crea la cuenta de tu empresa en Stockora: 7 días de prueba para ordenar inventario, producción y membresías.',
       ruta: '/registro',
     });
   }
@@ -621,10 +623,43 @@ export class RegistroComponent {
     this.cargando.set(true);
     this.error.set(null);
 
-    // Simulación de envío: el alta real la gestiona el superadministrador.
-    setTimeout(() => {
-      this.cargando.set(false);
-      this.enviado.set(true);
-    }, 600);
+    const v = this.form.getRawValue();
+    const opcional = (valor: string) => {
+      const limpio = valor.trim();
+      return limpio.length > 0 ? limpio : undefined;
+    };
+
+    this.auth
+      .registro({
+        razonSocial: v.razonSocial.trim(),
+        nombre: v.nombreEmpresa.trim(),
+        nit: opcional(v.nit),
+        matricula: opcional(v.matricula),
+        direccion: v.direccion.trim(),
+        ciudad: v.ciudad.trim(),
+        departamento: v.departamento.trim(),
+        representante: v.representante.trim(),
+        telefono: opcional(v.telefono),
+        correoDatos: v.correoDatos.trim(),
+        sitioWeb: opcional(v.sitioWeb),
+        nombreAdmin: v.nombreAdmin.trim(),
+        email: v.email.trim(),
+        password: v.password,
+        aceptaTerminos: v.aceptaTerminos,
+      })
+      .subscribe({
+        next: () => {
+          this.cargando.set(false);
+          this.enviado.set(true);
+          void this.router.navigate(['/app/dashboard']);
+        },
+        error: (err) => {
+          this.cargando.set(false);
+          const msg =
+            err?.error?.message ??
+            'No pudimos crear la cuenta. Revisa los datos e intenta de nuevo.';
+          this.error.set(Array.isArray(msg) ? msg.join(', ') : msg);
+        },
+      });
   }
 }

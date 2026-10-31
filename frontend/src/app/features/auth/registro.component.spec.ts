@@ -1,12 +1,21 @@
 import { TestBed } from '@angular/core/testing';
-import { provideRouter } from '@angular/router';
+import { provideHttpClient } from '@angular/common/http';
+import {
+  HttpTestingController,
+  provideHttpClientTesting,
+} from '@angular/common/http/testing';
+import { provideRouter, Router } from '@angular/router';
 import { RegistroComponent } from './registro.component';
 
 describe('RegistroComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [RegistroComponent],
-      providers: [provideRouter([])],
+      providers: [
+        provideRouter([]),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+      ],
     }).compileComponents();
   });
 
@@ -127,6 +136,89 @@ describe('RegistroComponent', () => {
     const componente = fixture.componentInstance;
     componente.enviar();
     expect(componente.error()).toContain('Revisa los campos obligatorios');
+    expect(componente.enviado()).toBe(false);
+  });
+
+  it('envia al backend solo los datos capturados', () => {
+    const fixture = crear();
+    const componente = fixture.componentInstance;
+    vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+
+    componente.form.patchValue({
+      ...empresaValida,
+      ...adminValido,
+      aceptaTerminos: true,
+    });
+    componente.enviar();
+
+    const http = TestBed.inject(HttpTestingController);
+    const req = http.expectOne((r) => r.url.endsWith('/auth/registro'));
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toMatchObject({
+      razonSocial: 'Distribuidora El Roble S.A.S.',
+      correoDatos: 'privacidad@elroble.com',
+      email: 'ana@empresa.com',
+      aceptaTerminos: true,
+    });
+    expect(req.request.body).not.toHaveProperty('esPropietario');
+    expect(req.request.body).not.toHaveProperty('plan');
+    expect(req.request.body).not.toHaveProperty('rol');
+
+    req.flush({
+      accessToken: 'a',
+      refreshToken: 'r',
+      user: {
+        id: 'u1',
+        email: 'ana@empresa.com',
+        empresaId: 'e1',
+        esSuperAdmin: false,
+        esPropietario: true,
+        permisos: [],
+      },
+    });
+    expect(componente.enviado()).toBe(true);
+  });
+
+  it('omite los campos opcionales vacios', () => {
+    const fixture = crear();
+    const componente = fixture.componentInstance;
+    vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+
+    componente.form.patchValue({
+      ...empresaValida,
+      ...adminValido,
+      nit: '',
+      matricula: '',
+      telefono: '',
+      sitioWeb: '',
+      aceptaTerminos: true,
+    });
+    componente.enviar();
+
+    const http = TestBed.inject(HttpTestingController);
+    const req = http.expectOne((r) => r.url.endsWith('/auth/registro'));
+    expect(req.request.body.nit).toBeUndefined();
+    expect(req.request.body.sitioWeb).toBeUndefined();
+  });
+
+  it('muestra el mensaje del backend cuando el correo ya existe', () => {
+    const fixture = crear();
+    const componente = fixture.componentInstance;
+    componente.form.patchValue({
+      ...empresaValida,
+      ...adminValido,
+      aceptaTerminos: true,
+    });
+    componente.enviar();
+
+    const http = TestBed.inject(HttpTestingController);
+    const req = http.expectOne((r) => r.url.endsWith('/auth/registro'));
+    req.flush(
+      { message: 'Ese correo ya tiene una cuenta. Inicia sesión.' },
+      { status: 409, statusText: 'Conflict' },
+    );
+
+    expect(componente.error()).toContain('Ese correo ya tiene una cuenta');
     expect(componente.enviado()).toBe(false);
   });
 });

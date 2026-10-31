@@ -7,6 +7,7 @@ import {
   AuthenticatedUser,
   LoginRequest,
   LoginResponse,
+  RegistroRequest,
 } from '../models/auth.model';
 
 const ACCESS_KEY = 'inv_access_token';
@@ -104,6 +105,18 @@ export class AuthService {
 
   login(req: LoginRequest): Observable<AuthenticatedUser> {
     return this.http.post<LoginResponse>(`${this.base}/login`, req).pipe(
+      tap((resp) => this.guardarSesion(resp)),
+      map((resp) => resp.user),
+    );
+  }
+
+  /**
+   * Registro público: crea la empresa, su propietario y la prueba de 7 días.
+   * La respuesta tiene la misma forma que el login, así que la sesión queda
+   * iniciada sin un segundo paso.
+   */
+  registro(req: RegistroRequest): Observable<AuthenticatedUser> {
+    return this.http.post<LoginResponse>(`${this.base}/registro`, req).pipe(
       tap((resp) => this.guardarSesion(resp)),
       map((resp) => resp.user),
     );
