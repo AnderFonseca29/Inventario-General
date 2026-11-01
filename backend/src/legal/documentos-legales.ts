@@ -17,7 +17,7 @@ export const FECHA_DOCUMENTOS_LEGALES = '2026-10-30';
  */
 export const VERSION_POLITICA_COOKIES = '0.2-borrador';
 export const HASH_POLITICA_COOKIES =
-  '1cb346dab986f233dd7211d19de003b688cfbade80093d0ad4f5a588506dd793';
+  '406b0594ba44cf46efde33581dad1c5902c26d27d9736bf85b3cae116d0c963a';
 
 export interface DocumentoLegalVigente {
   documento: DocumentoLegal;

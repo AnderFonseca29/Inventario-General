@@ -123,6 +123,8 @@ No crear cuentas desde este repositorio. Cada paso lo ejecuta la empresa y luego
 - [x] Enlazar el Aviso de Privacidad en registro y derechos; repetir en formularios futuros.
 - [ ] Probar el modal de aceptación a 320/360 px y con teclado. Geometría y scroll verificados; falta navegación por teclado.
 - [ ] Probar los endpoints de superadmin con una sesión real.
+- [ ] Probar login, refresh, logout y CSRF con cookies en navegador real; verificar Safari/Firefox y definir dominio same-origin o proxy para evitar cookies de terceros.
+- [ ] Probar refresh en dos pestañas: la rotación con detección de reuso puede cerrar todas las sesiones si ambas pestañas refrescan al mismo tiempo.
 - [ ] Ejecutar prueba de restauración de backup y documentarla.
 - [ ] Crear runbook de incidentes y hacer un simulacro.
 - [ ] Programar revisión de accesos y capacitación anual.
@@ -144,6 +146,7 @@ No crear cuentas desde este repositorio. Cada paso lo ejecuta la empresa y luego
 | Superadmin derechos | Listar, responder y cerrar con sesión real | ⚠️ No probado |
 | Modal 320/360 px | Sin desbordes; foco y teclado correctos | ⚠️ Parcial (geometría y scroll OK; teclado pendiente) |
 | Cookies en todas las rutas `/app` | Banner ausente por diseño; registro remoto y enlace interno implementados; falta probar en navegador | ⚠️ Parcial |
+| Sesión en cookies httpOnly | Login/refresh/logout sin tokens en JavaScript; CSRF por cabecera; pruebas unitarias backend/frontend | ⚠️ Parcial (falta navegador real; cookies de terceros en Safari/Firefox) |
 | RNBD | Cálculo de activos y decisión documentada | ⛔ Pendiente |
 
 ## 6. Orden de despliegue sugerido

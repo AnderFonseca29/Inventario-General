@@ -26,7 +26,7 @@ Los plazos de la columna “Plazo propuesto” son una propuesta operativa. Los 
 | Auditoría | Acción, entidad, usuario, IP, cambios | Seguridad y trazabilidad | 5 años **[VERIFICAR]** | Registro | Eliminación |
 | Logs técnicos | Errores, peticiones, latencia | Operación y seguridad | 90 días | Registro | Eliminación |
 | Intentos de login | Correo, IP, resultado | Bloqueo y seguridad | 30 días | Registro | Eliminación automática |
-| Tokens de sesión | Hash, expiración, revocación | Sesión segura | 30 días después de expirar o revocar | Expiración/revocación | Eliminación automática |
+| Tokens de sesión | Hash, expiración, revocación; cookies `httpOnly` en el navegador | Sesión segura | Cookie de acceso: 15 minutos; cookie de refresco: 7 días; registro en servidor: 30 días después de expirar o revocar | Expiración/revocación | Eliminación automática |
 | Consentimiento de cookies | Decisión, fecha, categorías, identificador anónimo, IP, agente, versión y hash | Probar el consentimiento | 12 meses | Decisión | Eliminación automática |
 | Backups | Copia cifrada de la base | Recuperación | 30 días | Copia | Destrucción segura |
 | Comunicaciones comerciales | Correo, teléfono, preferencias | Marketing | 2 años desde la última interacción o hasta la revocatoria | Última interacción | Eliminación |
@@ -47,7 +47,7 @@ Los plazos de la columna “Plazo propuesto” son una propuesta operativa. Los 
 
 Ya implementada:
 
-- `refresh_tokens`: se eliminan los expirados y los revocados con más de 30 días.
+- `refresh_tokens`: se eliminan los expirados y los revocados con más de 30 días. El servidor guarda solo el hash del token; el navegador lo recibe en una cookie `httpOnly` de 7 días.
 - `intentos_login`: se eliminan los registros con más de 30 días.
 - Consentimiento de cookies: el navegador descarta la decisión después de 12 meses y vuelve a pedir el consentimiento; el servidor elimina los registros de `consentimientos_cookies` con más de 12 meses.
 

@@ -28,7 +28,9 @@ Las cookies son pequeños archivos que se almacenan en el navegador. También us
 
 | Nombre | Proveedor | Categoría | Finalidad | Duración |
 |---|---|---|---|---|
-| `inv_access_token`, `inv_refresh_token`, `inv_user` | Stockora | Necesaria | Sesión y autenticación (almacenamiento local, no cookie) | Hasta cerrar sesión o expirar |
+| `inv_access_token` | Stockora | Necesaria | Cookie httpOnly con el token de acceso; autentica las peticiones a la API. No es legible por JavaScript. | 15 minutos o hasta expirar |
+| `inv_refresh_token` | Stockora | Necesaria | Cookie httpOnly limitada a `/api/auth`; renueva la sesión sin exponer el token al navegador. | 7 días, hasta cerrar sesión o expirar |
+| `inv_user` | Stockora | Necesaria | Almacenamiento local (no cookie) con el espejo del usuario para la interfaz. El servidor vuelve a validar permisos y rol en cada petición. | Hasta cerrar sesión |
 | `inv_sidebar_collapsed` | Stockora | Preferencia | Recordar estado del menú | Persistente |
 | `inv_cookie_consent_v1` | Stockora | Necesaria | Guardar la decisión y su fecha | 12 meses |
 | `inv_cookie_id` | Stockora | Necesaria | Identificador anónimo para el registro de consentimiento | 12 meses |
@@ -36,6 +38,8 @@ Las cookies son pequeños archivos que se almacenan en el navegador. También us
 | `_fbp` | Meta | Publicitaria | Medir campañas | [VERIFICAR: duración vigente] |
 
 Los nombres y duraciones pueden cambiar cuando cambian los proveedores. La tabla se actualizará con la versión del documento. Mientras GA4 y Meta Pixel no estén habilitados, el sitio no carga sus etiquetas.
+
+Las cookies de sesión son `httpOnly` y, en producción, se marcan `Secure` y `SameSite=None` cuando el panel y la API están en dominios distintos. Algunos navegadores bloquean las cookies de terceros; si eso ocurre, el inicio de sesión no se conserva. La solución definitiva es publicar el panel y la API bajo un mismo dominio o detrás de un proxy del mismo origen **[VERIFICAR: dominio definitivo]**.
 
 ## 5. Reglas de consentimiento
 
@@ -59,7 +63,7 @@ Google y Meta están ubicados en Estados Unidos. El consentimiento y los contrat
 ## 8. Cómo controlar las cookies
 
 - Desde el banner: aceptar, rechazar o configurar.
-- Desde el navegador: bloquear o eliminar cookies. Si bloquea las necesarias, algunas funciones no operarán.
+- Desde el navegador: bloquear o eliminar cookies. Si bloquea las cookies necesarias de sesión, no podrá iniciar sesión ni mantener la sesión abierta.
 - Desde el enlace “Preferencias de cookies” del pie del sitio.
 
 ## 9. Cambios

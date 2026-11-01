@@ -93,7 +93,7 @@ Consulta: 28 de octubre de 2026. Las fuentes se usan para identificar obligacion
 
 | ID | Control | Fuente | Estado | Evidencia | Brecha / pendiente |
 |---|---|---|---|---|---|
-| S-01 | Autenticación y sesión | Ley 1581/2012 | ✅ Aprobado | JWT, refresh tokens, guard global, expiración | Probar login real en producción |
+| S-01 | Autenticación y sesión | Ley 1581/2012 | ⚠️ Parcial | Cookies httpOnly para acceso y refresh, rotación, CSRF por cabecera, CORS con credenciales; pruebas backend 31/31 suites y frontend 24/24 archivos | Falta probar login/refresh/logout en navegador real y definir dominio same-origin para evitar bloqueo de cookies de terceros |
 | S-02 | Hash de contraseñas | Seguridad | ✅ Aprobado | Argon2id | — |
 | S-03 | Aislamiento multiempresa | Seguridad | ✅ Aprobado | Guards, filtros por `empresaId`, pruebas backend 97/97 | Sin pentest |
 | S-04 | Roles y permisos | Seguridad | ✅ Aprobado | `@SoloPropietario`, `PropietarioGuard`, permisos | Revisar rol `Produccion` sin acento |

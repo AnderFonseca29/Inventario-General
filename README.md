@@ -99,6 +99,7 @@ Definidas en `backend/.env` (no se versiona — ver `backend/.env.example`):
 | `JWT_REFRESH_EXPIRES_IN`| Vigencia del refresh token (p. ej. `7d`)             |
 | `PORT`                  | Puerto del backend (por defecto `3001`)              |
 | `CORS_ORIGINS`          | Orígenes permitidos, separados por coma              |
+| `COOKIE_SECURE`         | Fuerza cookies `Secure`/`SameSite=None` en un entorno HTTPS que no sea `NODE_ENV=production` (por ejemplo, staging). En producción se activa solo. |
 
 ---
 
@@ -215,6 +216,13 @@ dentro de `frontend/`.
 
 Recuerda apuntar `frontend/src/environments/environment.prod.ts` → `apiUrl` a la
 URL pública del backend y agregar el dominio de Vercel en `CORS_ORIGINS`.
+
+La sesión viaja en cookies `httpOnly`. Si el panel y la API están en dominios
+distintos (por ejemplo, GitHub Pages/Vercel y Render), el navegador las trata
+como cookies de terceros y Safari/Firefox pueden bloquearlas. Para producción se
+recomienda publicar ambos bajo el mismo dominio o detrás de un proxy del mismo
+origen. Mientras no exista ese dominio, el login puede fallar en navegadores con
+bloqueo de cookies de terceros.
 
 ### Alternativas de hosting estático
 
