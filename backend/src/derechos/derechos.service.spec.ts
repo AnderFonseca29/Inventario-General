@@ -108,7 +108,7 @@ describe('DerechosService', () => {
           radicado: 'DER-20261028-ABCDEF12',
           correo: { equals: 'ana@example.com', mode: 'insensitive' },
         },
-        select: expect.objectContaining({ respuesta: true }),
+        select: expect.objectContaining({ respuesta: true }) as Record<string, boolean>,
       }),
     );
   });

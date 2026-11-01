@@ -39,7 +39,7 @@ describe('SesionCookiesService', () => {
         secure: true,
         sameSite: 'none',
         path: '/api',
-        maxAge: expect.any(Number),
+        maxAge: expect.any(Number) as number,
       }),
     );
     expect(res.cookie).toHaveBeenNthCalledWith(
@@ -51,7 +51,7 @@ describe('SesionCookiesService', () => {
         secure: true,
         sameSite: 'none',
         path: '/api/auth',
-        maxAge: expect.any(Number),
+        maxAge: expect.any(Number) as number,
       }),
     );
   });
