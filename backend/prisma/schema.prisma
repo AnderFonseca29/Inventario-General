@@ -1149,3 +1149,22 @@ model AceptacionLegal {
   @@index([aceptadoEn])
   @@map("aceptaciones_legales")
 }
+
+// ======================= CONSENTIMIENTO DE COOKIES ========================
+
+model ConsentimientoCookies {
+  id              String   @id @default(uuid()) @db.Uuid
+  identificador   String   @db.Uuid
+  version         Int      @default(1)
+  versionPolitica String
+  hashPolitica    String
+  analitica       Boolean
+  publicidad      Boolean
+  ip              String?
+  userAgent       String?
+  registradoEn    DateTime @default(now()) @db.Timestamptz(3)
+
+  @@index([identificador, registradoEn])
+  @@index([registradoEn])
+  @@map("consentimientos_cookies")
+}

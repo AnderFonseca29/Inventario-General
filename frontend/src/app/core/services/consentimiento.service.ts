@@ -1,18 +1,47 @@
 import { computed, Injectable, signal } from '@angular/core';
+import { environment } from '../../../environments/environment';
 
 export interface DecisionCookies {
   version: number;
   fecha: string;
   analitica: boolean;
   publicidad: boolean;
+  /** Identificador anónimo del navegador; no identifica al usuario. */
+  identificador: string;
 }
 
 const CLAVE = 'inv_cookie_consent_v1';
+const CLAVE_ID = 'inv_cookie_id';
 const VERSION = 1;
 const VIGENCIA_MS = 365 * 24 * 60 * 60 * 1000;
+const PATRON_UUID =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+function generarIdentificador(): string {
+  const cripto =
+    typeof globalThis !== 'undefined' ? globalThis.crypto : undefined;
+  if (cripto && typeof cripto.randomUUID === 'function') {
+    return cripto.randomUUID();
+  }
+  const bytes = new Uint8Array(16);
+  if (cripto && typeof cripto.getRandomValues === 'function') {
+    cripto.getRandomValues(bytes);
+  } else {
+    for (let i = 0; i < bytes.length; i += 1) {
+      bytes[i] = Math.floor(Math.random() * 256);
+    }
+  }
+  bytes[6] = (bytes[6] & 0x0f) | 0x40;
+  bytes[8] = (bytes[8] & 0x3f) | 0x80;
+  const hex = [...bytes].map((byte) => byte.toString(16).padStart(2, '0'));
+  return `${hex.slice(0, 4).join('')}-${hex.slice(4, 6).join('')}-${hex
+    .slice(6, 8)
+    .join('')}-${hex.slice(8, 10).join('')}-${hex.slice(10).join('')}`;
+}
 
 @Injectable({ providedIn: 'root' })
 export class ConsentimientoService {
+  private readonly identificador = this.obtenerIdentificador();
   private readonly decisionInterna = signal<DecisionCookies | null>(this.leer());
   private readonly panelInterno = signal(false);
 
@@ -38,15 +67,17 @@ export class ConsentimientoService {
       fecha: new Date().toISOString(),
       analitica,
       publicidad,
+      identificador: this.identificador,
     };
     try {
       localStorage.setItem(CLAVE, JSON.stringify(decision));
     } catch {
-      // Navegación privada o almacenamiento bloqueado: se mantiene en memoria.
+      // Navegacion privada o almacenamiento bloqueado: se mantiene en memoria.
     }
     this.decisionInterna.set(decision);
     this.aplicarConsentMode(decision);
     this.panelInterno.set(false);
+    this.registrarEnServidor(decision);
   }
 
   abrirPanel(): void {
@@ -55,6 +86,45 @@ export class ConsentimientoService {
 
   cerrarPanel(): void {
     this.panelInterno.set(false);
+  }
+
+  private obtenerIdentificador(): string {
+    try {
+      const guardado = localStorage.getItem(CLAVE_ID);
+      if (guardado && PATRON_UUID.test(guardado)) return guardado;
+    } catch {
+      // Si el almacenamiento esta bloqueado se usa uno temporal en memoria.
+    }
+    const nuevo = generarIdentificador();
+    try {
+      localStorage.setItem(CLAVE_ID, nuevo);
+    } catch {
+      // Sin persistencia el identificador cambia en la siguiente carga.
+    }
+    return nuevo;
+  }
+
+  /**
+   * Envia la decision al servidor para dejar evidencia. Es un envio de mejor
+   * esfuerzo: si falla la red, la decision local sigue siendo la fuente de
+   * verdad para el navegador y no se interrumpe al usuario.
+   */
+  private registrarEnServidor(decision: DecisionCookies): void {
+    if (typeof fetch !== 'function') return;
+    try {
+      void fetch(`${environment.apiUrl}/cookies/consentimientos`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          identificador: decision.identificador,
+          analitica: decision.analitica,
+          publicidad: decision.publicidad,
+        }),
+        keepalive: true,
+      }).catch(() => undefined);
+    } catch {
+      // La decision local se conserva aunque el registro remoto no este disponible.
+    }
   }
 
   private leer(): DecisionCookies | null {
@@ -78,12 +148,20 @@ export class ConsentimientoService {
         }
         return null;
       }
-      return {
+      const decision: DecisionCookies = {
         version: VERSION,
         fecha: String(dato.fecha ?? ''),
         analitica: dato.analitica,
         publicidad: dato.publicidad,
+        identificador: this.identificador,
       };
+      try {
+        // Migra decisiones anteriores que todavia no guardaban el identificador.
+        localStorage.setItem(CLAVE, JSON.stringify(decision));
+      } catch {
+        // Sin persistencia se conserva la decision en memoria.
+      }
+      return decision;
     } catch {
       return null;
     }

@@ -143,7 +143,7 @@ No crear cuentas desde este repositorio. Cada paso lo ejecuta la empresa y luego
 | Incidente simulado | Detección, contención, notificación y cierre en plazo | ❌ No probado |
 | Superadmin derechos | Listar, responder y cerrar con sesión real | ⚠️ No probado |
 | Modal 320/360 px | Sin desbordes; foco y teclado correctos | ⚠️ Parcial (geometría y scroll OK; teclado pendiente) |
-| Cookies en todas las rutas `/app` | Banner ausente y sin scripts de analítica | ⚠️ Parcial |
+| Cookies en todas las rutas `/app` | Banner ausente por diseño; registro remoto y enlace interno implementados; falta probar en navegador | ⚠️ Parcial |
 | RNBD | Cálculo de activos y decisión documentada | ⛔ Pendiente |
 
 ## 6. Orden de despliegue sugerido

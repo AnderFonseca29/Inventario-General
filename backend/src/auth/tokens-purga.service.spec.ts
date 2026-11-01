@@ -12,13 +12,25 @@ describe('TokensPurgaService (hallazgo H)', () => {
     const intentoLogin = {
       deleteMany: jest.fn().mockResolvedValue({ count: 1 }),
     };
-    const servicio = crear({ refreshToken, intentoLogin });
+    const consentimientoCookies = {
+      deleteMany: jest.fn().mockResolvedValue({ count: 2 }),
+    };
+    const servicio = crear({
+      refreshToken,
+      intentoLogin,
+      consentimientoCookies,
+    });
 
     const resultado = await servicio.purgar();
 
-    expect(resultado).toEqual({ tokens: 3, intentos: 1 });
+    expect(resultado).toEqual({
+      tokens: 3,
+      intentos: 1,
+      consentimientos: 2,
+    });
     expect(refreshToken.deleteMany).toHaveBeenCalledTimes(1);
     expect(intentoLogin.deleteMany).toHaveBeenCalledTimes(1);
+    expect(consentimientoCookies.deleteMany).toHaveBeenCalledTimes(1);
   });
 
   it('no propaga errores si la base de datos falla', async () => {
@@ -26,11 +38,17 @@ describe('TokensPurgaService (hallazgo H)', () => {
       deleteMany: jest.fn().mockRejectedValue(new Error('BD caida')),
     };
     const intentoLogin = { deleteMany: jest.fn() };
-    const servicio = crear({ refreshToken, intentoLogin });
+    const consentimientoCookies = { deleteMany: jest.fn() };
+    const servicio = crear({
+      refreshToken,
+      intentoLogin,
+      consentimientoCookies,
+    });
 
     await expect(servicio.purgar()).resolves.toEqual({
       tokens: 0,
       intentos: 0,
+      consentimientos: 0,
     });
   });
 });

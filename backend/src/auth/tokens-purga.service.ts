@@ -1,9 +1,4 @@
-import {
-  Injectable,
-  Logger,
-  OnModuleDestroy,
-  OnModuleInit,
-} from '@nestjs/common';
+import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 
 /**
@@ -33,28 +28,39 @@ export class TokensPurgaService implements OnModuleInit, OnModuleDestroy {
     if (this.temporizador) clearInterval(this.temporizador);
   }
 
-  async purgar(): Promise<{ tokens: number; intentos: number }> {
+  async purgar(): Promise<{
+    tokens: number;
+    intentos: number;
+    consentimientos: number;
+  }> {
     const ahora = new Date();
     const hace30Dias = new Date(ahora.getTime() - 30 * 24 * 60 * 60 * 1000);
+    const hace12Meses = new Date(ahora.getTime() - 365 * 24 * 60 * 60 * 1000);
     try {
       const tokens = await this.prisma.refreshToken.deleteMany({
         where: {
-          OR: [
-            { expiresAt: { lt: ahora } },
-            { revocado: true, createdAt: { lt: hace30Dias } },
-          ],
+          OR: [{ expiresAt: { lt: ahora } }, { revocado: true, createdAt: { lt: hace30Dias } }],
         },
       });
       const intentos = await this.prisma.intentoLogin.deleteMany({
         where: { creadoEn: { lt: hace30Dias } },
       });
-      return { tokens: tokens.count, intentos: intentos.count };
+      // El consentimiento de cookies se renueva a los 12 meses; su evidencia
+      // remota se conserva solo mientras la decision sigue vigente.
+      const consentimientos = await this.prisma.consentimientoCookies.deleteMany({
+        where: { registradoEn: { lt: hace12Meses } },
+      });
+      return {
+        tokens: tokens.count,
+        intentos: intentos.count,
+        consentimientos: consentimientos.count,
+      };
     } catch (error) {
       // La purga nunca debe tumbar la aplicacion (por ejemplo, si la BD cae).
       this.logger.error(
-        `No se pudo purgar tokens/intentos: ${(error as Error).message}`,
+        `No se pudo purgar tokens/intentos/consentimientos: ${(error as Error).message}`,
       );
-      return { tokens: 0, intentos: 0 };
+      return { tokens: 0, intentos: 0, consentimientos: 0 };
     }
   }
 }

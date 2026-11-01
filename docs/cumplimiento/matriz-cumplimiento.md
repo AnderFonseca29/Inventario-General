@@ -1,7 +1,7 @@
 # Matriz de implementación y brechas legales
 
 > **BORRADOR: REVISIÓN OBLIGATORIA POR ABOGADO**
-> Fecha de corte: 28 de octubre de 2026 · Mercado: Colombia · Moneda: COP
+> Fecha de corte: 1 de noviembre de 2026 · Mercado: Colombia · Moneda: COP
 > Esta matriz separa **implementación técnica verificada** de **cumplimiento legal definitivo**. No declara que Stockora cumpla al 100 %: enumera evidencias, fallas y pendientes.
 
 ## 1. Cómo leer esta matriz
@@ -75,7 +75,7 @@ Consulta: 28 de octubre de 2026. Las fuentes se usan para identificar obligacion
 | A-08 | Rechazo de cookies tan fácil como aceptar | Guías SIC | ✅ Aprobado | Botón “Rechazar” visible; guarda decisión y oculta banner | Revisar contraste y foco |
 | A-09 | Cookies solo en páginas públicas | Decisión L5 | ✅ Aprobado | Banner ausente en `/app/dashboard` (verificado en navegador) | Probar en todas las rutas privadas |
 | A-10 | Caducidad del consentimiento | Regla interna | ✅ Aprobado | 12 meses; prueba de servicio | Revalidar tras cambios de política |
-| A-11 | Registro de consentimiento | Ley 527/1999 | ⚠️ Parcial | `localStorage['inv_cookie_consent_v1']` con fecha y decisión | No hay registro del lado servidor |
+| A-11 | Registro de consentimiento | Ley 527/1999 | ⚠️ Parcial | `POST /api/cookies/consentimientos`; tabla `consentimientos_cookies` con identificador anónimo, versión/hash de la política, decisión, IP, agente y fecha; purga a 12 meses; pruebas unitarias | Migración sin aplicar en BD real; sin prueba E2E ni en navegador |
 
 ### 4.3 Derechos de los titulares
 
