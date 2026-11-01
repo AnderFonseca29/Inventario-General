@@ -24,10 +24,10 @@ import {
   VERSION_DOCUMENTOS_LEGALES,
 } from '../legal/documentos-legales';
 import { LoginDto } from './dto/login.dto';
-import { RefreshDto } from './dto/refresh.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { RegistroDto } from './dto/registro.dto';
 import { CaptchaService } from './captcha.service';
+import type { TokensSesion } from './sesion-cookies.service';
 
 @Injectable()
 export class AuthService {
@@ -192,7 +192,7 @@ export class AuthService {
     user: AuthenticatedUser,
     ip?: string,
     userAgent?: string,
-  ): Promise<{ accessToken: string; refreshToken: string }> {
+  ): Promise<TokensSesion> {
     const payload = {
       sub: user.id,
       email: user.email,
@@ -218,18 +218,28 @@ export class AuthService {
       },
     );
 
-    const decoded = this.jwt.decode<{ exp: number }>(refreshToken);
+    const accessDecodificado = this.jwt.decode<{ exp: number }>(accessToken);
+    const refreshDecodificado = this.jwt.decode<{ exp: number }>(refreshToken);
+    if (!accessDecodificado?.exp || !refreshDecodificado?.exp) {
+      throw new Error('No se pudo calcular la expiración de la sesión');
+    }
+
     await this.prisma.refreshToken.create({
       data: {
         usuarioId: user.id,
         tokenHash: this.hashToken(refreshToken),
-        expiresAt: new Date(decoded.exp * 1000),
+        expiresAt: new Date(refreshDecodificado.exp * 1000),
         userAgent,
         ip,
       },
     });
 
-    return { accessToken, refreshToken };
+    return {
+      accessToken,
+      refreshToken,
+      accessExpiraEn: accessDecodificado.exp * 1000,
+      refreshExpiraEn: refreshDecodificado.exp * 1000,
+    };
   }
 
   async login(dto: LoginDto, ip?: string, userAgent?: string) {
@@ -369,7 +379,11 @@ export class AuthService {
     return { ...tokens, user };
   }
 
-  async refresh(dto: RefreshDto, ip?: string, userAgent?: string) {
+  async refresh(
+    dto: { refreshToken: string },
+    ip?: string,
+    userAgent?: string,
+  ) {
     let payload: { sub: string };
     try {
       payload = await this.jwt.verifyAsync<{ sub: string }>(dto.refreshToken, {
@@ -416,7 +430,7 @@ export class AuthService {
     return { ...tokens, user };
   }
 
-  async logout(dto: RefreshDto): Promise<{ ok: true }> {
+  async logout(dto: { refreshToken: string }): Promise<{ ok: true }> {
     await this.prisma.refreshToken.updateMany({
       where: { tokenHash: this.hashToken(dto.refreshToken) },
       data: { revocado: true },

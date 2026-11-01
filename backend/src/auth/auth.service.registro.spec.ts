@@ -26,7 +26,12 @@ type Datos = Record<string, unknown>;
 
 interface ServicioInterno {
   loadAuthenticatedUser: (id: string) => Promise<Record<string, unknown>>;
-  emitirTokens: () => Promise<{ accessToken: string; refreshToken: string }>;
+  emitirTokens: () => Promise<{
+    accessToken: string;
+    refreshToken: string;
+    accessExpiraEn: number;
+    refreshExpiraEn: number;
+  }>;
 }
 
 function crearServicio(opciones: { existeUsuario?: boolean } = {}) {
@@ -92,7 +97,12 @@ function crearServicio(opciones: { existeUsuario?: boolean } = {}) {
     esPropietario: true,
     permisos: [],
   });
-  jest.spyOn(interno, 'emitirTokens').mockResolvedValue({ accessToken: 'a', refreshToken: 'r' });
+  jest.spyOn(interno, 'emitirTokens').mockResolvedValue({
+    accessToken: 'a',
+    refreshToken: 'r',
+    accessExpiraEn: Date.now() + 15 * 60 * 1000,
+    refreshExpiraEn: Date.now() + 7 * 24 * 60 * 60 * 1000,
+  });
 
   return { servicio, prisma, tx, aprovisionamiento, auditoria, captcha };
 }

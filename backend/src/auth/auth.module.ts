@@ -7,11 +7,18 @@ import { AuthService } from './auth.service';
 import { CaptchaService } from './captcha.service';
 import { TokensPurgaService } from './tokens-purga.service';
 import { JwtStrategy } from './strategies/jwt.strategy';
+import { SesionCookiesService } from './sesion-cookies.service';
 
 @Module({
   imports: [PassportModule, JwtModule.register({}), EmpresasModule],
   controllers: [AuthController],
-  providers: [AuthService, CaptchaService, JwtStrategy, TokensPurgaService],
+  providers: [
+    AuthService,
+    CaptchaService,
+    JwtStrategy,
+    TokensPurgaService,
+    SesionCookiesService,
+  ],
   exports: [AuthService],
 })
 export class AuthModule {}

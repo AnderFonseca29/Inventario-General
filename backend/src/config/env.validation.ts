@@ -7,6 +7,7 @@ export interface AppEnv {
   JWT_EXPIRES_IN: string;
   JWT_REFRESH_EXPIRES_IN: string;
   CORS_ORIGINS: string;
+  COOKIE_SECURE?: string;
   PERMISOS_CACHE_TTL_SEGUNDOS: number;
   EMAIL_ENABLED: string;
   TURNSTILE_ENABLED: string;
@@ -46,6 +47,10 @@ export function validateEnv(config: Record<string, unknown>): AppEnv {
     CORS_ORIGINS:
       (config.CORS_ORIGINS as string) ??
       'http://localhost:4200,https://anderfonseca29.github.io',
+    // En produccion se activa solo. En staging HTTPS (NODE_ENV distinto de
+    // production) hay que definir COOKIE_SECURE=true para usar cookies Secure
+    // y SameSite=None.
+    COOKIE_SECURE: (config.COOKIE_SECURE as string) ?? 'false',
     PERMISOS_CACHE_TTL_SEGUNDOS: Number(
       config.PERMISOS_CACHE_TTL_SEGUNDOS ?? 60,
     ),

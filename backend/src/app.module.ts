@@ -28,6 +28,7 @@ import { DerechosModule } from './derechos/derechos.module';
 import { LegalModule } from './legal/legal.module';
 import { CookiesModule } from './cookies/cookies.module';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
+import { CsrfGuard } from './common/guards/csrf.guard';
 import { EmpresaContextoGuard } from './common/guards/empresa-contexto.guard';
 import { PermisosGuard } from './common/guards/permisos.guard';
 import { SuperAdminGuard } from './common/guards/superadmin.guard';
@@ -65,6 +66,7 @@ import { TenantGuard } from './common/guards/tenant.guard';
   providers: [
     AppService,
     { provide: APP_GUARD, useClass: ThrottlerGuard },
+    { provide: APP_GUARD, useClass: CsrfGuard },
     { provide: APP_GUARD, useClass: JwtAuthGuard },
     { provide: APP_GUARD, useClass: EmpresaContextoGuard },
     { provide: APP_GUARD, useClass: PermisosGuard },
