@@ -1,7 +1,7 @@
 # Registro de versiones y hashes
 
 > **BORRADOR: REVISIÓN OBLIGATORIA POR ABOGADO**
-> Fecha de cálculo: 30 de octubre de 2026 · Algoritmo: SHA-256
+> Fecha de cálculo: 1 de noviembre de 2026 · Algoritmo: SHA-256
 
 Cualquier cambio en un documento exige: (1) nueva versión, (2) nueva fecha, (3) nuevo hash y (4) registro en este manifiesto. No se debe publicar un documento sin hash actualizado.
 
@@ -10,9 +10,9 @@ Cualquier cambio en un documento exige: (1) nueva versión, (2) nueva fecha, (3)
 | `aviso-de-privacidad.md` | 0.2-borrador | 2026-10-30 | `eeb9e847b6b30e5493a8d328d5621117eb2f8b4b720a539e2af4bd55ca062ea5` | Borrador | `feat/registro-directo` |
 | `contrato-de-encargo.md` | 0.2-borrador | 2026-10-30 | `6d65f343f4dddcd24fcd14798a45323a18dd58a8b59216d1cc862568586b3f84` | Borrador | `feat/registro-directo` |
 | `derechos-de-los-titulares.md` | 0.2-borrador | 2026-10-30 | `9122a31f572e2b1742448e56fd44c27ad8ca4b36a5e77c1b3fee42d02c8dbd31` | Borrador | `feat/registro-directo` |
-| `politica-de-cookies.md` | 0.2-borrador | 2026-10-30 | `1cc7e30c09c254b995f0916ce9267d499ebc9f98310edb8ad2ff8e37c7f295be` | Borrador | `feat/registro-directo` |
+| `politica-de-cookies.md` | 0.2-borrador | 2026-10-30 | `1cb346dab986f233dd7211d19de003b688cfbade80093d0ad4f5a588506dd793` | Borrador | `feat/registro-directo` |
 | `politica-de-privacidad.md` | 0.2-borrador | 2026-10-30 | `e9caa7a2abff0fc92b769e51c970a7c0d633c73cf922da87202261a51e1d6c0a` | Borrador | `feat/registro-directo` |
-| `politica-de-retencion.md` | 0.2-borrador | 2026-10-30 | `0be4b36ec7bd916e358e01b250cf2d782ee19048abf81f42abf1f3a3837f17ea` | Borrador | `feat/registro-directo` |
+| `politica-de-retencion.md` | 0.2-borrador | 2026-10-30 | `e85cd9501663ad070fe898e26552af1511a6b41c3374c16dd0d471f186a02045` | Borrador | `feat/registro-directo` |
 | `politica-de-tratamiento-de-datos.md` | 0.2-borrador | 2026-10-30 | `b2a9db942c5cb2727c982cd6ee63d5e8bc47622f0b934e2b062c42d1ae0dbf0d` | Borrador | `feat/registro-directo` |
 | `terminos-y-condiciones.md` | 0.2-borrador | 2026-10-30 | `8352867ad633d1bb6eaae10120fd3a7ba59c068f88d56c06c1f1c86eebc91965` | Borrador | `feat/registro-directo` |
 | `uso-aceptable.md` | 0.2-borrador | 2026-10-30 | `793971d6364e17a67d666479d0a8f9c185e951b8451bd6fa2384c5d6c23db198` | Borrador | `feat/registro-directo` |

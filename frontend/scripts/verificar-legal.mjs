@@ -134,6 +134,29 @@ for (const [, tipo, archivo, hash] of entradasBackend) {
   }
 }
 
+// La politica de cookies no se acepta en el registro, pero el consentimiento
+// guarda su version y hash. Tambien deben coincidir con el archivo publicado.
+const versionCookies = backend.match(
+  /VERSION_POLITICA_COOKIES = '([^']+)'/,
+)?.[1];
+const hashCookies = backend.match(
+  /HASH_POLITICA_COOKIES =\s*'([a-f0-9]{64})'/,
+)?.[1];
+
+if (!versionCookies) {
+  errores.push('El backend no declara VERSION_POLITICA_COOKIES.');
+} else if (versionCookies !== versionCatalogo) {
+  errores.push(
+    `Versión distinta en la política de cookies: backend ${versionCookies} y catálogo ${versionCatalogo}.`,
+  );
+}
+
+if (!hashCookies) {
+  errores.push('El backend no declara HASH_POLITICA_COOKIES.');
+} else if (hashes.get('politica-de-cookies.md') !== hashCookies) {
+  errores.push('Hash desactualizado en el backend para politica-de-cookies.md.');
+}
+
 // 5. Modo final sin datos pendientes.
 const modoFinal = /legalMode:\s*'final'/.test(entornoProd);
 const documentosConPendientes = [...contenidos.entries()]

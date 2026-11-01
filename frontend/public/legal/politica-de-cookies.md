@@ -2,6 +2,8 @@
 
 > **BORRADOR: REVISIÓN OBLIGATORIA POR ABOGADO**
 > Versión: 0.2-borrador · Fecha: 30 de octubre de 2026 · Idioma: español (Colombia)
+>
+> Control de cambios: 1 de noviembre de 2026 — se alinean los nombres reales de las claves y se documenta el registro del consentimiento en el servidor.
 
 ## 1. Qué son
 
@@ -26,13 +28,14 @@ Las cookies son pequeños archivos que se almacenan en el navegador. También us
 
 | Nombre | Proveedor | Categoría | Finalidad | Duración |
 |---|---|---|---|---|
-| `inv_token` / `inv_usuario` | Stockora | Necesaria | Sesión y autenticación | Hasta cerrar sesión |
+| `inv_access_token`, `inv_refresh_token`, `inv_user` | Stockora | Necesaria | Sesión y autenticación (almacenamiento local, no cookie) | Hasta cerrar sesión o expirar |
 | `inv_sidebar_collapsed` | Stockora | Preferencia | Recordar estado del menú | Persistente |
-| `inv_cookie_consent` | Stockora | Necesaria | Guardar la decisión de consentimiento | 12 meses |
+| `inv_cookie_consent_v1` | Stockora | Necesaria | Guardar la decisión y su fecha | 12 meses |
+| `inv_cookie_id` | Stockora | Necesaria | Identificador anónimo para el registro de consentimiento | 12 meses |
 | `_ga`, `_ga_*` | Google | Analítica | Medir visitas (GA4) | [VERIFICAR: duración vigente] |
 | `_fbp` | Meta | Publicitaria | Medir campañas | [VERIFICAR: duración vigente] |
 
-Los nombres y duraciones pueden cambiar cuando cambian los proveedores. La tabla se actualizará con la versión del documento.
+Los nombres y duraciones pueden cambiar cuando cambian los proveedores. La tabla se actualizará con la versión del documento. Mientras GA4 y Meta Pixel no estén habilitados, el sitio no carga sus etiquetas.
 
 ## 5. Reglas de consentimiento
 
@@ -40,7 +43,7 @@ Los nombres y duraciones pueden cambiar cuando cambian los proveedores. La tabla
 2. **Rechazo fácil:** el botón “Rechazar” tiene la misma visibilidad que “Aceptar”. No se usan patrones engañosos.
 3. **Granularidad:** el usuario puede aceptar solo analíticas, solo publicidad o ambas.
 4. **Consent Mode:** se envía el estado de consentimiento a Google antes de cargar etiquetas.
-5. **Registro:** se guarda fecha, hora, versión de la política, decisión e identificador anónimo.
+5. **Registro:** el navegador guarda fecha, hora, decisión e identificador anónimo. Además, el servidor registra en `consentimientos_cookies` el identificador anónimo, la decisión, la fecha, la versión y el hash de esta política, la IP y el agente de usuario. La versión y el hash los fija el servidor; no se aceptan los valores que envíe el navegador.
 6. **Retiro:** el usuario puede cambiar o retirar su decisión desde el enlace “Preferencias de cookies” en el pie del sitio.
 7. **Silencio:** no equivale a consentimiento. Si no hay decisión, no se cargan cookies no necesarias.
 

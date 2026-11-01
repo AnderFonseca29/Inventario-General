@@ -10,6 +10,15 @@ import { DocumentoLegal } from '@prisma/client';
 export const VERSION_DOCUMENTOS_LEGALES = '0.2-borrador';
 export const FECHA_DOCUMENTOS_LEGALES = '2026-10-30';
 
+/**
+ * La politica de cookies no se acepta en el registro, pero cada decision de
+ * consentimiento se registra con la version y el hash vigentes. El backend
+ * fija estos valores: el navegador no puede alterarlos.
+ */
+export const VERSION_POLITICA_COOKIES = '0.2-borrador';
+export const HASH_POLITICA_COOKIES =
+  '1cb346dab986f233dd7211d19de003b688cfbade80093d0ad4f5a588506dd793';
+
 export interface DocumentoLegalVigente {
   documento: DocumentoLegal;
   titulo: string;
