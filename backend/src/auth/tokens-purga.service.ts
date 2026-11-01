@@ -12,20 +12,32 @@ import { PrismaService } from '../prisma/prisma.service';
 export class TokensPurgaService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(TokensPurgaService.name);
   private temporizador?: NodeJS.Timeout;
+  private purgaEnCurso?: Promise<{
+    tokens: number;
+    intentos: number;
+    consentimientos: number;
+  }>;
   private static readonly INTERVALO_MS = 60 * 60 * 1000; // 1 hora
 
   constructor(private readonly prisma: PrismaService) {}
 
   onModuleInit(): void {
-    void this.purgar();
+    this.ejecutarPurga();
     this.temporizador = setInterval(() => {
-      void this.purgar();
+      this.ejecutarPurga();
     }, TokensPurgaService.INTERVALO_MS);
     this.temporizador.unref?.();
   }
 
-  onModuleDestroy(): void {
+  async onModuleDestroy(): Promise<void> {
     if (this.temporizador) clearInterval(this.temporizador);
+    // Espera la purga en curso antes de que Prisma cierre la conexion.
+    if (this.purgaEnCurso) await this.purgaEnCurso;
+  }
+
+  private ejecutarPurga(): void {
+    this.purgaEnCurso = this.purgar();
+    void this.purgaEnCurso;
   }
 
   async purgar(): Promise<{
