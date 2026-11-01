@@ -1,12 +1,13 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { NavigationEnd, Router } from '@angular/router';
+import { NavigationEnd, Router, RouterLink } from '@angular/router';
 import { filter, map } from 'rxjs';
 import { ConsentimientoService } from '../core/services/consentimiento.service';
 
 @Component({
   selector: 'app-cookie-banner',
   standalone: true,
+  imports: [RouterLink],
   template: `
     @if (visible()) {
       <section class="cookie" role="region" aria-label="Preferencias de cookies">
@@ -18,7 +19,7 @@ import { ConsentimientoService } from '../core/services/consentimiento.service';
                 Usamos cookies necesarias para el servicio y, con tu permiso,
                 analíticas y publicitarias. Puedes aceptar, rechazar o
                 configurar.
-                <a href="legal/politica-de-cookies.md">Política de cookies</a>.
+                <a routerLink="/legal/cookies">Política de cookies</a>.
               </p>
             </div>
             <div class="cookie-acciones">
