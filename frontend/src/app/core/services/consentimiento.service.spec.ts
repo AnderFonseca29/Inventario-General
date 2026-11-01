@@ -100,6 +100,9 @@ describe('ConsentimientoService', () => {
     ];
     expect(url).toBe(`${environment.apiUrl}/cookies/consentimientos`);
     expect(opciones).toMatchObject({ method: 'POST', keepalive: true });
+    expect(opciones.headers).toMatchObject({
+      'X-Requested-With': 'XMLHttpRequest',
+    });
     const cuerpo = JSON.parse(String(opciones.body)) as Record<string, unknown>;
     expect(cuerpo).toMatchObject({ analitica: true, publicidad: false });
     expect(cuerpo['identificador']).toMatch(

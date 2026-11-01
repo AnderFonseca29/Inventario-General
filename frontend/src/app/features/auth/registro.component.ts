@@ -643,6 +643,7 @@ export class RegistroComponent {
           this.cargando.set(false);
           const msg =
             err?.error?.message ??
+            (err instanceof Error ? err.message : null) ??
             'No pudimos crear la cuenta. Revisa los datos e intenta de nuevo.';
           this.error.set(Array.isArray(msg) ? msg.join(', ') : msg);
         },

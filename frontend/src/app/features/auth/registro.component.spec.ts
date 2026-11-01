@@ -165,8 +165,6 @@ describe('RegistroComponent', () => {
     expect(req.request.body).not.toHaveProperty('rol');
 
     req.flush({
-      accessToken: 'a',
-      refreshToken: 'r',
       user: {
         id: 'u1',
         email: 'ana@empresa.com',
@@ -175,6 +173,16 @@ describe('RegistroComponent', () => {
         esPropietario: true,
         permisos: [],
       },
+    });
+
+    const verificacion = http.expectOne((r) => r.url.endsWith('/auth/me'));
+    verificacion.flush({
+      id: 'u1',
+      email: 'ana@empresa.com',
+      empresaId: 'e1',
+      esSuperAdmin: false,
+      esPropietario: true,
+      permisos: [],
     });
     expect(componente.enviado()).toBe(true);
   });

@@ -1,18 +1,28 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { Observable, catchError, map, of, tap } from 'rxjs';
+import {
+  Observable,
+  catchError,
+  map,
+  of,
+  switchMap,
+  tap,
+  throwError,
+} from 'rxjs';
 import { environment } from '../../../environments/environment';
 import {
   AuthenticatedUser,
   LoginRequest,
-  LoginResponse,
   RegistroRequest,
+  SesionResponse,
 } from '../models/auth.model';
 
-const ACCESS_KEY = 'inv_access_token';
-const REFRESH_KEY = 'inv_refresh_token';
 const USER_KEY = 'inv_user';
+// Claves de la version anterior. Se eliminan al arrancar para que ningun token
+// quede expuesto en localStorage; la sesion ahora vive en cookies httpOnly.
+const LEGACY_ACCESS_KEY = 'inv_access_token';
+const LEGACY_REFRESH_KEY = 'inv_refresh_token';
 
 // Permisos "de terreno": identifican a un usuario operativo (vendedor) que solo
 // debe ver su propio resumen y no los modulos de gestión de la empresa.
@@ -62,22 +72,50 @@ export class AuthService {
     return tieneTerreno && !tieneEmpresa;
   });
 
-  private leerUsuario(): AuthenticatedUser | null {
-    const raw = localStorage.getItem(USER_KEY);
-    if (!raw) return null;
+  constructor() {
+    this.eliminarTokensAntiguos();
+  }
+
+  private eliminarTokensAntiguos(): void {
     try {
+      localStorage.removeItem(LEGACY_ACCESS_KEY);
+      localStorage.removeItem(LEGACY_REFRESH_KEY);
+    } catch {
+      // Almacenamiento bloqueado: no hay tokens antiguos que retirar.
+    }
+  }
+
+  private leerUsuario(): AuthenticatedUser | null {
+    try {
+      const raw = localStorage.getItem(USER_KEY);
+      if (!raw) return null;
       return JSON.parse(raw) as AuthenticatedUser;
     } catch {
       return null;
     }
   }
 
-  get accessToken(): string | null {
-    return localStorage.getItem(ACCESS_KEY);
+  private guardarUsuario(user: AuthenticatedUser): void {
+    try {
+      localStorage.setItem(USER_KEY, JSON.stringify(user));
+    } catch {
+      // Navegacion privada: el usuario vive en memoria durante esta sesion.
+    }
+    this._user.set(user);
   }
 
-  get refreshToken(): string | null {
-    return localStorage.getItem(REFRESH_KEY);
+  /**
+   * Limpia el espejo local del usuario. El servidor conserva las cookies hasta
+   * que expiran o se revocan; este metodo no intenta cerrar la sesion remota.
+   */
+  limpiarSesionLocal(): void {
+    try {
+      localStorage.removeItem(USER_KEY);
+    } catch {
+      // Sin almacenamiento, basta con limpiar la senal en memoria.
+    }
+    this.eliminarTokensAntiguos();
+    this._user.set(null);
   }
 
   hasPermiso(codigo: string): boolean {
@@ -89,24 +127,12 @@ export class AuthService {
     return codigos.some((c) => permisos.includes(c));
   }
 
-  private guardarSesion(resp: LoginResponse): void {
-    localStorage.setItem(ACCESS_KEY, resp.accessToken);
-    localStorage.setItem(REFRESH_KEY, resp.refreshToken);
-    localStorage.setItem(USER_KEY, JSON.stringify(resp.user));
-    this._user.set(resp.user);
-  }
-
-  private limpiarSesion(): void {
-    localStorage.removeItem(ACCESS_KEY);
-    localStorage.removeItem(REFRESH_KEY);
-    localStorage.removeItem(USER_KEY);
-    this._user.set(null);
-  }
-
   login(req: LoginRequest): Observable<AuthenticatedUser> {
-    return this.http.post<LoginResponse>(`${this.base}/login`, req).pipe(
-      tap((resp) => this.guardarSesion(resp)),
-      map((resp) => resp.user),
+    return this.http.post<SesionResponse>(`${this.base}/login`, req).pipe(
+      switchMap((resp) => {
+        this.guardarUsuario(resp.user);
+        return this.verificarCookieDeSesion();
+      }),
     );
   }
 
@@ -116,26 +142,50 @@ export class AuthService {
    * iniciada sin un segundo paso.
    */
   registro(req: RegistroRequest): Observable<AuthenticatedUser> {
-    return this.http.post<LoginResponse>(`${this.base}/registro`, req).pipe(
-      tap((resp) => this.guardarSesion(resp)),
-      map((resp) => resp.user),
-    );
-  }
-
-  me(): Observable<AuthenticatedUser> {
-    return this.http.get<AuthenticatedUser>(`${this.base}/me`).pipe(
-      tap((user) => {
-        localStorage.setItem(USER_KEY, JSON.stringify(user));
-        this._user.set(user);
+    return this.http.post<SesionResponse>(`${this.base}/registro`, req).pipe(
+      switchMap((resp) => {
+        this.guardarUsuario(resp.user);
+        return this.verificarCookieDeSesion();
       }),
     );
   }
 
-  refrescar(): Observable<LoginResponse> {
-    const refreshToken = this.refreshToken;
+  /**
+   * Comprueba que el navegador acepto la cookie httpOnly antes de navegar. Sin
+   * esta verificacion, un navegador que bloquea cookies de terceros mostraria
+   * el panel y expulsaria al usuario en la primera peticion.
+   */
+  private verificarCookieDeSesion(): Observable<AuthenticatedUser> {
+    return this.me().pipe(
+      catchError((error: HttpErrorResponse) => {
+        if (error.status === 401 || error.status === 403) {
+          this.limpiarSesionLocal();
+          return throwError(
+            () =>
+              new Error(
+                'No se pudo mantener la sesión. Habilita las cookies del navegador e intenta de nuevo.',
+              ),
+          );
+        }
+        return throwError(() => error);
+      }),
+    );
+  }
+
+  me(): Observable<AuthenticatedUser> {
     return this.http
-      .post<LoginResponse>(`${this.base}/refresh`, { refreshToken })
-      .pipe(tap((resp) => this.guardarSesion(resp)));
+      .get<AuthenticatedUser>(`${this.base}/me`)
+      .pipe(tap((user) => this.guardarUsuario(user)));
+  }
+
+  /**
+   * Renueva la sesion usando la cookie httpOnly. No recibe ni devuelve tokens:
+   * el navegador actualiza las cookies con la respuesta del servidor.
+   */
+  refrescar(): Observable<SesionResponse> {
+    return this.http.post<SesionResponse>(`${this.base}/refresh`, {}).pipe(
+      tap((resp) => this.guardarUsuario(resp.user)),
+    );
   }
 
   /**
@@ -155,25 +205,27 @@ export class AuthService {
   }
 
   cerrarSesion(): void {
-    const refreshToken = this.refreshToken;
-    if (refreshToken) {
-      this.http.post(`${this.base}/logout`, { refreshToken }).subscribe({
-        next: () => undefined,
-        error: () => undefined,
-      });
-    }
-    this.limpiarSesion();
+    this.http.post(`${this.base}/logout`, {}).subscribe({
+      next: () => undefined,
+      error: () => undefined,
+    });
+    this.limpiarSesionLocal();
     void this.router.navigate(['/login']);
   }
 
   inicializar(): Observable<void> {
-    if (!this.accessToken) {
+    // Sin un usuario recordado no se consulta la API: la portada publica no
+    // debe pagar una peticion por visitante. Si hay usuario, `me` valida la
+    // cookie (y el interceptor intenta refrescar una sola vez si expiro).
+    if (!this._user()) {
       return of(void 0);
     }
     return this.me().pipe(
       map(() => void 0),
-      catchError(() => {
-        this.limpiarSesion();
+      catchError((error: HttpErrorResponse) => {
+        if (error.status === 401 || error.status === 403) {
+          this.limpiarSesionLocal();
+        }
         return of(void 0);
       }),
     );

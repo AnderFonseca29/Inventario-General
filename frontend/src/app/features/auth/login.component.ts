@@ -187,6 +187,7 @@ export class LoginComponent {
         this.cargando.set(false);
         const msg =
           err?.error?.message ??
+          (err instanceof Error ? err.message : null) ??
           'No se pudo iniciar sesión. Verifica tus credenciales.';
         this.error.set(Array.isArray(msg) ? msg.join(', ') : msg);
       },

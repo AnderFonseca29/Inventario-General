@@ -8,9 +8,7 @@ export interface AuthenticatedUser {
   permisos: string[];
 }
 
-export interface LoginResponse {
-  accessToken: string;
-  refreshToken: string;
+export interface SesionResponse {
   user: AuthenticatedUser;
 }
 

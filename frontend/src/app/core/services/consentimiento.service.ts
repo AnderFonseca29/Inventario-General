@@ -114,7 +114,13 @@ export class ConsentimientoService {
     try {
       void fetch(`${environment.apiUrl}/cookies/consentimientos`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          // La API exige esta cabecera en peticiones que modifican estado
+          // para bloquear CSRF. `fetch` nativo no pasa por los interceptores
+          // de Angular, asi que se agrega aqui.
+          'X-Requested-With': 'XMLHttpRequest',
+        },
         body: JSON.stringify({
           identificador: decision.identificador,
           analitica: decision.analitica,

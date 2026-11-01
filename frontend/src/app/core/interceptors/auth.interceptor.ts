@@ -10,32 +10,31 @@ import { AuthService } from '../services/auth.service';
 let refrescando: Observable<unknown> | null = null;
 
 function esEndpointAuth(url: string): boolean {
-  return url.includes('/auth/login') || url.includes('/auth/refresh') || url.includes('/auth/logout');
+  return (
+    url.includes('/auth/login') ||
+    url.includes('/auth/registro') ||
+    url.includes('/auth/refresh') ||
+    url.includes('/auth/logout')
+  );
 }
 
+/**
+ * La sesion viaja en cookies httpOnly: el interceptor solo habilita el envio de
+ * credenciales y, ante un 401, intenta renovar una vez. Un solo refresh se
+ * comparte entre todas las peticiones concurrentes que fallaron.
+ */
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const auth = inject(AuthService);
   const router = inject(Router);
 
-  const token = auth.accessToken;
-  const conToken =
-    token && !esEndpointAuth(req.url)
-      ? req.clone({ setHeaders: { Authorization: `Bearer ${token}` } })
-      : req;
+  const conCredenciales = req.clone({ withCredentials: true });
 
-  return next(conToken).pipe(
+  return next(conCredenciales).pipe(
     catchError((error: HttpErrorResponse) => {
-      if (error.status !== 401 || esEndpointAuth(req.url) || !auth.refreshToken) {
-        if (error.status === 401 && !esEndpointAuth(req.url)) {
-          auth.cerrarSesion();
-        }
+      if (error.status !== 401 || esEndpointAuth(req.url)) {
         return throwError(() => error);
       }
 
-      // Una sola petición de refresh concurrente para todas las peticiones que
-      // fallaron con 401 (hallazgo V). Antes se limpiaba con un setTimeout fijo
-      // de 1s, lo que dejaba la variable en un estado inconsistente y permitia
-      // refresh duplicados o refresh colgados indefinidamente.
       if (!refrescando) {
         refrescando = auth.refrescar().pipe(
           timeout(15000),
@@ -44,17 +43,19 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
       }
 
       return refrescando.pipe(
-        switchMap(() => {
-          const nuevoToken = auth.accessToken;
-          const reintento = req.clone({
-            setHeaders: { Authorization: `Bearer ${nuevoToken}` },
-          });
-          return next(reintento);
-        }),
-        catchError((refreshError) => {
+        switchMap(() => next(conCredenciales)),
+        catchError((refreshError: HttpErrorResponse) => {
           refrescando = null;
-          auth.cerrarSesion();
-          void router.navigate(['/login']);
+          // Un fallo transitorio del refresh (red o 5xx) no debe cerrar la
+          // sesion local; solo un 401/403 indica que ya no es valida.
+          if (refreshError.status === 401 || refreshError.status === 403) {
+            auth.limpiarSesionLocal();
+            // No enviar a /login desde la portada publica: solo las rutas de
+            // la aplicacion requieren sesion.
+            if (router.url.startsWith('/app')) {
+              void router.navigate(['/login']);
+            }
+          }
           return throwError(() => refreshError);
         }),
       );

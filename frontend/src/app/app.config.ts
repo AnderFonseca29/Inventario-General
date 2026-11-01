@@ -12,6 +12,7 @@ import { provideServiceWorker } from '@angular/service-worker';
 import { routes } from './app.routes';
 import { AuthService } from './core/services/auth.service';
 import { authInterceptor } from './core/interceptors/auth.interceptor';
+import { csrfInterceptor } from './core/interceptors/csrf.interceptor';
 import { errorInterceptor } from './core/interceptors/error.interceptor';
 
 export const appConfig: ApplicationConfig = {
@@ -24,7 +25,9 @@ export const appConfig: ApplicationConfig = {
       // página pública y no solo desde la portada.
       withInMemoryScrolling({ anchorScrolling: 'enabled' }),
     ),
-    provideHttpClient(withInterceptors([authInterceptor, errorInterceptor])),
+    provideHttpClient(
+      withInterceptors([csrfInterceptor, authInterceptor, errorInterceptor]),
+    ),
     provideAppInitializer(() => inject(AuthService).inicializar()),
     // PWA (hallazgo W): el service worker solo se registra en producción,
     // para no cachear recursos durante el desarrollo.
