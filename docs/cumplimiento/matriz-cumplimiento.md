@@ -93,7 +93,7 @@ Consulta: 28 de octubre de 2026. Las fuentes se usan para identificar obligacion
 
 | ID | Control | Fuente | Estado | Evidencia | Brecha / pendiente |
 |---|---|---|---|---|---|
-| S-01 | Autenticación y sesión | Ley 1581/2012 | ⚠️ Parcial | Cookies httpOnly para acceso y refresh, rotación, CSRF por cabecera, CORS con credenciales; CI `41278439071` en `2204c2a`; smoke de producción 2026-11-02: CSRF `403/200`, refresh `401`, cookies de borrado y preflight de ambos orígenes | Falta login exitoso, refresh en dos pestañas, Safari/Firefox y dominio same-origin; Pages devuelve `404` en rutas profundas. Evidencia: `evidencia-despliegue-2026-11-02.md` |
+| S-01 | Autenticación y sesión | Ley 1581/2012 | ⚠️ Parcial | Cookies httpOnly para acceso y refresh, rotación, CSRF por cabecera, CORS con credenciales; Vercel sirve `/api` same-origin y Pages llama directo a Render; CI `41493492660` en `1954ddc`; smoke 2026-11-02: logout `403/200`, refresh `401`, login inválido `401` en ambos frontends y cookies de borrado a través del proxy | Falta login exitoso, refresh en dos pestañas, Safari/Firefox, verificar `req.ip` detrás de Vercel y definir si Pages seguirá cross-origin; Pages devuelve `404` en rutas profundas. Evidencia: `evidencia-despliegue-2026-11-02.md` |
 | S-02 | Hash de contraseñas | Seguridad | ✅ Aprobado | Argon2id | — |
 | S-03 | Aislamiento multiempresa | Seguridad | ✅ Aprobado | Guards, filtros por `empresaId`, backend 31 suites / 152 pruebas | Sin pentest |
 | S-04 | Roles y permisos | Seguridad | ✅ Aprobado | `@SoloPropietario`, `PropietarioGuard`, permisos | Revisar rol `Produccion` sin acento |
@@ -141,12 +141,13 @@ Consulta: 28 de octubre de 2026. Las fuentes se usan para identificar obligacion
 | Prueba | Resultado | Fecha | Evidencia |
 |---|---|---|---|
 | Backend unitario | 31 suites / 152 pruebas | 2026-11-01 | `jest --runInBand` |
-| Frontend unitario | 24 archivos / 110 pruebas | 2026-11-01 | `ng test --no-watch` |
+| Frontend unitario | 24 archivos / 110 pruebas | 2026-11-02 | `ng test --no-watch` |
 | E2E con PostgreSQL temporal | 3 suites / 11 pruebas | 2026-11-01 | Migraciones + Jest con `E2E_DATABASE_URL`; base eliminada |
 | Build backend | Verde | 2026-11-01 | `nest build` |
-| Build frontend | Verde; presupuesto de estilos ajustado a 13 kB | 2026-11-01 | `ng build` |
-| Smoke producción: CSRF, cookies y CORS | Logout `403/200`; refresh `401`; preflight `204` con credenciales | 2026-11-02 | `curl` contra Render; ver `evidencia-despliegue-2026-11-02.md` |
-| Smoke producción: rutas y login inválido | Vercel `200`; Pages renderiza con HTTP `404`; login `401` con mensaje visible | 2026-11-02 | Navegador + `curl`; ver `evidencia-despliegue-2026-11-02.md` |
+| Build frontend | Verde; presupuesto de estilos ajustado a 13 kB | 2026-11-02 | `ng build` producción y `--configuration pages` |
+| Proxy `/api` de Vercel | `403/200`, `401`; bundle sin URL de Render; `Set-Cookie` conserva paths y atributos | 2026-11-02 | `curl` contra Vercel; ver `evidencia-despliegue-2026-11-02.md` |
+| Smoke producción: CSRF, cookies y CORS | Logout `403/200`; refresh `401`; preflight `204` con credenciales | 2026-11-02 | `curl` contra Render y Vercel; ver `evidencia-despliegue-2026-11-02.md` |
+| Smoke producción: rutas y login inválido | Vercel `200`; Pages renderiza con HTTP `404`; login `401` con mensaje visible y `X-Requested-With` | 2026-11-02 | Navegador + `curl`; ver `evidencia-despliegue-2026-11-02.md` |
 | Responsive 14 rutas × 8 anchos | 0 desbordes de página | 2026-10-27/28 | Navegador automatizado (CDP) |
 | Formularios y modales responsive | 0 desbordes; controles de 44 px; body con scroll y footer visible | 2026-10-28 | 1440/1024/820/768/640/480/390/360/320; roles a 320×568 y 360×640 |
 | Líneas dinámicas (inventario, cargues, fórmula) | Eliminar 44×44 alineado a la derecha; una columna ≤480 | 2026-10-28 | 3 formularios × 5 anchos (1440/640/480/360/320) |
