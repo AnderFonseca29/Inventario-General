@@ -427,6 +427,9 @@ model RefreshToken {
   tokenHash String   @unique
   expiresAt DateTime @db.Timestamptz(3)
   revocado  Boolean  @default(false)
+  // Momento de la rotacion. Permite distinguir un refresh concurrente
+  // legitimo (dos pestanas) de la reutilizacion de un token robado.
+  revocadoEn DateTime? @db.Timestamptz(3)
   userAgent String?
   ip        String?
   createdAt DateTime @default(now()) @db.Timestamptz(3)

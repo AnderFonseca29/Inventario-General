@@ -29,6 +29,14 @@ import { RegistroDto } from './dto/registro.dto';
 import { CaptchaService } from './captcha.service';
 import type { TokensSesion } from './sesion-cookies.service';
 
+/**
+ * Ventana para aceptar un refresh concurrente de otra pestana. El navegador
+ * comparte la cookie entre pestanas: si ambas renuevan a la vez, la segunda
+ * llega con el token que la primera acaba de rotar. Sin esta ventana se
+ * revocarian todas las sesiones por un falso positivo de reutilizacion.
+ */
+const GRACIA_REFRESCO_MS = 10_000;
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -397,10 +405,42 @@ export class AuthService {
       where: { tokenHash: this.hashToken(dto.refreshToken) },
     });
 
-    // Deteccion de reuso (hallazgo H): si el token existe pero ya fue revocado,
-    // alguien esta reutilizando un token rotado (posible robo). Se revocan
+    if (!almacenado || almacenado.expiresAt < new Date()) {
+      throw new UnauthorizedException('Refresh token revocado o expirado');
+    }
+
+    // Deteccion de reuso (hallazgo H): si el token ya fue revocado, se revisa
+    // primero si es el refresh simultaneo de otra pestana. La cookie se
+    // comparte entre pestanas, asi que dos solicitudes pueden llegar con el
+    // mismo token recien rotado. Se acepta solo durante una ventana corta y
+    // desde el mismo contexto (IP y navegador). Fuera de ahi, se revocan
     // TODAS las sesiones del usuario y se rechaza.
-    if (almacenado && almacenado.revocado) {
+    if (almacenado.revocado) {
+      const ahora = Date.now();
+      const revocadoHace = almacenado.revocadoEn
+        ? ahora - almacenado.revocadoEn.getTime()
+        : Number.POSITIVE_INFINITY;
+      const mismoContexto =
+        (!almacenado.ip || almacenado.ip === ip) &&
+        (!almacenado.userAgent || almacenado.userAgent === userAgent);
+      const dentroDeGracia =
+        revocadoHace >= 0 && revocadoHace <= GRACIA_REFRESCO_MS;
+
+      if (dentroDeGracia && mismoContexto) {
+        await this.auditoria.registrar({
+          empresaId: null,
+          usuarioId: almacenado.usuarioId,
+          accion: 'auth.refresh_concurrente',
+          entidad: 'RefreshToken',
+          entidadId: almacenado.id,
+          ip,
+        });
+
+        const user = await this.loadAuthenticatedUser(almacenado.usuarioId);
+        const tokens = await this.emitirTokens(user, ip, userAgent);
+        return { ...tokens, user };
+      }
+
       await this.prisma.refreshToken.updateMany({
         where: { usuarioId: almacenado.usuarioId, revocado: false },
         data: { revocado: true },
@@ -416,13 +456,9 @@ export class AuthService {
       throw new UnauthorizedException('Refresh token revocado o expirado');
     }
 
-    if (!almacenado || almacenado.expiresAt < new Date()) {
-      throw new UnauthorizedException('Refresh token revocado o expirado');
-    }
-
     await this.prisma.refreshToken.update({
       where: { id: almacenado.id },
-      data: { revocado: true },
+      data: { revocado: true, revocadoEn: new Date() },
     });
 
     const user = await this.loadAuthenticatedUser(payload.sub);
