@@ -4,7 +4,11 @@
   "buildCommand": "cd frontend && npm ci && npm run build -- --configuration production",
   "outputDirectory": "frontend/dist/frontend/browser",
   "installCommand": "echo skip",
-  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }],
+  "rewrites": [
+    { "source": "/api", "destination": "https://inventario-backend-gsd7.onrender.com/api" },
+    { "source": "/api/:path*", "destination": "https://inventario-backend-gsd7.onrender.com/api/:path*" },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ],
   "headers": [
     {
       "source": "/(.*)",
