@@ -178,7 +178,7 @@ No crear cuentas desde este repositorio. Cada paso lo ejecuta la empresa y luego
 | Lint, purga y CI | `feat/registro-directo` | `ca8f927`, `8fee8fd`, `2204c2a` |
 | Cumplimiento | `docs/cumplimiento` | `docs/cumplimiento` (este cambio) |
 
-El contenido legal y de seguridad está integrado en `main`; al 2 de noviembre de 2026 `main` está en `2204c2a`. `feature/trial-gracia` sigue fuera de `main`. La evidencia de despliegue está en [`evidencia-despliegue-2026-11-02.md`](./evidencia-despliegue-2026-11-02.md).
+El contenido legal y de seguridad está integrado en `main`; la verificación de despliegue se hizo sobre `2204c2a`. `feature/trial-gracia` sigue fuera de `main`. La evidencia de despliegue está en [`evidencia-despliegue-2026-11-02.md`](./evidencia-despliegue-2026-11-02.md).
 
 ## 8. Criterio de cierre
 

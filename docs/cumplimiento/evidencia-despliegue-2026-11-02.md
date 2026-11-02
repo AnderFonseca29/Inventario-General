@@ -2,7 +2,7 @@
 
 > **Evidencia técnica, no certificación legal.**
 > Repositorio: `AnderFonseca29/Inventario-General`
-> `main`: `2204c2affae021452bac0451a244e4360c52d2ae`
+> Commit verificado: `2204c2affae021452bac0451a244e4360c52d2ae` (estaba en `main` al hacer las pruebas)
 > Fecha de la verificación: 2 de noviembre de 2026 (UTC)
 > Alcance: cookies httpOnly, CSRF, CORS, rutas públicas y pruebas de humo no destructivas en producción.
 
