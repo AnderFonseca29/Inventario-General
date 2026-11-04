@@ -111,11 +111,12 @@ No se probó un login exitoso: no hay una cuenta de prueba autorizada en producc
 
 ## 5. Prueba local de sesión y refresco concurrente
 
-El 2 y 3 de noviembre de 2026 se ejecutó un E2E local con una base PostgreSQL desechable (`inventario_e2e_<marca>`), las 12 migraciones del repositorio y el seed. No se usó la base local del usuario ni la base de producción. La empresa, el usuario y los tokens fueron ficticios; al terminar se ejecutó `DROP DATABASE ... WITH (FORCE)`. El backend se levantó en `localhost:3101` con `NODE_ENV=development`, `COOKIE_SECURE=false`, `EMAIL_ENABLED=false` y `TURNSTILE_ENABLED=false`.
+El 2, 3 y 4 de noviembre de 2026 se ejecutó un E2E local con una base PostgreSQL desechable (`inventario_e2e_<marca>`), las 12 migraciones del repositorio y el seed. No se usó la base local del usuario ni la base de producción. La empresa, el usuario y los tokens fueron ficticios; al terminar se ejecutó `DROP DATABASE ... WITH (FORCE)`. El backend se levantó en `localhost:3101` con `NODE_ENV=test`/`development`, `COOKIE_SECURE=false`, `EMAIL_ENABLED=false` y `TURNSTILE_ENABLED=false`.
 
 | Prueba | Resultado |
 |---|---|
 | `POST /api/auth/registro` con datos ficticios | `201`; crea empresa y usuario, fija dos cookies |
+| `POST /api/auth/registro` sin CSRF / con contraseña débil | `403` / `400`; no crea empresa ni usuario |
 | Atributos de cookies en local | `HttpOnly`; paths `/api` y `/api/auth`; `SameSite=Lax`; `Secure=false`; sin `Domain`; `Max-Age` de 899 s y 604799 s |
 | `GET /api/auth/me` con cookie de acceso | `200`; devuelve el usuario autenticado |
 | `POST /api/auth/refresh` con cookie | `200`; rota el refresh token y deja un acceso utilizable |
@@ -123,23 +124,36 @@ El 2 y 3 de noviembre de 2026 se ejecutó un E2E local con una base PostgreSQL d
 | Cookies tras logout | `Expires=Thu, 01 Jan 1970 00:00:00 GMT`; el jar queda vacío |
 | `GET /api/auth/me` y `POST /api/auth/refresh` tras logout | `401` / `401`; el refresh queda revocado |
 | `POST /api/auth/refresh` sin cookie | `401` |
-| `POST /api/auth/login` sin CSRF / con credenciales válidas | `403` / `200` |
+| `POST /api/auth/login` sin CSRF / con credenciales incorrectas / con credenciales válidas | `403` / `401` / `200` |
+| `POST /api/auth/change-password` con actual incorrecta / con actual válida | `401` / `200`; revoca los refresh tokens |
+| `POST /api/auth/refresh` tras cambiar contraseña | `401`; no reutiliza la sesión anterior |
+| `POST /api/auth/login` con contraseña anterior / con contraseña nueva | `401` / `200` |
 | Dos pestañas con la misma cookie: dos `POST /api/auth/refresh` concurrentes | `200` / `200`; las cookies resultantes de ambas siguen renovando (`200` / `200`) |
 | Reuso secuencial del token anterior dentro de 10 s | `200`; auditoría `auth.refresh_concurrente` |
 | Reuso del token anterior después de 11 s | `401`; auditoría `auth.refresh_reuso_detectado`; revoca la sesión rotada (`401`) |
 
 La prueba de dos pestañas se hizo clonando la cookie jar compartida y lanzando dos peticiones concurrentes; no sustituye una prueba con navegador real. Antes del fix, la misma prueba devolvía `A=401, B=200` y la detección de reuso revocaba el token recién emitido. El fix está en `594e55a`: agrega `revocadoEn` a `RefreshToken`, migración `20261102190000_refresh_token_revocado_en` y una ventana de gracia de 10 s limitada por IP y `User-Agent`. Fuera de esa ventana el reuso sigue revocando todas las sesiones.
 
+La repetición del 2026-11-04 UTC usó el mismo `User-Agent` en la rotación inicial y en las dos peticiones concurrentes. Un ensayo previo del arnés usó `curl` para la rotación inicial y `E2E-Tabs` para las concurrentes; la segunda petición devolvió `401` porque el control `mismoContexto` comparó `User-Agent` distintos, no porque la ventana de gracia fallara. Con el mismo contexto, las dos peticiones devolvieron `200/200`. La prueba unitaria de contexto distinto (`auth.service.refresh.spec.ts`) conserva la cobertura de ese rechazo.
+
 Verificación automática del mismo cambio:
 
 - `npm run build`: verde.
 - `npm test -- --runInBand`: 32 suites / 157 pruebas en verde.
-- `npm run test:e2e -- --runInBand` con la base desechable: 3 suites, 11 pruebas (1 suite / 5 pruebas ejecutadas; 2 suites / 6 pruebas omitidas por la configuración existente).
+- `npm run test:e2e -- --runInBand` con la base desechable: 3 suites, 11 pruebas ejecutadas, 0 omitidas; 12 migraciones y seed aplicados, base eliminada al final.
 - `npm run lint`: verde después de `d3c9fd4`. El primer run de CI de `594e55a` (`41503888737`) falló solo en Lint porque la prueba nueva asignaba un `expect.any(Date)` a un campo tipado; `d3c9fd4` tipa el mock y no cambia código de producción. El run `41746207100` de `d3c9fd4` terminó en `success`.
+
+Repetición total del 2026-11-04 UTC:
+
+- Backend: `nest build` verde; 32 suites / 157 pruebas verdes; lint verde y árbol restaurado después del `--fix`.
+- Frontend: build de producción y build `pages` verdes; 24 archivos / 110 pruebas verdes; `verificar:colores`, `verificar:planes`, `verificar:legal` y `check-encoding.mjs` verdes.
+- E2E y flujo HTTP local: 3 suites / 11 pruebas verdes; registro, `/me`, refresh inicial, dos pestañas `200/200`, refresh posterior de ambas, reuso tras 11 s `401`, login, cambio de contraseña, logout y limpieza de cookies verificados con base desechable.
+- Producción: CI `41762011747` en `success` para `cc1a95c`; health y `health/ready` `200` directo y por Vercel; raíces de Vercel y Pages `200`; `/me` y refresh sin cookie `401`; logout `403/200`; cookies `HttpOnly; Secure; SameSite=None`; login inválido `401`; preflight CORS `204` con credenciales; cabeceras `X-Content-Type-Options` y `X-Frame-Options`.
+- Navegador: Vercel y Pages renderizan la landing e inician sesión; el login inválido muestra “Correo o contraseña incorrectos” en ambos frontends. En Pages la petición va directo a Render y el preflight CORS responde correctamente.
 
 ## 6. Limitaciones y riesgos abiertos
 
-1. **Sin login exitoso ni dos pestañas en producción:** el E2E local cubrió registro, login, cookies, refresh, logout, CSRF, dos pestañas y la ventana de gracia, pero no sustituye una cuenta productiva. No se creó ninguna cuenta en producción porque no existe un mecanismo verificable para borrar la empresa y sus relaciones.
+1. **Sin login exitoso ni dos pestañas en producción:** el E2E local cubrió registro, login, cookies, refresh, logout, CSRF, dos pestañas y la ventana de gracia, y se repitió el 2026-11-04 UTC, pero no sustituye una cuenta productiva. No se creó ninguna cuenta en producción porque no existe un mecanismo verificable para borrar la empresa y sus relaciones.
 2. **Pages sigue siendo cross-origin:** el proxy `/api` solo existe en Vercel. El frontend de Pages llama directamente a Render y puede sufrir bloqueo de cookies de terceros en Safari, Firefox o modos de privacidad. Vercel ya es same-origin, pero falta probarlo con una sesión real y en esos navegadores.
 3. **IP detrás del proxy:** `backend/src/main.ts` usa `express.set('trust proxy', 1)`. Vercel añade un salto de proxy; no se verificó si `req.ip` sigue siendo la IP del cliente o pasa a ser la del edge de Vercel. Esto puede afectar el límite de peticiones, la auditoría y la ventana de gracia del refresh. No se cambió `trust proxy` sin evidencia.
 4. **GitHub Pages y rutas profundas:** el fallback `404.html` renderiza la aplicación, pero el HTTP sigue siendo `404` (y `/legal` responde `301`). Vercel responde `200` por sus rewrites. Para enlaces públicos definitivos conviene usar Vercel o un dominio propio; no se cambió el routing.
@@ -151,4 +165,4 @@ Verificación automática del mismo cambio:
 
 ## 7. Conclusión
 
-El proxy same-origin `/api` de Vercel está desplegado y responde para CSRF, cookies de borrado, refresh sin sesión y login inválido; las rutas públicas siguen funcionando en Vercel y Pages. El E2E local con base desechable verificó el ciclo completo de sesión, la rotación, el logout, la limpieza de cookies y el refresh concurrente de dos pestañas; el fix `594e55a` evita que la detección de reuso cierre una sesión legítima. Render desplegó `594e55a` con estado `success` y Vercel quedó en `success`; las pruebas posteriores al redeploy repitieron health, CSRF, cookies de borrado, refresh sin cookie y login inválido. El primer CI de `594e55a` falló solo por una asignación `any` en la prueba nueva, corregida en `d3c9fd4`; el CI `41746207100` de esa corrección y su deploy del código quedaron en `success`, y la verificación de las 00:25Z repitió los mismos resultados. El commit documental posterior (`d3be746`) pasó su CI y su autoDeploy, pero no modifica el runtime. La evidencia permite cerrar la verificación técnica del proxy, del despliegue y del flujo local, pero **no** el login exitoso en producción, la inspección directa de la migración, la compatibilidad Safari/Firefox, el comportamiento de Pages como frontend cross-origin, la IP real detrás de Vercel ni el cierre legal.
+El proxy same-origin `/api` de Vercel está desplegado y responde para CSRF, cookies de borrado, refresh sin sesión y login inválido; las rutas públicas siguen funcionando en Vercel y Pages. El E2E local con base desechable verificó el ciclo completo de sesión, la rotación, el logout, la limpieza de cookies y el refresh concurrente de dos pestañas; el fix `594e55a` evita que la detección de reuso cierre una sesión legítima. Render desplegó `594e55a` con estado `success` y Vercel quedó en `success`; las pruebas posteriores al redeploy repitieron health, CSRF, cookies de borrado, refresh sin cookie y login inválido. El primer CI de `594e55a` falló solo por una asignación `any` en la prueba nueva, corregida en `d3c9fd4`; el CI `41746207100` de esa corrección y su deploy del código quedaron en `success`, y la verificación de las 00:25Z repitió los mismos resultados. El commit documental posterior (`d3be746`) pasó su CI y su autoDeploy, pero no modifica el runtime. La repetición total del 2026-11-04 UTC dejó el CI `41762011747` de `cc1a95c` en `success`, 32 suites / 157 pruebas backend, 24 archivos / 110 pruebas frontend, 3 suites / 11 pruebas E2E y el smoke de producción y navegador descrito arriba. La evidencia permite cerrar la verificación técnica del proxy, del despliegue y del flujo local, pero **no** el login exitoso en producción, la inspección directa de la migración, la compatibilidad Safari/Firefox, el comportamiento de Pages como frontend cross-origin, la IP real detrás de Vercel ni el cierre legal.
