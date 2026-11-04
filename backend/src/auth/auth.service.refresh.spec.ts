@@ -81,10 +81,14 @@ describe('AuthService.refresh (rotacion y concurrencia)', () => {
     const resultado = await servicio.refresh({ refreshToken: 'token-viejo' }, '127.0.0.1', 'jest');
 
     expect(resultado).toMatchObject({ ...TOKENS, user: USUARIO });
-    expect(prisma.refreshToken.update).toHaveBeenCalledWith({
-      where: { id: 'rt-1' },
-      data: { revocado: true, revocadoEn: expect.any(Date) },
-    });
+    const actualizar = prisma.refreshToken.update as jest.Mock<
+      Promise<unknown>,
+      [{ where: { id: string }; data: { revocado: boolean; revocadoEn: Date } }]
+    >;
+    const llamada = actualizar.mock.calls[0][0];
+    expect(llamada.where).toEqual({ id: 'rt-1' });
+    expect(llamada.data.revocado).toBe(true);
+    expect(llamada.data.revocadoEn).toBeInstanceOf(Date);
   });
 
   it('acepta el refresh concurrente dentro de la ventana de gracia', async () => {
