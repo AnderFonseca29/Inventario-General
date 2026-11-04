@@ -1,7 +1,7 @@
 # Matriz de implementación y brechas legales
 
 > **BORRADOR: REVISIÓN OBLIGATORIA POR ABOGADO**
-> Fecha de corte: 2 de noviembre de 2026 · Mercado: Colombia · Moneda: COP
+> Fecha de corte: 4 de noviembre de 2026 · Mercado: Colombia · Moneda: COP
 > Esta matriz separa **implementación técnica verificada** de **cumplimiento legal definitivo**. No declara que Stockora cumpla al 100 %: enumera evidencias, fallas y pendientes.
 
 ## 1. Cómo leer esta matriz
@@ -93,9 +93,9 @@ Consulta: 28 de octubre de 2026. Las fuentes se usan para identificar obligacion
 
 | ID | Control | Fuente | Estado | Evidencia | Brecha / pendiente |
 |---|---|---|---|---|---|
-| S-01 | Autenticación y sesión | Ley 1581/2012 | ⚠️ Parcial | Cookies httpOnly para acceso y refresh, rotación, CSRF por cabecera, CORS con credenciales; Vercel sirve `/api` same-origin y Pages llama directo a Render; CI `41493492660` en `1954ddc`; smoke 2026-11-02: logout `403/200`, refresh `401`, login inválido `401` en ambos frontends y cookies de borrado a través del proxy | Falta login exitoso, refresh en dos pestañas, Safari/Firefox, verificar `req.ip` detrás de Vercel y definir si Pages seguirá cross-origin; Pages devuelve `404` en rutas profundas. Evidencia: `evidencia-despliegue-2026-11-02.md` |
+| S-01 | Autenticación y sesión | Ley 1581/2012 | ⚠️ Parcial | Cookies httpOnly para acceso y refresh, rotación, CSRF por cabecera, CORS con credenciales; Vercel sirve `/api` same-origin y Pages llama directo a Render; CI `41493492660` en `1954ddc`; smoke 2026-11-02: logout `403/200`, refresh `401`, login inválido `401` en ambos frontends y cookies de borrado a través del proxy; fix `594e55a` y E2E local 2026-11-02/03: registro, login, `/me`, refresh, logout, CSRF, dos pestañas `200/200` y gracia de 10 s; Render deploy `7500503092` en `success`; post-redeploy 2026-11-04: health `200`, logout `403/200`, refresh sin cookie `401`, login inválido `401`; CI de `594e55a` falló solo en Lint y `d3c9fd4` lo corrigió; CI `41746207100` en `success` y deploy final `7534292529` en `success` con repetición de las pruebas a las 00:25Z | Falta login exitoso y dos pestañas en producción, inspección directa de la migración `revocadoEn`, Safari/Firefox, verificar `req.ip` detrás de Vercel y definir si Pages seguirá cross-origin; Pages devuelve `404` en rutas profundas. Evidencia: `evidencia-despliegue-2026-11-02.md` |
 | S-02 | Hash de contraseñas | Seguridad | ✅ Aprobado | Argon2id | — |
-| S-03 | Aislamiento multiempresa | Seguridad | ✅ Aprobado | Guards, filtros por `empresaId`, backend 31 suites / 152 pruebas | Sin pentest |
+| S-03 | Aislamiento multiempresa | Seguridad | ✅ Aprobado | Guards, filtros por `empresaId`, backend 32 suites / 157 pruebas | Sin pentest |
 | S-04 | Roles y permisos | Seguridad | ✅ Aprobado | `@SoloPropietario`, `PropietarioGuard`, permisos | Revisar rol `Produccion` sin acento |
 | S-05 | Bloqueo por intentos fallidos | Seguridad | ✅ Aprobado | `intentos_login`; throttle | — |
 | S-06 | Auditoría de operaciones | Ley 1581/2012 | ✅ Aprobado | `AuditoriaService`; registros de aceptación | Retención manual |
@@ -140,11 +140,14 @@ Consulta: 28 de octubre de 2026. Las fuentes se usan para identificar obligacion
 
 | Prueba | Resultado | Fecha | Evidencia |
 |---|---|---|---|
-| Backend unitario | 31 suites / 152 pruebas | 2026-11-01 | `jest --runInBand` |
+| Backend unitario | 32 suites / 157 pruebas | 2026-11-02 | `jest --runInBand` |
 | Frontend unitario | 24 archivos / 110 pruebas | 2026-11-02 | `ng test --no-watch` |
-| E2E con PostgreSQL temporal | 3 suites / 11 pruebas | 2026-11-01 | Migraciones + Jest con `E2E_DATABASE_URL`; base eliminada |
-| Build backend | Verde | 2026-11-01 | `nest build` |
+| E2E con PostgreSQL temporal | 3 suites / 11 pruebas; 1 suite / 5 ejecutadas y 2 suites / 6 omitidas | 2026-11-02 | Migraciones + Jest con `E2E_DATABASE_URL`; base eliminada |
+| Refresh concurrente local | Dos pestañas `200/200`; gracia `200`; reuso tras 11 s `401` y revocación total | 2026-11-02/03 | Cookie jar clonada + base desechable; auditoría `auth.refresh_concurrente` y `auth.refresh_reuso_detectado` |
+| Build backend | Verde | 2026-11-02 | `nest build` |
 | Build frontend | Verde; presupuesto de estilos ajustado a 13 kB | 2026-11-02 | `ng build` producción y `--configuration pages` |
+| Deploy del fix | Render `7500503092` en `success` (SHA `594e55a`); Vercel `success`; health `200` | 2026-11-02/04 | GitHub Deployments + `curl` directo y por Vercel; ver `evidencia-despliegue-2026-11-02.md` |
+| Deploy de la corrección | Render `7534292529` y Vercel en `success` (SHA `d3c9fd4`); CI `41746207100` en verde; health y CSRF iguales | 2026-11-04 | GitHub Deployments + `curl` a las 00:25Z; ver `evidencia-despliegue-2026-11-02.md` |
 | Proxy `/api` de Vercel | `403/200`, `401`; bundle sin URL de Render; `Set-Cookie` conserva paths y atributos | 2026-11-02 | `curl` contra Vercel; ver `evidencia-despliegue-2026-11-02.md` |
 | Smoke producción: CSRF, cookies y CORS | Logout `403/200`; refresh `401`; preflight `204` con credenciales | 2026-11-02 | `curl` contra Render y Vercel; ver `evidencia-despliegue-2026-11-02.md` |
 | Smoke producción: rutas y login inválido | Vercel `200`; Pages renderiza con HTTP `404`; login `401` con mensaje visible y `X-Requested-With` | 2026-11-02 | Navegador + `curl`; ver `evidencia-despliegue-2026-11-02.md` |

@@ -123,8 +123,8 @@ No crear cuentas desde este repositorio. Cada paso lo ejecuta la empresa y luego
 - [x] Enlazar el Aviso de Privacidad en registro y derechos; repetir en formularios futuros.
 - [ ] Probar el modal de aceptación a 320/360 px y con teclado. Geometría y scroll verificados; falta navegación por teclado.
 - [ ] Probar los endpoints de superadmin con una sesión real.
-- [ ] Probar login, refresh, logout y CSRF con cookies en navegador real; verificar Safari/Firefox y definir dominio same-origin o proxy para evitar cookies de terceros. **Avance 2026-11-02:** Vercel ya sirve `/api` con un rewrite same-origin; Pages mantiene la llamada directa a Render. Login inválido, CSRF, refresh/logout sin sesión, cookies de borrado y CORS verificados en ambos frontends y con `curl`; falta login exitoso y Safari/Firefox.
-- [ ] Probar refresh en dos pestañas: la rotación con detección de reuso puede cerrar todas las sesiones si ambas pestañas refrescan al mismo tiempo. **Bloqueado:** requiere una sesión válida de producción.
+- [ ] Probar login, refresh, logout y CSRF con cookies en navegador real; verificar Safari/Firefox y definir dominio same-origin o proxy para evitar cookies de terceros. **Avance 2026-11-02:** Vercel ya sirve `/api` con un rewrite same-origin; Pages mantiene la llamada directa a Render. Login inválido, CSRF, refresh/logout sin sesión, cookies de borrado y CORS verificados en ambos frontends y con `curl`. **Avance local 2026-11-02/03:** registro, login, `/me`, refresh, logout, CSRF y cookies verificados con una base desechable; falta repetirlo con una cuenta productiva y en Safari/Firefox.
+- [x] Probar refresh en dos pestañas: la rotación con detección de reuso puede cerrar todas las sesiones si ambas pestañas refrescan al mismo tiempo. **Hecho localmente 2026-11-02/03:** la prueba concurrente devolvía `401/200`; el fix `594e55a` agregó la ventana de gracia de 10 s y la repetición dio `200/200`. Falta repetirlo en producción con una cuenta temporal borrable.
 - [ ] Ejecutar prueba de restauración de backup y documentarla.
 - [ ] Crear runbook de incidentes y hacer un simulacro.
 - [ ] Programar revisión de accesos y capacitación anual.
@@ -146,8 +146,9 @@ No crear cuentas desde este repositorio. Cada paso lo ejecuta la empresa y luego
 | Superadmin derechos | Listar, responder y cerrar con sesión real | ⚠️ No probado |
 | Modal 320/360 px | Sin desbordes; foco y teclado correctos | ⚠️ Parcial (geometría y scroll OK; teclado pendiente) |
 | Cookies en todas las rutas `/app` | Banner ausente por diseño; registro remoto y enlace interno implementados; falta probar en navegador | ⚠️ Parcial |
-| Sesión en cookies httpOnly | Login/refresh/logout sin tokens en JavaScript; CSRF por cabecera; Vercel sirve `/api` same-origin y Pages llama directo a Render | ⚠️ Parcial (2026-11-02: login inválido, CSRF, refresh/logout sin sesión, cookies y CORS verificados en producción; falta login exitoso y Safari/Firefox) |
-| Despliegue de seguridad en producción | API y rutas públicas responden; proxy `/api` de Vercel, CSRF, CORS y cookies de borrado verificados | ⚠️ Parcial (2026-11-02; ver `evidencia-despliegue-2026-11-02.md`) |
+| Sesión en cookies httpOnly | Login/refresh/logout sin tokens en JavaScript; CSRF por cabecera; Vercel sirve `/api` same-origin y Pages llama directo a Render | ⚠️ Parcial (2026-11-02: login inválido, CSRF, refresh/logout sin sesión, cookies y CORS verificados en producción; 2026-11-02/03: ciclo completo verificado en local con base desechable; falta login exitoso y Safari/Firefox) |
+| Refresh concurrente en dos pestañas | Dos pestañas con la misma cookie pueden renovar sin revocar la sesión; reuso fuera de gracia sigue revocando todo | ✅ Verificado localmente (2026-11-02/03): concurrente `200/200`; gracia `200`; reuso tras 11 s `401`; fix `594e55a` |
+| Despliegue de seguridad en producción | API y rutas públicas responden; proxy `/api` de Vercel, CSRF, CORS y cookies de borrado verificados | ⚠️ Parcial (2026-11-02/04: Render desplegó `594e55a` y `d3c9fd4` con `success`; CI `41746207100` en verde; post-redeploy health `200`, logout `403/200`, refresh sin cookie `401`, login inválido `401`; falta login exitoso y verificar la migración con una cuenta temporal; ver `evidencia-despliegue-2026-11-02.md`) |
 | RNBD | Cálculo de activos y decisión documentada | ⛔ Pendiente |
 
 ## 6. Orden de despliegue sugerido
@@ -177,9 +178,11 @@ No crear cuentas desde este repositorio. Cada paso lo ejecuta la empresa y luego
 | Cookies httpOnly y CSRF | `feat/registro-directo` | `33688e3`, `7cbf413`, `366c2b1` |
 | Lint, purga y CI | `feat/registro-directo` | `ca8f927`, `8fee8fd`, `2204c2a` |
 | Proxy same-origin Vercel | `main` | `1954ddc` |
+| Fix refresh concurrente | `main` | `594e55a` |
+| Corrección de lint de la prueba | `main` | `d3c9fd4` |
 | Cumplimiento | `docs/cumplimiento` | `docs/cumplimiento` (este cambio) |
 
-El contenido legal y de seguridad está integrado en `main`; la verificación de despliegue se hizo sobre `2204c2a` y el proxy se verificó en `1954ddc`. `feature/trial-gracia` sigue fuera de `main`. La evidencia de despliegue está en [`evidencia-despliegue-2026-11-02.md`](./evidencia-despliegue-2026-11-02.md).
+El contenido legal y de seguridad está integrado en `main`; la verificación de despliegue se hizo sobre `2204c2a`, el proxy se verificó en `1954ddc` y el fix de refresco concurrente quedó en `594e55a`. El run de CI de `594e55a` falló solo en Lint por una asignación `any` en la prueba nueva; `d3c9fd4` la corrige sin cambiar código de producción y su CI `41746207100` terminó en `success`, al igual que su deploy en Render y Vercel. `feature/trial-gracia` sigue fuera de `main`. La evidencia de despliegue y del E2E local está en [`evidencia-despliegue-2026-11-02.md`](./evidencia-despliegue-2026-11-02.md).
 
 ## 8. Criterio de cierre
 
